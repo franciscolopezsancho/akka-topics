@@ -20,3 +20,5 @@ lazy val `unit-testing` = project
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
       "org.scalatest" %% "scalatest" % "3.1.4" % Test,
     ))
+
+ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
