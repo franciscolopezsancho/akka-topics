@@ -73,12 +73,11 @@ object Worker {
     Behaviors.receive { (context, message) =>
       message match {
         case Do(replyTo) =>
-          throw new IllegalArgumentException("yeye")
           doing(scala.util.Random.between(2000, 4000))
           context.log.info(
             s"My name is '${context.self.path.name}'. And I've done my task")
           replyTo ! Worker.Done
-          Behaviors.stopped
+          Behaviors.same
       }
     }
 
