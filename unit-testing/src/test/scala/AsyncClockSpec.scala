@@ -3,6 +3,7 @@ package asyncclock
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.actor.testkit.typed.scaladsl.ManualTime
+import akka.actor.testkit.typed.scaladsl.TestProbe
 
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
@@ -10,7 +11,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 import scala.concurrent.duration._
-import akka.actor.testkit.typed.scaladsl.TestProbe
 
 class AsyncClockSpec
     extends ScalaTestWithActorTestKit(ManualTime.config)
@@ -19,23 +19,43 @@ class AsyncClockSpec
 
   val manualTime: ManualTime = ManualTime()
 
-  "Actor Proxy" must {
+  "Manual Time" must {
 
-    "redirect to Reader the content of the messages received" ignore {
-      val probe = TestProbe[Counter.Command]("counter")
-      probe.ref ! Counter.Increase
-      probe.expectMessage(Counter.Increase)
-      manualTime.expectNoMessageFor(9.millis, probe)
-      manualTime.timePasses(21.millis)
-      probe.expectMessage(Counter.Increase)
+    "redirect to Reader the content of the messages received" in {
+      val exchanger = spawn(SwapDelayed(), "cookie") // create -> monitor
+      val probe = TestProbe[String]("counter")
+      exchanger ! SwapDelayed.Take(probe.ref, "stuff")
+      manualTime.expectNoMessageFor(99.millis, probe)
       manualTime.timePasses(2.millis)
-
-      probe.ref ! Counter.CancelTimer
-      manualTime.expectNoMessageFor(9.millis, probe)
+      probe.expectMessage("stuff".reverse)
+      manualTime.expectNoMessageFor(1.seconds, probe)
 
     }
   }
+}
 
+// def tap[T: ClassTag] = new BehaviorInterceptor[T, T] {
+//     override def aroundReceive(context: TypedActorContext[T], message: T, target: ReceiveTarget[T]): Behavior[T] =
+//       target(context, message)
+// }
+
+object SwapDelayed {
+
+  sealed trait Command
+  case class Take(from: ActorRef[String], thing: String) extends Command
+  case class Give(to: ActorRef[String], thing: String) extends Command
+
+  def apply(): Behavior[Command] =
+    Behaviors.withTimers { timers =>
+      Behaviors.receiveMessage {
+        case Take(from, thing) =>
+          timers.startSingleTimer("unusedKey", Give(from, thing), 100.millis)
+          Behaviors.same
+        case Give(to, thing) =>
+          to ! thing.reverse
+          Behaviors.same
+      }
+    }
 }
 
 object Counter {

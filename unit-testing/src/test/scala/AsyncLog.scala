@@ -1,16 +1,15 @@
 package logging
 
-import akka.actor.testkit.typed.scaladsl.ActorTestKit
-
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import akka.actor.testkit.typed.scaladsl.LoggingTestKit
+
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 import scala.concurrent.duration._
-import akka.actor.testkit.typed.scaladsl.LoggingTestKit
-import akka.actor.testkit.typed.scaladsl.TestProbe
 
 class AsyncTestingExampleSpec
     extends ScalaTestWithActorTestKit
@@ -19,9 +18,9 @@ class AsyncTestingExampleSpec
 
   "Actor Proxy" must {
 
-    "redirect to Reader and log the content of the message" in {
+    "redirect to Listener and log the content of the message" in {
       val proxy = testKit.spawn(Proxy(), "reading-logs")
-      val reader = testKit.spawn(Reader(), "reader")
+      val reader = testKit.spawn(Listener(), "reader")
       val message = "aloha"
 
       LoggingTestKit.info(s"message '$message', received").expect {
@@ -34,26 +33,19 @@ class AsyncTestingExampleSpec
 object Proxy {
 
   sealed trait Message
-  case class Send(message: String, sendTo: ActorRef[Reader.Text])
-      extends Message
+  case class Send(message: String, sendTo: ActorRef[String]) extends Message
 
   def apply(): Behavior[Message] = Behaviors.receiveMessage {
     case Send(message, sendTo) =>
-      sendTo ! Reader.Read(message)
+      sendTo ! message
       Behaviors.same
   }
 }
 
-object Reader {
+object Listener {
 
-  sealed trait Text
-  case class Read(message: String) extends Text
-
-  def apply(): Behavior[Text] = Behaviors.receive { (context, message) =>
-    message match {
-      case Read(message) =>
-        context.log.info(s"message '$message', received")
-        Behaviors.stopped
-    }
+  def apply(): Behavior[String] = Behaviors.receive { (context, message) =>
+    context.log.info(s"message '$message', received")
+    Behaviors.stopped
   }
 }

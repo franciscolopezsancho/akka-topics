@@ -37,7 +37,8 @@ object Manager {
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
-      implicit val timeout: Timeout = Timeout(3, SECONDS)
+      println(context.self.path)
+      implicit val timeout: Timeout = Timeout(1, SECONDS)
       def auxCreateRequest(task: Worker.Task)(
           replyTo: ActorRef[Worker.Response]): Worker.Do =
         Worker.Do(task, replyTo)

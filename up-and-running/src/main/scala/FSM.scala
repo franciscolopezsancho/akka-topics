@@ -7,29 +7,27 @@ object FSMApp extends App {
 
   val system: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "finite-state-machine")
-  system ! Guardian.Start
+  system ! Guardian.Start(List("one", "two", "three"))
 
 }
 
 object Guardian {
 
+  sealed trait Command
+  case class Start(tasks: List[String]) extends Command
+
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(1), "manager-1")
-      val tasks: List[String] = List("one", "two", "three")
-
-      Behaviors.receiveMessage { message =>
-        tasks.map { task =>
-          manager ! Manager.Delegate(task)
-        }
-        Behaviors.same
+      Behaviors.receiveMessage {
+        case Start(tasks) =>
+          tasks.map { task =>
+            manager ! Manager.Delegate(task)
+          }
+          Behaviors.same
       }
     }
-
-  sealed trait Command
-  case object Start extends Command
-
 }
 
 object Manager {

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] [%logger] [%marker] [%thread] - %msg MDC: {%mdc}%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CapturingAppender" class="akka.actor.testkit.typed.internal.CapturingAppender" />
+
+    <logger name="akka.actor.testkit.typed.internal.CapturingAppenderDelegate" >
+      <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="DEBUG">
+        <appender-ref ref="CapturingAppender"/>
+    </root>
+</configuration>

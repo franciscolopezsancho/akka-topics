@@ -1,7 +1,5 @@
 package logging.config
 
-import akka.actor.testkit.typed.scaladsl.ActorTestKit
-
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
@@ -14,7 +12,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import org.slf4j.event.Level
 
 class AsyncLogConfigSpec
-    extends ScalaTestWithActorTestKit("akka.loglevel = DEBUG")
+    extends ScalaTestWithActorTestKit("akka.loglevel = info")
     with AnyWordSpecLike
     with Matchers {
 

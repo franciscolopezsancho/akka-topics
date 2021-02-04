@@ -10,23 +10,24 @@ object ManangerWorkerApp extends App {
 
   val system: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "example-ask-without-content")
-  system ! Guardian.Start
+  system ! Guardian.Start(List("task-a", "task-b", "task-c", "task-d"))
 }
 
 object Guardian {
+
+  sealed trait Command
+  case class Start(tasks: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-1")
-      Behaviors.receiveMessage { message =>
-        manager ! Manager.Delegate(List("task-a", "task-b", "task-c", "task-d"))
-        Behaviors.same
+      Behaviors.receiveMessage {
+        case Start(tasks) =>
+          manager ! Manager.Delegate(tasks)
+          Behaviors.same
       }
     }
-
-  sealed trait Command
-  case object Start extends Command
 }
 
 object Manager {

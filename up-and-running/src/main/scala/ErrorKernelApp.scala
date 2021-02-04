@@ -7,23 +7,23 @@ object ErrorKernelApp extends App {
 
   val system: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "error-kernel")
-  system ! Guardian.Start
-
+  system ! Guardian.Start(List("one", "two"))
 }
 
 object Guardian {
 
   sealed trait Command
-  case object Start extends Command
+  case class Start(tasks: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       context.log.info("setting up")
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-alpha")
-      Behaviors.receiveMessage { message =>
-        manager ! Manager.Delegate(List("one", "two"))
-        Behaviors.same
+      Behaviors.receiveMessage {
+        case Start(tasks) =>
+          manager ! Manager.Delegate(tasks)
+          Behaviors.same
       }
     }
 }
@@ -71,9 +71,9 @@ object Worker {
   def apply(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Do(manager, task) =>
+        case Do(replyTo, task) =>
           context.log.info(s"'${context.self.path}'. Done with '$task'")
-          manager ! Worker.Done(task)
+          replyTo ! Worker.Done(task)
           Behaviors.stopped
       }
     }
