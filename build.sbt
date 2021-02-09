@@ -46,4 +46,16 @@ lazy val `discovery-routers` = project
       "org.scalatest" %% "scalatest" % "3.1.4" % Test,
     ))
 
+lazy val clustering = project
+  .in(file("clustering"))
+  .settings(
+    scalaVersion := ScalaVersion,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
+      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+    ))
+
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
