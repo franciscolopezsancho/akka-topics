@@ -29,13 +29,13 @@ object JobMaster {
   case class NextTask(worker: ActorRef[JobWorker.Command])
       extends Command
 
-  case object Timeout extends Command
-
   def apply() = Behaviors.setup[Command] { context =>
 
     val workers = context.spawn(
       Routers
-        .pool(poolSize = 100)(JobWorker())
+        .pool(poolSize = 100){
+          Behaviors.supervise(JobWorker()).onFailure[SupervisionStrategy.restart]
+        }
         .withBroadcastPredicate(_ => true),
       "workers-pool")
 

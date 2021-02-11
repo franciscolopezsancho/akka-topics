@@ -47,7 +47,7 @@ lazy val `discovery-routers` = project
     ))
 
 lazy val clustering = project
-  .in(file("clustering02"))
+  .in(file("clustering04"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(

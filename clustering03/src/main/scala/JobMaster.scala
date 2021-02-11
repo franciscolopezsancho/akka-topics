@@ -38,23 +38,21 @@ object JobMaster {
 
     val workers = context.spawn(
       Routers
-        .pool(poolSize = 100)(JobWorker())
+        .pool(poolSize = 100){
+          Behaviors.supervise(JobWorker()).onFailure[SupervisionStrategy.restart]
+        }
         .withBroadcastPredicate(_ => true),
       "workers-pool")
 
-    Behaviors.withTimers { timers =>
       Behaviors.receiveMessage {
         case StartJob(jobName, texts, director) =>
-          val timerKey = s"timer-$jobName"
           workers ! JobWorker.Work(jobName, context.self)
           //after getting this message will cancel the job?
-          timers.startSingleTimer(timerKey, Timeout, 60 seconds)
           working(
             director,
             timerKey,
             JobStatus(name = jobName, textParts = Vector(texts)))
       }
-    }
   }
 
   def working(

@@ -59,8 +59,8 @@ class DivisibleJobSpec
     }
 
     "the flow Director -> Master -> Worker -> Master " should {
-      "send a JobRequest to the Director that produces a 100 enlisted Workers" +
-      " that request NextTask to the JobMaster so the latter give Tasks until depletion" in {
+      "send a JobRequest to the Director that produces indirectly (see test above) 100 enlisted Workers" +
+      "each one of them request a NextTask to the JobMaster and it gives them Tasks until depletion" in {
         val director =
           spawn(Director(), "director2")
 

@@ -25,7 +25,7 @@ class DivisibleJobSpec
     PatienceConfig(5.second) //? is this working?
 
   "The words app" should {
-    "count the words ocurrences in a text" in {
+    "count ocurrences of each word in a list of phrases" in {
       val probe = TestProbe[Director.Command]
       val directorMonitored =
         spawn(Behaviors.monitor(probe.ref, Director()), "director0")
@@ -45,27 +45,32 @@ class DivisibleJobSpec
             "test" -> 200000)))
     }
   }
-  "the basic flow" should {
-    "send a JobRequest to the Director that produces a Worker that receives it" in {
+  "the flow from Director to Worker" should {
+    "send a JobRequest to the Director creating a JobMaster that produces a 100 Workers," +
+    "and broadcast 'Work' to each one of them so they get ready to be enlisted" in {
       val director =
-        spawn(Director(), "director")
-
-      LoggingTestKit
-        .debug("Enlisted, will start requesting work for job 'test'.")
-        .withOccurrences(100)
-        .expect {
-          director ! Director.JobRequest(
-            "test",
-            List("this is a test "))
-        }
-    }
-    "send a JobRequest to the Director that produces a Worker to respond to master" in {
-      val director =
-        spawn(Director(), "director-2")
+        spawn(Director(), "director1")
 
       LoggingTestKit
         .debug(
-          "Enlisted, will start requesting work for job 'test2'.")
+          "Enlisting, will start requesting work for job 'test1'.")
+        .withOccurrences(100)
+        .expect {
+          director ! Director.JobRequest(
+            "test1",
+            List("this is a test "))
+        }
+    }
+  }
+
+  "the flow Director -> Master -> Worker -> Master " should {
+    "send a JobRequest to the Director that produces indirectly (see test above) 100 enlisted Worker," +
+    "each one of them request a NextTask to the JobMaster which gives them Tasks until depletion" in {
+      val director =
+        spawn(Director(), "director2")
+
+      LoggingTestKit
+        .debug("Work load 'test2' is depleted, retiring...")
         .withOccurrences(100)
         .expect {
           director ! Director.JobRequest(
@@ -74,53 +79,16 @@ class DivisibleJobSpec
         }
     }
   }
-  "the second flow" should {
-    "send a JobRequest to the Director that produces a Worker that receives it" +
-    " then the Worker send back request for a task to Manager and the Worker receives tasks till not task is left but it doesn't perform the task only consumes it" ignore {
-      val director =
-        spawn(Director(), "director3")
-
-      LoggingTestKit
-        .debug("Work load 'test3' is depleted, retiring...")
-        .withOccurrences(100)
-        .expect {
-          director ! Director.JobRequest(
-            "test3",
-            List("this is a test "))
-        }
-    }
-  }
-  "the thirds flow" should { //should I try composition from lower level, meaning not starting the flow from the Director?
-    "send a JobRequest to the Director that produces a Worker that receives it" +
-    " then the Worker send back request for a task to Manager and the Worker receives tasks till not task is left performing the task and informing the Manager" +
-    " then the Manager should receive MergeResults" in {
-      val probe = TestProbe[Director.Command]
-      val directorMonitored =
-        Behaviors.monitor(probe.ref, Director())
-      val director =
-        spawn(directorMonitored, "director4")
-
-      director ! Director.JobRequest(
-        "test4",
-        List("this is a test ", "it is"))
-      probe.expectMessageType[Director.JobRequest]
-      val wordCount =
-        probe.receiveMessage().asInstanceOf[Director.JobSuccess]
-
-      wordCount.aggregate.toSet contains
-      Set(("test", 1), ("this", 1), ("is", 1), ("a", 1), ("it", 1))
-
-    }
-
-    "a master starting a job should receive a task result with the totals" in {
+  "an inermediate step, only Master -> Worker -> Master" should {
+    "sending StartJob to master will in time return the words count and aggregated" in {
       val probe = TestProbe[JobMaster.Command]
       val jobMasterMonitored =
         Behaviors.monitor(probe.ref, JobMaster())
       val director =
-        spawn(Director(), "director5")
-      val master = spawn(jobMasterMonitored, "master-1")
+        spawn(Director(), "director4")
+      val master = spawn(jobMasterMonitored, "master4")
       master ! JobMaster.StartJob(
-        "test5",
+        "test4",
         List("there are", "are many"),
         director)
 
@@ -138,8 +106,7 @@ class DivisibleJobSpec
 
       messages contains Seq(
         JobMaster.TaskResult(
-          Map("there" -> 1, "are" -> 2, "many" -> 1)),
-        JobMaster.MergeResults)
+          Map("there" -> 1, "are" -> 2, "many" -> 1)))
 
     }
 

@@ -106,7 +106,9 @@ object JobMaster {
 
     val workers = context.spawn(
       Routers
-        .pool(poolSize = 100)(JobWorker())
+        .pool(poolSize = 100){
+          Behaviors.supervise(JobWorker()).onFailure[SupervisionStrategy.restart]
+        }
         .withBroadcastPredicate(_ => true),
       "workers-pool")
 

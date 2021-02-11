@@ -18,16 +18,14 @@ object JobWorker {
       extends Command
 
   def apply() =
-    Behaviors.setup[Command] { context =>
-      Behaviors.receiveMessage {
-        case Work(jobName, master) =>
-          context.log.debug(
-            s"Enlisted, will start requesting work for job '${jobName}'.")
-          master ! JobMaster.Enlist(context.self)
-          master ! JobMaster.NextTask(context.self)
-          enlisted(0)
-      }
-
+    Behaviors.receive[Command] {
+      case (context, Work(jobName, master)) =>
+        context.log.debug(
+          s"Enlisting, will start requesting work for job '${jobName}'.")
+        master ! JobMaster.Enlist(context.self)
+        master ! JobMaster.NextTask(context.self)
+        enlisted(0)
+      case _ => Behaviors.unhandled
     }
 
   def enlisted(taskProcessed: Int): Behavior[Command] =
