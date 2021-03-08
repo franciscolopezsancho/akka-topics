@@ -33,7 +33,8 @@ class AsyncTestingExampleSpec
 object Proxy {
 
   sealed trait Message
-  case class Send(message: String, sendTo: ActorRef[String]) extends Message
+  case class Send(message: String, sendTo: ActorRef[String])
+      extends Message
 
   def apply(): Behavior[Message] = Behaviors.receiveMessage {
     case Send(message, sendTo) =>
@@ -44,8 +45,9 @@ object Proxy {
 
 object Listener {
 
-  def apply(): Behavior[String] = Behaviors.receive { (context, message) =>
-    context.log.info(s"message '$message', received")
-    Behaviors.stopped
+  def apply(): Behavior[String] = Behaviors.receive {
+    (context, message) =>
+      context.log.info(s"message '$message', received")
+      Behaviors.stopped
   }
 }

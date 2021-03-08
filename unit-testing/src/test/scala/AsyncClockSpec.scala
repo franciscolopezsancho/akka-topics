@@ -42,14 +42,18 @@ class AsyncClockSpec
 object SwapDelayed {
 
   sealed trait Command
-  case class Take(from: ActorRef[String], thing: String) extends Command
+  case class Take(from: ActorRef[String], thing: String)
+      extends Command
   case class Give(to: ActorRef[String], thing: String) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.withTimers { timers =>
       Behaviors.receiveMessage {
         case Take(from, thing) =>
-          timers.startSingleTimer("unusedKey", Give(from, thing), 100.millis)
+          timers.startSingleTimer(
+            "unusedKey",
+            Give(from, thing),
+            100.millis)
           Behaviors.same
         case Give(to, thing) =>
           to ! thing.reverse

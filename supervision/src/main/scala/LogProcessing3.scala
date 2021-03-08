@@ -77,7 +77,8 @@ object FileWatcher extends FileWatchingAbilities {
             }
         }
       }
-      .onFailure[ClosedWatchServiceException](SupervisorStrategy.restart)
+      .onFailure[ClosedWatchServiceException](
+        SupervisorStrategy.restart)
   //after restart work can get duplicated, dedup is out of the scope.
 
 }
@@ -138,12 +139,14 @@ object DbWriter {
       }
     }
 
-  def supervisorStrategy(behavior: Behavior[Command]): Behavior[Command] =
+  def supervisorStrategy(
+      behavior: Behavior[Command]): Behavior[Command] =
     Behaviors
       .supervise {
         Behaviors
           .supervise(behavior)
-          .onFailure[UnexpectedColumnsException](SupervisorStrategy.resume)
+          .onFailure[UnexpectedColumnsException](
+            SupervisorStrategy.resume)
       }
       .onFailure[DbBrokenConnectionException](
         SupervisorStrategy

@@ -62,7 +62,9 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  final case class Do(replyTo: ActorRef[Worker.Response], task: String)
+  final case class Do(
+      replyTo: ActorRef[Worker.Response],
+      task: String)
       extends Command
 
   sealed trait Response
@@ -72,7 +74,8 @@ object Worker {
     Behaviors.receive { (context, message) =>
       message match {
         case Do(replyTo, task) =>
-          context.log.info(s"'${context.self.path}'. Done with '$task'")
+          context.log.info(
+            s"'${context.self.path}'. Done with '$task'")
           replyTo ! Worker.Done(task)
           Behaviors.stopped
       }

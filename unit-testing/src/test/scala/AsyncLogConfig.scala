@@ -19,12 +19,13 @@ class AsyncLogConfigSpec
   "Actor" must {
 
     "log in debug the content when receiving message" in {
-      val behavior: Behavior[String] = Behaviors.receive { (context, message) =>
-        message match {
-          case message: String =>
-            context.log.debug(s"message '$message', received")
-            Behaviors.stopped
-        }
+      val behavior: Behavior[String] = Behaviors.receive {
+        (context, message) =>
+          message match {
+            case message: String =>
+              context.log.debug(s"message '$message', received")
+              Behaviors.stopped
+          }
       }
 
       val actor = testKit.spawn(behavior)

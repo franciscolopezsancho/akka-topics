@@ -42,14 +42,16 @@ object Manager {
     Behaviors.setup { context =>
 
       val workers: Seq[ActorRef[Worker.Command]] =
-        (0 to manPower).map(num => context.spawn(Worker(), s"worker-$num"))
+        (0 to manPower).map(num =>
+          context.spawn(Worker(), s"worker-$num"))
       val adapter: ActorRef[Worker.Response] =
         context.messageAdapter(rsp => AdapterWorkerResponse(rsp))
 
       Behaviors.receiveMessage { message =>
         message match {
           case Delegate(task) =>
-            val worker = workers(scala.util.Random.nextInt(workers.size))
+            val worker =
+              workers(scala.util.Random.nextInt(workers.size))
             worker ! Worker.Do(adapter, task)
           case Done(task) =>
             context.log.info(s"task '$task' has been finished")
@@ -70,7 +72,9 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  final case class Do(replyTo: ActorRef[Worker.Response], task: String)
+  final case class Do(
+      replyTo: ActorRef[Worker.Response],
+      task: String)
       extends Command
   final case object Clean extends Command
 
@@ -91,7 +95,8 @@ object Worker {
           Behaviors.same
         case Clean =>
           doing(1000) // this represent some work
-          context.log.info(s"${context.self.path.name}: I'm DONE cleaning")
+          context.log.info(
+            s"${context.self.path.name}: I'm DONE cleaning")
           idle(jobsDone)
       }
     }
@@ -108,7 +113,8 @@ object Worker {
           context.self ! Clean
           cleaning(jobSoFar)
         case Clean =>
-          context.log.info(s"${context.self.path.name} : nothing to clean yet")
+          context.log.info(
+            s"${context.self.path.name} : nothing to clean yet")
           Behaviors.same
       }
     }

@@ -1,12 +1,8 @@
 package example.cluster
 
 import akka.actor.typed.{ ActorRef, Behavior }
-import akka.actor.typed.scaladsl.{ Behaviors, GroupRouter, Routers }
+import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.receptionist.{ Receptionist, ServiceKey }
-
-import scala.util.{ Failure, Success }
-import akka.util.Timeout
-import scala.concurrent.duration._
 
 object Worker {
 
@@ -18,6 +14,8 @@ object Worker {
       with CborSerializable
 
   def apply() = Behaviors.setup[Command] { context =>
+    context.log.debug(
+      s"${context.self} subscribing to $RegistrationKey")
     context.system.receptionist ! Receptionist
       .Register(RegistrationKey, context.self)
 

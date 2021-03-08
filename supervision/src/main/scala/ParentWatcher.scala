@@ -1,4 +1,9 @@
-import akka.actor.typed.{ ActorRef, Behavior, ChildFailed, Terminated }
+import akka.actor.typed.{
+  ActorRef,
+  Behavior,
+  ChildFailed,
+  Terminated
+}
 import akka.actor.typed.scaladsl.{ Behaviors }
 
 object ParentWatcher {

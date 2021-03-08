@@ -15,7 +15,8 @@ object HelloWorld {
 
 object HelloWorldApp extends App {
 
-  val guardian: ActorSystem[String] = ActorSystem(HelloWorld(), "HelloWorld")
+  val guardian: ActorSystem[String] =
+    ActorSystem(HelloWorld(), "HelloWorld")
   guardian ! "Hello"
   guardian ! "Hello Again"
 

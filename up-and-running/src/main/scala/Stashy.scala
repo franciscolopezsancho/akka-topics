@@ -39,11 +39,13 @@ object Manager {
   def apply(manPower: Int): Behavior[Command] =
     Behaviors.setup { context =>
       val workers: Seq[ActorRef[Worker.Command]] =
-        (0 to manPower).map(num => context.spawn(Worker(), s"worker-$num"))
+        (0 to manPower).map(num =>
+          context.spawn(Worker(), s"worker-$num"))
       Behaviors.receiveMessage { message =>
         message match {
           case Delegate1(task) =>
-            val worker = workers(scala.util.Random.nextInt(workers.size))
+            val worker =
+              workers(scala.util.Random.nextInt(workers.size))
             worker ! Worker.Do(context.self, task)
           case Done(task) =>
             context.log.info(s"task '$task' has been finished")
@@ -75,7 +77,8 @@ object Worker {
             Behaviors.same
           case Clean =>
             doing(1000) // this represent some work
-            context.log.info(s"I'm ${context.self.path}, I'm DONE cleaning")
+            context.log.info(
+              s"I'm ${context.self.path}, I'm DONE cleaning")
             buffer.unstashAll(idle(jobsDone))
         }
       }
@@ -99,7 +102,9 @@ object Worker {
     }
 
   sealed trait Command
-  final case class Do(replyTo: ActorRef[Manager.Command], task: String)
+  final case class Do(
+      replyTo: ActorRef[Manager.Command],
+      task: String)
       extends Command
   final case object Clean extends Command
 

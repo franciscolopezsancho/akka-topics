@@ -3,7 +3,11 @@ package basics
 import akka.actor.testkit.typed.scaladsl.BehaviorTestKit
 import akka.actor.testkit.typed.scaladsl.TestInbox
 import akka.actor.testkit.typed.CapturedLogEvent
-import akka.actor.testkit.typed.Effect.{ NoEffects, Scheduled, Spawned }
+import akka.actor.testkit.typed.Effect.{
+  NoEffects,
+  Scheduled,
+  Spawned
+}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.exceptions.TestFailedException
@@ -22,7 +26,8 @@ object SyncTestingExampleSpec {
 
     sealed trait Command
     case class Create(name: String) extends Command
-    case class Proxy(message: String, sendTo: ActorRef[String]) extends Command
+    case class Proxy(message: String, sendTo: ActorRef[String])
+        extends Command
     case object ScheduleDone extends Command
     case object Done extends Command
 
@@ -78,7 +83,8 @@ class SyncTestingExampleSpec extends AnyWordSpec with Matchers {
       intercept[TestFailedException] {
         val testKit = BehaviorTestKit(Hello())
         testKit.run(Hello.ScheduleDone)
-        testKit.expectEffect(Scheduled(1.seconds, testKit.ref, Hello.Done))
+        testKit.expectEffect(
+          Scheduled(1.seconds, testKit.ref, Hello.Done))
         testKit.logEntries() shouldBe Seq(
           CapturedLogEvent(Level.INFO, "it's done"))
       }

@@ -10,7 +10,8 @@ object ManangerWorkerApp extends App {
 
   val system: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "example-ask-without-content")
-  system ! Guardian.Start(List("task-a", "task-b", "task-c", "task-d"))
+  system ! Guardian.Start(
+    List("task-a", "task-b", "task-c", "task-d"))
 }
 
 object Guardian {
@@ -48,9 +49,11 @@ object Manager {
                 context.spawn(Worker(), s"worker-$task")
               context.ask(worker, Worker.Do) {
                 case Success(Worker.Done) =>
-                  Report(s"$task has been finished by ${worker.path.name}")
+                  Report(
+                    s"$task has been finished by ${worker.path.name}")
                 case Failure(ex) =>
-                  Report(s"task '$task' has failed with [${ex.getMessage()}")
+                  Report(
+                    s"task '$task' has failed with [${ex.getMessage()}")
               }
             }
             Behaviors.same

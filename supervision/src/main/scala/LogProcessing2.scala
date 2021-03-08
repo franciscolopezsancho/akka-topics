@@ -62,7 +62,8 @@ object FileWatcher {
 
   def apply(
       directory: String,
-      logProcessor: ActorRef[LogProcessor.Command]): Behavior[Command] = {
+      logProcessor: ActorRef[LogProcessor.Command])
+      : Behavior[Command] = {
     Behaviors
       .supervise {
         Behaviors.setup[Command] { context =>
@@ -126,7 +127,8 @@ object DbWriter {
           .supervise {
             beh
           }
-          .onFailure[DbBrokenConnectionException](SupervisorStrategy.restart)
+          .onFailure[DbBrokenConnectionException](
+            SupervisorStrategy.restart)
       }
       .onFailure[DbNodeDownException](SupervisorStrategy.stop)
 
@@ -146,4 +148,6 @@ class DbBrokenConnectionException(msg: String)
     with Serializable
 
 @SerialVersionUID(1L)
-class DbNodeDownException(msg: String) extends Exception(msg) with Serializable
+class DbNodeDownException(msg: String)
+    extends Exception(msg)
+    with Serializable

@@ -1,4 +1,9 @@
-import akka.actor.typed.{ ActorRef, Behavior, ChildFailed, Terminated }
+import akka.actor.typed.{
+  ActorRef,
+  Behavior,
+  ChildFailed,
+  Terminated
+}
 import akka.actor.typed.scaladsl.{ Behaviors }
 
 object Watcher {
@@ -6,7 +11,8 @@ object Watcher {
   sealed trait Command
   case class Watch(ref: ActorRef[String]) extends Command
 
-  def apply(children: List[ActorRef[String]] = List()): Behavior[Command] =
+  def apply(
+      children: List[ActorRef[String]] = List()): Behavior[Command] =
     Behaviors
       .receive[Command] { (context, message) =>
         message match {

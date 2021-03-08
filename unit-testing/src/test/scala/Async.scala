@@ -100,7 +100,8 @@ object AdditionProxy {
 
   sealed trait Command
   case class Add(numbers: List[Int]) extends Command
-  case class GetState(replyTo: ActorRef[AdditionProxy.Event]) extends Command
+  case class GetState(replyTo: ActorRef[AdditionProxy.Event])
+      extends Command
 
   sealed trait Event
   case class State(count: Int) extends Event
@@ -113,8 +114,8 @@ object AdditionProxy {
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
 
-      def messageAdapter(
-          replyTo: ActorRef[AdditionProxy.Event]): ActorRef[Counter.Event] =
+      def messageAdapter(replyTo: ActorRef[AdditionProxy.Event])
+          : ActorRef[Counter.Event] =
         context.messageAdapter(rsp => AdaptState(replyTo, rsp))
 
       val counter = context.spawnAnonymous(Counter(0))
@@ -158,11 +159,12 @@ object Reader {
   sealed trait Text
   case class Read(message: String) extends Text
 
-  def apply(): Behavior[Text] = Behaviors.receive { (context, message) =>
-    message match {
-      case Read(message) =>
-        context.log.info(s"message '$message', received")
-        Behaviors.stopped
-    }
+  def apply(): Behavior[Text] = Behaviors.receive {
+    (context, message) =>
+      message match {
+        case Read(message) =>
+          context.log.info(s"message '$message', received")
+          Behaviors.stopped
+      }
   }
 }

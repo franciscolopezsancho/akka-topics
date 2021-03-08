@@ -11,7 +11,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class SupervisionExampleSpec
-    extends ScalaTestWithActorTestKit("akka.jvm-exit-on-fatal-error = off")
+    extends ScalaTestWithActorTestKit(
+      "akka.jvm-exit-on-fatal-error = off")
     with AnyWordSpecLike
     with Matchers
     with LogCapturing {

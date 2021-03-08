@@ -1,8 +1,7 @@
 package example.cluster
 
 import akka.actor.typed.{ ActorRef, Behavior }
-import akka.actor.typed.scaladsl.{ Behaviors, GroupRouter, Routers }
-import akka.actor.typed.receptionist.{ Receptionist, ServiceKey }
+import akka.actor.typed.scaladsl.Behaviors
 
 import scala.util.{ Failure, Success }
 import akka.util.Timeout
@@ -31,20 +30,23 @@ object Master {
     Behaviors.setup[Event] { context =>
 
       implicit val timeout: Timeout = 3.seconds
+      val paralellism =
+        context.system.settings.config
+          .getInt("example.cluster.delegation-parallelism")
+
       Behaviors.receiveMessage[Event] {
         case Tick =>
           context.log.debug(s"receiving, current lag ${lag.size} ")
 
           val text = "this simulates a stream, a very simple stream"
           val allTexts = lag :+ text
-          val (firstPart, secondPart) = allTexts.splitAt(5)
+          val (firstPart, secondPart) =
+            allTexts.splitAt(paralellism)
           firstPart.map { text =>
             context.ask(workersRouter, Worker.Process(text, _)) {
               case Success(CountedWords(map)) =>
                 CountedWords(map) //weird
               case Failure(ex) =>
-                context.log.warn(
-                  s"error processing '$text'. Exception found: ${ex.toString()}")
                 FailedJob(text)
             }
           }

@@ -14,7 +14,8 @@ class AskSpec
     "be referrencing to the sender of the ask" in {
 
       val manager = spawn(Manager(), "manager-1")
-      manager ! Manager.Delegate(List("task-a", "task-b", "task-c", "task-d"))
+      manager ! Manager.Delegate(
+        List("task-a", "task-b", "task-c", "task-d"))
 
       Thread.sleep(3000)
     }

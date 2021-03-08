@@ -20,7 +20,8 @@ object Guardian {
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-1")
       Behaviors.receiveMessage { message =>
-        manager ! Manager.Delegate(List("task-a", "task-b", "task-c", "task-d"))
+        manager ! Manager.Delegate(
+          List("task-a", "task-b", "task-c", "task-d"))
         Behaviors.same
       }
     }
@@ -52,7 +53,9 @@ object Manager {
               context.ask(
                 worker,
                 auxCreateRequest(
-                  Worker.Task(System.currentTimeMillis().toString(), task))) {
+                  Worker.Task(
+                    System.currentTimeMillis().toString(),
+                    task))) {
                 case Success(Worker.Done(taskId)) =>
                   Report(s"$taskId has been finished by ${worker}")
                 case Failure(ex) =>

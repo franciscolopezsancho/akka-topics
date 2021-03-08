@@ -6,7 +6,8 @@ import scala.concurrent.duration._
 
 object TimeApp extends App {
 
-  val guardian = ActorSystem[Timing.Command](Timing(), "timing-example")
+  val guardian =
+    ActorSystem[Timing.Command](Timing(), "timing-example")
   guardian ! Timing.Start
 }
 
@@ -28,7 +29,10 @@ object Timing {
           case Start =>
             context.log.info("started")
             timers.startSingleTimer(TimedOut, 5.second)
-            timers.startTimerWithFixedDelay(CheckingKey, Checking, 1.second)
+            timers.startTimerWithFixedDelay(
+              CheckingKey,
+              Checking,
+              1.second)
           case TimedOut =>
             context.log.info("time is out")
             timers.cancel(CheckingKey)

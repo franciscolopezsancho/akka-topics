@@ -1,7 +1,3 @@
 package stashing
 
-
-object Stasher {
-	
-}
-
+object Stasher {}

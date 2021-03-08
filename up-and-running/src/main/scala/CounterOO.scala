@@ -1,7 +1,11 @@
 package oo
 
 import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.actor.typed.scaladsl.{ AbstractBehavior, ActorContext, Behaviors }
+import akka.actor.typed.scaladsl.{
+  AbstractBehavior,
+  ActorContext,
+  Behaviors
+}
 
 object Counter {
 
