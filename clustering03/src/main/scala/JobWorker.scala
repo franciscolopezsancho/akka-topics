@@ -18,23 +18,22 @@ object JobWorker {
       extends Command
 
   def apply() =
-    Behaviors.setup[Command] { context =>
-      Behaviors.receiveMessage {
-        case Work(jobName, master) =>
-          context.log.debug(
-            s"Enlisted, will start requesting work for job '${jobName}'.")
-          master ! JobMaster.Enlist(context.self)
-          master ! JobMaster.NextTask(context.self)
-          enlisted(0)
-      }
-
+    Behaviors.receive[Command] {
+      case (context, Work(jobName, master)) =>
+        context.log.debug(
+          s"Enlisting, will start requesting work for job '${jobName}'.")
+        master ! JobMaster.Enlist(context.self)
+        master ! JobMaster.NextTask(context.self)
+        enlisted(0)
+      case _ => Behaviors.unhandled
     }
 
   def enlisted(taskProcessed: Int): Behavior[Command] =
     Behaviors.receive[Command] {
       case (context, WorkLoadDepleted(jobName)) =>
         context.log.debug(
-          s"Work load '$jobName' is depleted, retiring...")
+          s"Work load '$jobName' is depleted, retiring..."
+        ) //shall I back to idle?
         Behaviors.same
       case (context, Task(textPart, master)) =>
         val countMap = processTask(textPart)
