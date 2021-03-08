@@ -7,12 +7,16 @@ import akka.actor.testkit.typed.scaladsl.{
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{ Behaviors, Routers }
 
+import com.typesafe.config.{ ConfigFactory }
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class WordsSampleSpec
     extends ScalaTestWithActorTestKit(
-      """example.cluster.workers-per-node = 5""")
+      ConfigFactory
+        .parseString("""example.cluster.workers-per-node = 5""")
+        .withFallback(ConfigFactory.load("words")))
     with AnyWordSpecLike
     with Matchers
     with LogCapturing {

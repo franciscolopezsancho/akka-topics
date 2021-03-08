@@ -3,9 +3,6 @@ val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.0.9"
 
-import com.typesafe.sbt.SbtMultiJvm.multiJvmSettings
-import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
-
 lazy val `up-and-running` = project
   .in(file("up-and-running"))
   .settings(
@@ -64,21 +61,8 @@ lazy val clustering = project
       "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
       "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "com.typesafe.akka" %% "akka-multi-node-testkit"    % AkkaVersion % Test,//remove                     
       "org.scalatest" %% "scalatest" % "3.1.4" % Test,
     ),
-    mainClass in assembly := Some("example.cluster.App"),//remove                     
-    assemblyMergeStrategy in assembly := {                      //remove                      
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard//remove                     
-      case x => MergeStrategy.first//remove                     
-    },//remove                      
-    assemblyJarName in assembly := "words-node.jar"//remove                     
   )
-  .settings(multiJvmSettings: _*) //remove
-  .enablePlugins(MultiJvmPlugin)  //remove
-  .configs(MultiJvm) //remove
-
-  // Assembly settings
-
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger

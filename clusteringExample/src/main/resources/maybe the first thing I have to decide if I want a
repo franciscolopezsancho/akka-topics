@@ -1,9 +1,0 @@
-maybe the first thing I have to decide if I want a batch or a stream
-- if batch just list of something
-- if stream should keep receiveing data while 'working'
-
-maybe batch is good if we think in a web page, so the system should be able to rank
-each one and give back so for every page there is a master and some workers
-- how do I create multiple masters? I don't put a comment, we are not tackling Akka ports here. But you see the need. 
-- now the question is I get the lines but how do I know i finished, let's make the parallelism to 2 and tick 10 secs. I know I'm finished when lines a get back from each aggregate tell me the line, I will keep a map with the hash of the line. 
-- How do I make sure I'm not sending the same again the same? I don't know, at least once. 
