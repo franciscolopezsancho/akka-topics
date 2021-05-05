@@ -29,7 +29,7 @@ import akka.cluster.sharding.typed.scaladsl.{
 }
 import akka.cluster.sharding.typed.ShardingEnvelope
 
-class PersistenceSpec
+class SContainerSpec
     extends ScalaTestWithActorTestKit(
       EventSourcedBehaviorTestKit.config.withFallback(
         ConfigFactory.load("application-test")))
@@ -39,32 +39,29 @@ class PersistenceSpec
 
   "a persistent entity with sharding" should {
 
-    "be able to add parcels" in {
+    "be able to add container" in {
       val sharding = ClusterSharding(system)
 
-      val shardRegion: ActorRef[
-        ShardingEnvelope[ShippingShardingVehicle.Command]] =
+      val shardRegion
+          : ActorRef[ShardingEnvelope[SContainer.Command]] =
         sharding.init(
-          Entity(ShippingShardingVehicle.TypeKey)(createBehavior =
-            entityContext =>
-              ShippingShardingVehicle(entityContext.entityId)))
+          Entity(SContainer.TypeKey)(createBehavior = entityContext =>
+            SContainer(entityContext.entityId)))
 
-      val vehicleId = "id-1"
-      val parcel1 = ShippingShardingVehicle.Parcel("ref1", "MEDIUM")
+      val containerId = "id-1"
+      val cargo = SContainer.Cargo("id-c", "sack", 3)
 
       shardRegion ! ShardingEnvelope(
-        vehicleId,
-        ShippingShardingVehicle.AddParcel(parcel1))
+        containerId,
+        SContainer.AddCargo(cargo))
 
       val probe =
-        createTestProbe[List[ShippingShardingVehicle.Parcel]]()
-      val truck: EntityRef[ShippingShardingVehicle.Command] =
-        sharding.entityRefFor(
-          ShippingShardingVehicle.TypeKey,
-          vehicleId)
-      truck ! ShippingShardingVehicle.GetParcels(probe.ref)
+        createTestProbe[List[SContainer.Cargo]]()
+      val container: EntityRef[SContainer.Command] =
+        sharding.entityRefFor(SContainer.TypeKey, containerId)
+      container ! SContainer.GetCargos(probe.ref)
 
-      probe.expectMessage(List(parcel1))
+      probe.expectMessage(List(cargo))
 
     }
 
@@ -74,43 +71,43 @@ class PersistenceSpec
   //     val sharding = ClusterSharding(system)
 
   //     val shardRegion: ActorRef[
-  //       ShardingEnvelope[ShippingShardingVehicleFSM.Command]] =
+  //       ShardingEnvelope[SContainerFSM.Command]] =
   //       sharding.init(
-  //         Entity(ShippingShardingVehicleFSM.TypeKey)(createBehavior =
+  //         Entity(SContainerFSM.TypeKey)(createBehavior =
   //           entityContext =>
-  //             ShippingShardingVehicleFSM(entityContext.entityId)))
+  //             SContainerFSM(entityContext.entityId)))
 
-  //     val vehicleId = "id-2"
+  //     val containerId = "id-2"
   //     val parcelCode = "ABC"
 
   //     shardRegion ! ShardingEnvelope(
-  //       vehicleId,
-  //       ShippingShardingVehicleFSM.Clean)
+  //       containerId,
+  //       SContainerFSM.Clean)
 
   //     shardRegion ! ShardingEnvelope(
-  //       vehicleId,
-  //       ShippingShardingVehicleFSM.AddParcel(parcelCode))
+  //       containerId,
+  //       SContainerFSM.AddParcel(parcelCode))
 
   //     shardRegion ! ShardingEnvelope(
-  //       vehicleId,
-  //       ShippingShardingVehicleFSM.AddParcel(parcelCode))
+  //       containerId,
+  //       SContainerFSM.AddParcel(parcelCode))
 
   //     val probe = createTestProbe[List[String]]()
-  //     val truck: EntityRef[ShippingShardingVehicleFSM.Command] =
+  //     val truck: EntityRef[SContainerFSM.Command] =
   //       sharding.entityRefFor(
-  //         ShippingShardingVehicleFSM.TypeKey,
-  //         vehicleId)
-  //     truck ! ShippingShardingVehicleFSM.GetParcels(probe.ref)
+  //         SContainerFSM.TypeKey,
+  //         containerId)
+  //     truck ! SContainerFSM.GetParcels(probe.ref)
 
   //     probe.expectMessage(List("no parcels, we're cleaning"))
 
   //   }
   // }
 }
-// object ShippingShardingVehicleFSM {
+// object SContainerFSM {
 
 //   val TypeKey =
-//     EntityTypeKey[ShippingShardingVehicleFSM.Command](
+//     EntityTypeKey[SContainerFSM.Command](
 //       "vehicle-type-key")
 
 //   sealed trait Command
@@ -130,9 +127,9 @@ class PersistenceSpec
 //   final case class Ready(parcels: List[String]) extends State
 //   final case class Cleaning(parcels: List[String] = Nil) extends State
 
-//   def apply(vehicleId: String): Behavior[Command] =
+//   def apply(containerId: String): Behavior[Command] =
 //     EventSourcedBehavior[Command, Event, State](
-//       PersistenceId(TypeKey.name, vehicleId),
+//       PersistenceId(TypeKey.name, containerId),
 //       Ready(List()),
 //       commandHandler,
 //       eventHandler)
