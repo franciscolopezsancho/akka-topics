@@ -114,7 +114,7 @@ lazy val projections = project
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
-      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion  ,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
       "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
       "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
@@ -135,7 +135,7 @@ lazy val projections = project
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
       "org.scalatest" %% "scalatest" % "3.1.4" % Test,
       "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
-        "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
+      "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
 
       "org.postgresql" % "postgresql" % "42.2.18",
     )
@@ -151,5 +151,25 @@ lazy val `akka-streams-one` = project
         "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion, //otherwise java.lang.ClassNotFoundException: akka.cluster.ClusterActorRefProvider 
         "org.scalatest" %% "scalatest" % "3.1.4" % Test,
       ))
+
+lazy val `persistence-query` = project
+    .in(file("persistence-query"))
+    .settings(
+        scalaVersion := ScalaVersion, 
+        libraryDependencies ++= Seq(
+          "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
+          "com.typesafe.akka" %% "akka-persistence-query" % AkkaVersion, 
+          "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+          "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
+          "org.postgresql" % "postgresql" % "42.2.18",
+          "com.lightbend.akka" %% "akka-stream-alpakka-slick" % "2.0.0",
+          "ch.qos.logback" % "logback-classic" % LogbackVersion,
+          "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
+          "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
+          "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+          "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
+          )
+
+    )
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
