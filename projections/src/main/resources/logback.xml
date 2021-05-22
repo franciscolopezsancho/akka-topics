@@ -12,7 +12,7 @@
    <logger name="scalikejdbc" level="debug" />
    <logger name="example.projection" level="debug" />
 
-    <root level="info">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

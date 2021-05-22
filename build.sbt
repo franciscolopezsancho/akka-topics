@@ -110,6 +110,7 @@ lazy val persistence = project
 
 lazy val projections = project
   .in(file("projections"))
+  .dependsOn(persistence)
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
@@ -136,7 +137,6 @@ lazy val projections = project
       "org.scalatest" %% "scalatest" % "3.1.4" % Test,
       "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
       "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
-
       "org.postgresql" % "postgresql" % "42.2.18",
     )
   )
@@ -171,5 +171,7 @@ lazy val `persistence-query` = project
           )
 
     )
+
+
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger

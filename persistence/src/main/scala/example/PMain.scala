@@ -23,7 +23,7 @@ import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
 
 import example.persistence.CommandLine.Command
 
-object Main {
+object PMain {
 
   //write
   val logger = LoggerFactory.getLogger(Main + "")
@@ -41,16 +41,16 @@ object Main {
   }
 
   def init(system: ActorSystem[_])
-      : ActorRef[ShardingEnvelope[SContainer.Command]] = {
+      : ActorRef[ShardingEnvelope[PContainer.Command]] = {
     val sharding = ClusterSharding(system)
 
-    val shardRegion: ActorRef[ShardingEnvelope[SContainer.Command]] =
+    val shardRegion: ActorRef[ShardingEnvelope[PContainer.Command]] =
       sharding.init(
-        Entity(SContainer.TypeKey)(createBehavior = entityContext =>
-          SContainer(entityContext.entityId)))
+        Entity(PContainer.TypeKey)(createBehavior = entityContext =>
+          PContainer(entityContext.entityId)))
 
     val containerId = "id-1"
-    val cargo = SContainer.Cargo("id-c", "sack", 3)
+    val cargo = PContainer.Cargo("id-c", "sack", 3)
 
     shardRegion
 
@@ -59,7 +59,7 @@ object Main {
   @tailrec
   private def commandLoop(
       system: ActorSystem[_],
-      shardRegion: ActorRef[ShardingEnvelope[SContainer.Command]])
+      shardRegion: ActorRef[ShardingEnvelope[PContainer.Command]])
       : Unit = {
 
     print("please write:")
@@ -76,8 +76,8 @@ object Main {
             cargoSize) =>
           shardRegion ! ShardingEnvelope(
             containerId,
-            SContainer.AddCargo(
-              SContainer.Cargo(cargoId, cargoKind, cargoSize)))
+            PContainer.AddCargo(
+              PContainer.Cargo(cargoId, cargoKind, cargoSize)))
 
           commandLoop(system, shardRegion)
         case Command.Unknown(command) =>
