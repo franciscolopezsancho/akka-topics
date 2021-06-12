@@ -6,7 +6,7 @@ import akka.actor.typed.ActorSystem
 
 import akka.projection.ProjectionId
 import akka.projection.scaladsl.ExactlyOnceProjection
-import akka.projection.eventsourced.{ EventEnvelope }
+import akka.projection.eventsourced.EventEnvelope
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 
 import akka.projection.jdbc.scaladsl.{ JdbcHandler, JdbcProjection }
@@ -19,7 +19,7 @@ import example.repository.scalike.{
   ScalikeJdbcSession
 }
 
-import example.persistence.PContainer
+import example.persistence.SContainer
 
 object CargosPerContainerProjection {
 
@@ -31,44 +31,43 @@ object CargosPerContainerProjection {
       repository: CargosPerContainerRepository,
       indexTag: Int): ExactlyOnceProjection[
     Offset,
-    EventEnvelope[PContainer.Event]] = {
+    EventEnvelope[SContainer.Event]] = {
 
     val tag = "container-tag-" + indexTag
 
     val sourceProvider =
-      EventSourcedProvider.eventsByTag[PContainer.Event](
+      EventSourcedProvider.eventsByTag[SContainer.Event](
         system = system,
         readJournalPluginId = JdbcReadJournal.Identifier,
         tag = tag)
+
     JdbcProjection.exactlyOnce(
       projectionId =
         ProjectionId("CargosPerContainerProjection", tag),
       sourceProvider = sourceProvider,
       handler =
-        () => new CPCProjectionHandler(tag, system, repository),
+        () => new CPCProjectionHandler(repository),
       sessionFactory = () => new ScalikeJdbcSession())(system)
   }
 }
 
 class CPCProjectionHandler(
-    tag: String,
-    system: ActorSystem[_],
     repository: CargosPerContainerRepository)
     extends JdbcHandler[
-      EventEnvelope[PContainer.Event],
+      EventEnvelope[SContainer.Event],
       ScalikeJdbcSession] {
 
   val logger = LoggerFactory.getLogger(classOf[CPCProjectionHandler])
 
   override def process(
       session: ScalikeJdbcSession,
-      envelope: EventEnvelope[PContainer.Event]): Unit = {
+      envelope: EventEnvelope[SContainer.Event]): Unit = {
     envelope.event match {
-      case PContainer.CargoAdded(containerId, cargo) =>
+      case SContainer.CargoAdded(containerId, cargo) =>
         repository.addCargo(containerId, session)
+      case x => 
+        logger.debug("ignoring event {} in projection",x)
 
     }
-
   }
-
 }

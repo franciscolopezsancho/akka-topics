@@ -1,42 +1,39 @@
 package example.projection
 
 import scala.util.control.NonFatal
-import scala.annotation.tailrec
-import scala.io.StdIn
 
 import java.time.Instant
 
 import org.slf4j.LoggerFactory
 
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
-import akka.actor.typed.scaladsl.Behaviors
+import com.typesafe.config.ConfigFactory
 
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  Entity,
-  EntityTypeKey
-}
-import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
 
 import akka.cluster.sharding.typed.ShardedDaemonProcessSettings
 import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
 
 import akka.projection.ProjectionBehavior
 
-import example.persistence.PContainer
 import example.repository.scalike.CargosPerContainerRepositoryImpl
 import example.repository.scalike.ScalikeJdbcSetup
+
 object Main {
 
-  //write
   val logger = LoggerFactory.getLogger(Main + "")
 
   def main(args: Array[String]): Unit = {
     logger.info("initializing system")
-    val system = ActorSystem[Nothing](Behaviors.empty, "postoffice")
-    ScalikeJdbcSetup.init(system)
+    val system = if (args.isEmpty) {
+      initActorSystem(25533)
+    }else{
+      initActorSystem(args(0).toInt)
+    }
+    
     try {
-      val shardRegion = init(system)
+      ScalikeJdbcSetup.init(system)
+      initProjection(system)
     } catch {
       case NonFatal(ex) =>
         logger.error(s"terminating by NonFatal Exception", ex)
@@ -44,25 +41,19 @@ object Main {
     }
   }
 
-  def init(system: ActorSystem[_])
-      : ActorRef[ShardingEnvelope[PContainer.Command]] = {
-    logger.info("initializing sharded cluster")
-    val shardRegion = ClusterSharding(system).init(
-      Entity(PContainer.TypeKey)(entityContext =>
-        PContainer(entityContext.entityId)))
+  def initActorSystem(port: Int): ActorSystem[Nothing] = {
+    val config = ConfigFactory
+      .parseString(s"""
+      akka.remote.artery.canonical.port=$port
+      """)
+      .withFallback(ConfigFactory.load())
+      ActorSystem[Nothing](Behaviors.empty, "containersprojection", config)
+  }
 
-    logger.info("initializing projection")
-    // val projection = VisitedCitiesProjection.createProjectionFor(
-    //   system,
-    //   new VisitedCitiesRepositoryDBImpl(),1)
-
-    // val projectionBehavior: Behavior[ProjectionBehavior.Command] = ProjectionBehavior(projection)
-    // val projectionTypeKey = EntityTypeKey[ProjectionBehavior.Command]("projections-type-key")
-    // val anotherRegion = ClusterSharding(system).init(
-    //   Entity(projectionTypeKey)( entityContext => projectionBehavior))
-
+  def initProjection(system: ActorSystem[_])
+      : Unit  = {
     ShardedDaemonProcess(system).init(
-      name = "whatever",
+      name = "cargos-per-container-projection",
       3,
       index =>
         ProjectionBehavior(
@@ -72,9 +63,6 @@ object Main {
             index)),
       ShardedDaemonProcessSettings(system),
       Some(ProjectionBehavior.Stop))
-
-    shardRegion
-
   }
 
 }

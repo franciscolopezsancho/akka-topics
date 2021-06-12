@@ -49,9 +49,6 @@ object Main {
         Entity(SContainer.TypeKey)(createBehavior = entityContext =>
           SContainer(entityContext.entityId)))
 
-    val containerId = "id-1"
-    val cargo = SContainer.Cargo("id-c", "sack", 3)
-
     shardRegion
 
   }

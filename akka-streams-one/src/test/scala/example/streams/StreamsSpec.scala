@@ -12,6 +12,7 @@ import akka.stream.scaladsl.{
 }
 
 import akka.{ Done, NotUsed }
+import akka.actor.Cancellable
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
@@ -91,5 +92,29 @@ class StreamsSpec
 
   // "a infinite producer"
   // "alpakka?"
+
+  "an infinite producer with a consumer creating side effect" should {
+    "be cancellable" in {
+      val liveSource: Source[String, Cancellable] =
+        Source.tick(1.second, 1.second, "Hello, World")
+
+      val masking = Flow[String].map(_.replaceAll("World", "xyz"))
+
+      def dbFakeInsert(value: String): Unit =
+        println(s"inserting $value")
+
+      val dbFakeSink = Sink.foreach[String](dbFakeInsert)
+
+      val (cancel, future): (Cancellable, Future[Done]) =
+        liveSource.via(masking).toMat(dbFakeSink)(Keep.both).run
+
+      Thread.sleep(3000)
+      cancel.cancel
+
+      Await.result(future, 1.seconds)
+      assert(future.isCompleted)
+
+    }
+  }
 
 }

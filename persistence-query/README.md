@@ -1,4 +1,4 @@
-start database
+start database before running the test?
 	$ docker-compose up
 
 run scripts

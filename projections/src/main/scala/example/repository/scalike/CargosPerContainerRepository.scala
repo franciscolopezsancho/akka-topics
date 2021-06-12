@@ -9,7 +9,7 @@ trait CargosPerContainerRepository {
       implicit dbSession: DBSession): Map[String, Int]
 
 }
-
+//TODO create a query that group per kind of cargo??
 class CargosPerContainerRepositoryImpl
     extends CargosPerContainerRepository {
 
@@ -19,7 +19,8 @@ class CargosPerContainerRepositoryImpl
     session.db.withinTx { implicit dbSession =>
       sql"""
 				INSERT INTO cargos_per_container (containerId, cargos) VALUES ($containerId, 1)
-				ON CONFLICT (containerId) DO UPDATE SET cargos = cargos_per_container.cargos + 1
+				ON CONFLICT (containerId) DO 
+          UPDATE SET cargos = cargos_per_container.cargos + 1
 			""".executeUpdate().apply()
     }
 

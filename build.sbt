@@ -1,7 +1,7 @@
-val AkkaVersion = "2.6.13"
+val AkkaVersion = "2.6.14"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
-val AkkaManagementVersion = "1.0.9"
+val AkkaManagementVersion = "1.1.0"
 val AkkaProjectionVersion = "1.1.0"
 val ScalikeJdbcVersion = "3.5.0"
 
@@ -154,6 +154,7 @@ lazy val `akka-streams-one` = project
 
 lazy val `persistence-query` = project
     .in(file("persistence-query"))
+    .dependsOn(persistence)
     .settings(
         scalaVersion := ScalaVersion, 
         libraryDependencies ++= Seq(
@@ -171,6 +172,35 @@ lazy val `persistence-query` = project
           )
 
     )
+
+lazy val clustering2 = project
+  .in(file("clustering2"))
+  .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
+        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      )
+  )
+
+
+lazy val clustering3 = project
+  .in(file("clustering3"))
+  .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
+        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+        "io.fabric8" % "kubernetes-client" % FabricVersion,
+      )
+)
+
 
 
 
