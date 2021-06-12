@@ -39,7 +39,8 @@ spec:
         #health
         ports:
         # akka-management bootstrap
-        - containerPort: 8558
+        - name: management
+          containerPort: 8558
           protocol: TCP
           # when contact-point-discovery.port-name is set for cluster bootstrap,
           # the management port must be named accordingly:
@@ -53,3 +54,5 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: "metadata.labels['app']"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m"  
