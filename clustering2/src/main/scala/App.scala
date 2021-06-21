@@ -4,7 +4,7 @@ import akka.management.scaladsl.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import com.typesafe.config.{ ConfigFactory }
+import com.typesafe.config.ConfigFactory
 
 object App {
 

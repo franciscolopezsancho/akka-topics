@@ -2,7 +2,7 @@ val AkkaVersion = "2.6.14"
 val LogbackVersion = "1.2.3"
 val AkkaManagementVersion = "1.1.0"
 
-version := "0.1.2-SNAPSHOT"
+version := "0.1.3-SNAPSHOT"
 
 scalaVersion := "2.13.1"
 libraryDependencies ++= Seq(
@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
 )
 
 
-enablePlugins(JavaServerAppPackaging, DockerPlugin)
-
-dockerExposedPorts := Seq(8080, 8558, 2552)
+enablePlugins(JavaAppPackaging, DockerPlugin)
+dockerExposedPorts := Seq(8558, 2552)
 dockerBaseImage := "adoptopenjdk:11-jre-hotspot"

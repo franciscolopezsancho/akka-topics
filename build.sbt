@@ -197,7 +197,6 @@ lazy val clustering3 = project
         "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
         "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
-        "io.fabric8" % "kubernetes-client" % FabricVersion,
       )
 )
 
