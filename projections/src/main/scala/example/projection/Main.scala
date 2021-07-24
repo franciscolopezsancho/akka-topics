@@ -27,10 +27,10 @@ object Main {
     logger.info("initializing system")
     val system = if (args.isEmpty) {
       initActorSystem(25533)
-    }else{
+    } else {
       initActorSystem(args(0).toInt)
     }
-    
+
     try {
       ScalikeJdbcSetup.init(system)
       initProjection(system)
@@ -47,11 +47,13 @@ object Main {
       akka.remote.artery.canonical.port=$port
       """)
       .withFallback(ConfigFactory.load())
-      ActorSystem[Nothing](Behaviors.empty, "containersprojection", config)
+    ActorSystem[Nothing](
+      Behaviors.empty,
+      "containersprojection",
+      config)
   }
 
-  def initProjection(system: ActorSystem[_])
-      : Unit  = {
+  def initProjection(system: ActorSystem[_]): Unit = {
     ShardedDaemonProcess(system).init(
       name = "cargos-per-container-projection",
       3,

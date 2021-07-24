@@ -45,14 +45,12 @@ object CargosPerContainerProjection {
       projectionId =
         ProjectionId("CargosPerContainerProjection", tag),
       sourceProvider = sourceProvider,
-      handler =
-        () => new CPCProjectionHandler(repository),
+      handler = () => new CPCProjectionHandler(repository),
       sessionFactory = () => new ScalikeJdbcSession())(system)
   }
 }
 
-class CPCProjectionHandler(
-    repository: CargosPerContainerRepository)
+class CPCProjectionHandler(repository: CargosPerContainerRepository)
     extends JdbcHandler[
       EventEnvelope[SContainer.Event],
       ScalikeJdbcSession] {
@@ -65,8 +63,8 @@ class CPCProjectionHandler(
     envelope.event match {
       case SContainer.CargoAdded(containerId, cargo) =>
         repository.addCargo(containerId, session)
-      case x => 
-        logger.debug("ignoring event {} in projection",x)
+      case x =>
+        logger.debug("ignoring event {} in projection", x)
 
     }
   }

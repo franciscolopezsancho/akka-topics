@@ -20,5 +20,4 @@ object App {
     ClusterBootstrap(system).start()
 
   }
-
 }

@@ -4,12 +4,12 @@ kind: Deployment
 metadata:
   labels:
     app: testing-bootstrap21xyz
-  name: testing-bootstrap21
+  name: testing-bootstrap21 # shall a remove 21 here and in line 23?
 spec:
   replicas: 3
   selector:
     matchLabels:
-     app: testing-bootstrap21
+     app: testing-bootstrap21-env
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -19,9 +19,10 @@ spec:
   template:
     metadata:
       labels:
-        app: testing-bootstrap21
+        app: testing-bootstrap21-env
         actorSystemName: testing-bootstrap21
     spec:
+      serviceAccountName: my-cluster
       containers:
       - name: testing-bootstrap21
         image: franciscolopezsancho/clustering21:0.1.3-SNAPSHOT

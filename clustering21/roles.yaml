@@ -12,11 +12,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: read-pods
 subjects:
-  # Uses the default service account.
-  # Consider creating a dedicated service account to run your
-  # Akka Cluster services and binding the role to that one.
 - kind: ServiceAccount
-  name: default
+  name: my-cluster
 roleRef:
   kind: Role
   name: pod-reader

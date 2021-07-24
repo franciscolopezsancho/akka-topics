@@ -3,7 +3,7 @@ package example.persistence
 import com.typesafe.config.ConfigFactory
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy}
+import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy }
 
 import akka.persistence.typed.scaladsl.{
   Effect,
@@ -22,7 +22,6 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 //take out if not adding taggers, retention and onPersistFailure
 import akka.persistence.typed.scaladsl.RetentionCriteria
 import scala.concurrent.duration._
-
 
 object PContainer {
 

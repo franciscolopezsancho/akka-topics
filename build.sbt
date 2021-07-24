@@ -1,9 +1,11 @@
-val AkkaVersion = "2.6.14"
+val AkkaVersion = "2.6.15"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
 val AkkaProjectionVersion = "1.1.0"
 val ScalikeJdbcVersion = "3.5.0"
+val AkkaHttpVersion = "10.2.4"
+val AkkaGRPC = "2.0.0"
 
 lazy val `up-and-running` = project
   .in(file("up-and-running"))
@@ -200,7 +202,63 @@ lazy val clustering3 = project
       )
 )
 
+lazy val `akka-http` = project
+    .in(file("akka-http"))
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion
+        )
+    )
+lazy val gRPC = project
+    .in(file("gRPC"))
+    .enablePlugins(AkkaGrpcPlugin)
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      ))
 
 
+lazy val `gRPC-actor` = project
+    .in(file("gRPC-actor"))
+    .enablePlugins(AkkaGrpcPlugin)
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      ))
+
+lazy val `gRPC-actor-streaming` = project
+    .in(file("gRPC-actor-streaming"))
+    .enablePlugins(AkkaGrpcPlugin)
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      ))
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger

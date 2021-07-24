@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_package = "example.container.grpc";
+option java_outer_classname = "ContainerProto";
+
+message CargoEntity {
+	string entityId = 1;
+	string kind = 2;
+	int32 size = 3;
+}
+
+message SizeLeft {
+	int32 size = 1;
+}
+
+
+
+service ContainerService {
+
+	rpc AddCargo(stream CargoEntity) returns (stream SizeLeft) {}
+
+} 
