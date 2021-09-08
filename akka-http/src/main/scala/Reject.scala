@@ -18,18 +18,20 @@ object HttpServerReject {
 
     val route: Route =
       path("ping") {
-        get {
-          complete(
-            HttpResponse(
-              200,
-              entity =
-                HttpEntity(ContentTypes.`application/json`, "pong")))
-        } ~
-        post {
-          reject(
-            MissingCookieRejection(
-              "to post you have to give me a cookie"))
-        }
+        concat(
+          get {
+            complete(
+              HttpResponse(
+                200,
+                entity = HttpEntity(
+                  ContentTypes.`application/json`,
+                  "pong")))
+          },
+          post {
+            reject(
+              MissingCookieRejection(
+                "to pong, you have to give me a cookie"))
+          })
       }
 
     val bindingFuture =

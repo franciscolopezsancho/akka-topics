@@ -12,7 +12,8 @@ object Container {
   case class Cargos(cargos: List[Cargo])
 
   sealed trait Command
-  case class AddCargo(cargo: Cargo,replyTo: ActorRef[Int]) extends Command
+  case class AddCargo(cargo: Cargo, replyTo: ActorRef[Int])
+      extends Command
 
   def apply(
       entityId: String,

@@ -1,13 +1,12 @@
 package example.container.grpc
 
-import akka.stream.Materializer
 import example.container.grpc.{ AddedCargo, Cargo, ContainerService }
-
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class ContainerServiceImpl(implicit mat: Materializer)
+class ContainerServiceImpl(
+    implicit executionContext: ExecutionContext)
     extends ContainerService {
-  import mat.executionContext
 
   override def addCargo(in: Cargo): Future[AddedCargo] = {
     Future.successful(AddedCargo(true))

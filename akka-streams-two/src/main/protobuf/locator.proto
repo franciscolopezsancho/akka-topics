@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "example.locator.grpc";
+option java_outer_classname = "LocatorProto";
+
+message IoT {
+	string id = 1;
+}
+
+message Location {
+	double lat = 1;
+	double lon = 2;
+}
+
+service LocatorService {
+
+	rpc  Follow(IoT) returns (stream Location) {}
+} 

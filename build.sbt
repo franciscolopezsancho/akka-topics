@@ -1,4 +1,4 @@
-val AkkaVersion = "2.6.15"
+val AkkaVersion = "2.6.16"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
@@ -6,6 +6,7 @@ val AkkaProjectionVersion = "1.1.0"
 val ScalikeJdbcVersion = "3.5.0"
 val AkkaHttpVersion = "10.2.4"
 val AkkaGRPC = "2.0.0"
+val ScalaTest = "3.1.4"
 
 lazy val `up-and-running` = project
   .in(file("up-and-running"))
@@ -15,7 +16,7 @@ lazy val `up-and-running` = project
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
       )
     )
 lazy val `unit-testing` = project
@@ -26,7 +27,7 @@ lazy val `unit-testing` = project
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
 lazy val supervision = project
@@ -37,7 +38,7 @@ lazy val supervision = project
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
 lazy val `discovery-routers` = project
@@ -48,7 +49,7 @@ lazy val `discovery-routers` = project
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
 lazy val clustering = project
@@ -64,7 +65,7 @@ lazy val clustering = project
       "com.lightbend.akka.management" %% "akka-management" % AkkaManagementVersion,
       "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ),
   )
 
@@ -83,7 +84,7 @@ lazy val sharding = project
       "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
       "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
     )
   )
 
@@ -105,7 +106,7 @@ lazy val persistence = project
       "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
       "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
       "org.postgresql" % "postgresql" % "42.2.18",
     )
   )
@@ -136,7 +137,7 @@ lazy val projections = project
       "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
       "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion ,
       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
       "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
       "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
       "org.postgresql" % "postgresql" % "42.2.18",
@@ -151,7 +152,7 @@ lazy val `akka-streams-one` = project
         "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
         "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion  ,
         "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion, //otherwise java.lang.ClassNotFoundException: akka.cluster.ClusterActorRefProvider 
-        "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+        "org.scalatest" %% "scalatest" % ScalaTest % Test,
       ))
 
 lazy val `persistence-query` = project
@@ -169,7 +170,7 @@ lazy val `persistence-query` = project
           "ch.qos.logback" % "logback-classic" % LogbackVersion,
           "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
           "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-          "org.scalatest" %% "scalatest" % "3.1.4" % Test,
+          "org.scalatest" %% "scalatest" % ScalaTest % Test,
           "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
           )
 
@@ -259,6 +260,27 @@ lazy val `gRPC-actor-streaming` = project
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
         "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      ))
+
+lazy val `akka-streams-two` = project
+    .in(file("akka-streams-two"))
+    .enablePlugins(AkkaGrpcPlugin)//grpc example
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+       "com.typesafe.akka" %% "akka-stream" % AkkaVersion, 
+       "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
+       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
+       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+       "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
+       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,//grpc example
+       "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,//grpc example
+       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//grpc example
+       "org.scalikejdbc" %% "scalikejdbc" % "3.5.0",
+       "org.postgresql" % "postgresql" % "42.2.18" % Test, 
+       "org.scalikejdbc" %% "scalikejdbc-config"  % "3.5.0",
+       "org.scalatest" %% "scalatest" % ScalaTest % Test,
+       "ch.qos.logback" % "logback-classic" % LogbackVersion, 
       ))
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
