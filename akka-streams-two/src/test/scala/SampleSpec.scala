@@ -113,13 +113,16 @@ class SampleSpec
   import akka.http.scaladsl.unmarshalling.Unmarshal
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import spray.json.DefaultJsonProtocol._
+  import spray.json.RootJsonFormat
 
   import example.streams.two.HttpServer
   // Source.queue goes well with throttle?
   "calling to a real service" should {
     "work" ignore {
 
-      implicit val validatedFormat = jsonFormat1(HttpServer.Validated)
+      implicit val validatedFormat
+          : RootJsonFormat[HttpServer.Validated] =
+        jsonFormat1(HttpServer.Validated)
 
       //akka-http-core/src/main/resources/reference.conf  max-open-requests = 32
       val result: Future[Done] =
@@ -202,11 +205,12 @@ class SampleSpec
 
       //val sugaryAskFlow = ActorFlow.ask(ref)(Cap.Increment)
 
-      val result: Future[Done] = Source(1 to 1000000)
+      val result: Future[Done] = Source(1 to 100000)
         .via(askFlow)
+        .map(println)
         .run()
 
-      Await.result(result, 4.seconds)
+      Await.result(result, 10.seconds)
     }
   }
 
@@ -277,12 +281,9 @@ class SampleSpec
   import akka.stream.BoundedSourceQueue
 
   "Source queue" should {
-    "allow to add elements to a stream" ignore {
+    "allow adding elements to a stream" ignore {
 
-      val bufferSize = 10
-
-      //  def queue[T](bufferSize: Int): Source[T, BoundedSourceQueue[T]] =
-      // This is why we need to toMat to get the BoundedSourceQueue
+      val bufferSize = 2
 
       val queue: BoundedSourceQueue[Int] = Source
         .queue[Int](
@@ -293,8 +294,6 @@ class SampleSpec
         .run()
 
       (1 to 10).map(x => queue.offer(x))
-      //different OverflowStrategies
-      //different ouputs when offer
     }
   }
 
@@ -303,6 +302,24 @@ class SampleSpec
 
   "Source queue" should {
     "allow to configure its overflow strategy" in {
+
+      val bufferSize = 4
+
+      val queue: SourceQueue[Int] = Source
+        .queue[Int](bufferSize, OverflowStrategy.dropHead)
+        .throttle(1, 100.millis)
+        .map(x => 2 * x)
+        .toMat(Sink.foreach(x => println(s"PROCESSED $x")))(Keep.left)
+        .run()
+
+      (1 to 10).map(x => queue.offer(x))
+
+      Thread.sleep(1000)
+    }
+  }
+
+  "Source queue" should {
+    "allow to configure its overflow strategy and print QueueOfferResult " ignore {
 
       val bufferSize = 4
 
@@ -322,8 +339,6 @@ class SampleSpec
         })
 
       Thread.sleep(1000)
-      //different OverflowStrategies
-      //different ouputs when offer
     }
   }
 
@@ -480,7 +495,7 @@ class SampleSpec
   //80000 takes about 1-3 seconds one call
   // load is cumulative and the more threads we run
   // the more they have to share the CPU
-  def parsingdoc(doc: string): string = {
+  def parsingDoc(doc: String): String = {
     val init = System.currentTimeMillis
     factorial(new java.math.BigInteger("80000"))
     println(

@@ -266,6 +266,7 @@ lazy val `akka-streams-two` = project
     .in(file("akka-streams-two"))
     .enablePlugins(AkkaGrpcPlugin)//grpc example
     .settings(
+      scalafmtOnCompile := true,
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
        "com.typesafe.akka" %% "akka-stream" % AkkaVersion, 

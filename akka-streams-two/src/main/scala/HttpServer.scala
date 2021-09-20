@@ -15,6 +15,7 @@ import scala.concurrent.Future
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
+import spray.json.RootJsonFormat
 
 object HttpServer {
 
@@ -26,7 +27,8 @@ object HttpServer {
 
     implicit val executionContext = system.executionContext
 
-    implicit val validatedFormat = jsonFormat1(Validated)
+    implicit val validatedFormat: RootJsonFormat[Validated] =
+      jsonFormat1(Validated)
 
     val route: Route =
       path("validate") {
