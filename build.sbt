@@ -7,6 +7,7 @@ val ScalikeJdbcVersion = "3.5.0"
 val AkkaHttpVersion = "10.2.4"
 val AkkaGRPC = "2.0.0"
 val ScalaTest = "3.1.4"
+val JacksonVersion = "2.11.4" 
 
 lazy val `up-and-running` = project
   .in(file("up-and-running"))
@@ -283,5 +284,22 @@ lazy val `akka-streams-two` = project
        "org.scalatest" %% "scalatest" % ScalaTest % Test,
        "ch.qos.logback" % "logback-classic" % LogbackVersion, 
       ))
+
+lazy val alpakka = project
+    .in(file("alpakka"))
+    .settings(
+      scalafmtOnCompile := true,
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "3.0.3",
+        "com.lightbend.akka" %% "akka-stream-alpakka-file" % "3.0.3",
+        "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "3.0.3",
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//
+        "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion,// this is for solving dependency version mismatches
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+        "org.scalatest" %% "scalatest" % ScalaTest % Test, 
+        ))
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
