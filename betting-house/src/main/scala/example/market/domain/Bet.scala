@@ -30,43 +30,58 @@ import scala.concurrent.duration._
  *
  */
 
-object BetActor {
+object Bet {
 
 
   val TypeKey = EntityTypeKey[Command]("bet")
 
   sealed trait Command
   //how to avoid that they change result?
-  case class Bet(marketId: String, userId: String, price: int32, stake: int32, replyTo: ActorRef[Response])
-
+  case class CreateBet(marketId: String, userId: String, price: Int, stake: Int, replyTo: ActorRef[Response])
+  case class OpenBet(marketId: String, newPrice: Int)
+  case object Settle
+  case object Cancel
 
   // when are do the events have different values than the Command?
   sealed trait Event
-  case class BetProcessed(marketId: String, price: int32, stake: int32) extends Event
-  case class BetDenied(marketId: String, replyTo: ActorRef[Response])
+  case class Created(marketId: String, price: Int, stake: Int) extends Event
+  case class Denied(marketId: String, replyTo: ActorRef[Response]) extends Event
+  case class Accepted(marketId: String)
 
   sealed trait Response
   case object Accepted extends Response
   case class UnAcceptable(reason: String)
+  case class MarketChanged(betId: String, newPrice: Int)
   //why is scheduling important if we can bet before started?
 
-  case class State(marketId: String, userId: String, price: int32, stake: int32, scheduled: Int, open: Boolean, fixture: Fixture, accepted: boolean)
 
+  case class Status(marketId: String, userId: String, price: Int, stake: Int)
+  sealed trait State {
+    def state: Status;
+  }
+
+  case class Initial(Status("","",0,0))
+  case class Open(state: Status) extends State// the ask user when market no longer available
+  case class Cancelled(state: Status) extends State
+  case class Accepted(state: Status) extends State
+  case class Reimbursing(state: Status) extends State
+  //more states
 
 
   def apply(marketId: String): Behavior[Command] =
-    Behaviors.withTimers { timer => 
-      timer.startTimerAtFixedRate("late",CheckInSchedule,1.minute)
     EventSourcedBehavior[Command, Event, State](
       PersistenceId(TypeKey.name, marketId),
-      State(None, None,None),
+      Initial,
       commandHandler = handleCommands
       eventHandler = handleEvent
     )
 
   def handleCommands(state: State, command: Command): Effect[Event, State] = {
-    if (state.open) => active(marketId, state, command)
-    else closed(marketId, state, command)
+    state match {
+      case Initial => validate(betId, state, command) 
+
+
+    }
   }
 
   def active(
@@ -79,14 +94,16 @@ object BetActor {
         Effect.persist(BetAccepted(fixture, odds, result)).thenRun(replyTo ! BetPersisted)
     }
 
-  def scheduled(containerId: String,
-      state: State,
-      command: Command) = ???
-  def checkingValidation(containerId: String,
-      state: State,
-      command: Command) = ???// what are we trying to avoid here? what message we don't want to process?
 
-  def paying(
+  def validate(containerId: String,
+      state: State,
+      command: Command) = {
+    // checks the event has started otherwise sleeps
+    // here we request the market still has that price
+    // and check with third service that the user didn't consume too much
+  }
+
+  def reimbursement(
       containerId: String,
       state: State,
       command: Command): Effect[Event, State] = ???

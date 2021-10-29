@@ -292,14 +292,41 @@ lazy val alpakka = project
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
         "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "3.0.3",
         "com.lightbend.akka" %% "akka-stream-alpakka-file" % "3.0.3",
         "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "3.0.3",
         "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//
         "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion,// this is for solving dependency version mismatches
+        "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
+        "com.fasterxml.jackson.core" % "jackson-databind" % JacksonVersion, 
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
         "org.scalatest" %% "scalatest" % ScalaTest % Test, 
         ))
+
+lazy val `betting-house` = project
+    .in(file("betting-house"))
+    .enablePlugins(AkkaGrpcPlugin)
+    .settings(
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+        "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
+       "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      ))
+
+
+
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
