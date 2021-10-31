@@ -1,15 +1,15 @@
-package betting.market.actor
+package example.betting
 
 import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.persistence.typed.scaladsl.{ ReplyEffect, Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.PersistenceId
 
 
 import scala.concurrent.duration._
-import java.util.OffsetDateTime
+import java.time.{ZoneId, OffsetDateTime}
 
 
 /**
@@ -28,125 +28,115 @@ object Market {
   case class Odds(winHome: Int, loseHome: Int, tie: Int) //Q - its total sum must be 2?
 
   sealed trait Command {
-    def replyTo: ActorRef[Event]
+    def replyTo: ActorRef[Response]
   }
   //Can I delete marketId
-  case class Initialize(fixture: Fixture, odds: Odds, opensAt: OffsetDateTime, replyTo: ActorRef[Created]) extends Command
-  case class Update(odds: Odds, opensAt: OffsetDateTime,  replyTo: ActorRef[Updated]) extends Command
-  case class Open(replyTo: ActorRef[])
-  case object Close(replyTo: ActorRef[ClosedReponse]) extends Command
-  case object Suspend(marketId: String, reason: String) extends Command // while a goal scores and odds needs to be recalculated
-  case object Resume(marketId: String, reason: String) extends Command
-  case object Cancel(marketId: String, reason: String) extends Command
-  case class GetState(replyTo: ActorRef[State]) extends Command
+  case class Initialize(fixture: Fixture, odds: Odds, opensAt: OffsetDateTime, replyTo: ActorRef[Response]) extends Command
+  case class Update(odds: Odds, opensAt: OffsetDateTime,  replyTo: ActorRef[Response]) extends Command
+  case class Open(replyTo: ActorRef[Response]) extends Command
+  case class Close(replyTo: ActorRef[Response]) extends Command
+  case class Suspend(marketId: String, reason: String, at: OffsetDateTime, replyTo: ActorRef[Response]) extends Command // while a goal scores and odds needs to be recalculated
+  case class Cancel(marketId: String, reason: String) extends Command
+  case class GetState(replyTo: ActorRef[Response]) extends Command
   // case class Resolution() in cases when a Jury needs to review the result. Like in horse races. 
-
-
-  sealed trait Event
-  case class Initialized(marketId: String, fixture: Fixture, odds: Odds) extends Event
-  case class OddsUpdated(marketId: String, fixture: Fixture, odds: Odds) extends Event
-  case class Closed(marketId: String, reason: String, at: OffsetDateTime, replyTo: ActorRef[Response]) extends Event
-  // case class Resolved() // if it doesn't apply to football might be better not to add it
-  case class Suspended(marketId: String, reason: String, at: OffsetDateTime, replyTo: ActorRef[Response]) extends Event
-  case class Resumed(marketId: String, reason: String, at: OffsetDateTime, replyTo: ActorRef[Response]) extends Event
 
   sealed trait Response
   case class Accepted(marketId: String, command: Command) extends Response
   case class CurrentState(state: State) extends Response
   case class RequestUnaccepted(reason: String) extends Response
   //why is scheduling important if we can bet before started? -> to open the market
-
   
   sealed trait State {
     def status: Status;
   }
-  private case class Status(marketId: String, fixture: Fixture, odds: Odds)
-
-  case class Uninitialized(state: Status) extends State
-  case class InitializedState(state: Status) extends State
-  case class OpenState(state: Status) extends State
-  case class ClosedState(state: Status) extends State
-  case class SuspendedState(state: Status) extends State
+  case class Status(marketId: String, fixture: Fixture, odds: Odds)
+  object Status {
+      def empty(marketId: String) = Status(marketId, Fixture("", "", "", ""), Odds(-1,-1,-1))
+  }
+  case class Uninitialized(status: Status) extends State
+  case class InitializedState(status: Status) extends State
+  case class OpenState(status: Status) extends State
+  case class ClosedState(status: Status) extends State
+  case class SuspendedState(status: Status) extends State
 
   def apply(marketId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
       PersistenceId(TypeKey.name, marketId),
-      State(None, None,None),
-      commandHandler = handleCommands
+      Uninitialized(Status.empty(marketId)),
+      commandHandler = handleCommands,
       eventHandler = handleEvents)
 
 
-  def handleCommands(state: State, command: Command): ReplyEffect[Response] = { 
-    case (state: Uninitialized, commmand: Initialize) => init(state, command)
-    case (state: Initialized, command: Update) => update(state, command) 
-    case (state: Initialized, command: Open) => open(state, command)
-    case (state: OpenState, command: Update) => update(state, command) 
-    case (state: OpenState, command: Suspend) => suspend(state, command)
-    case (state: Suspend, command: Resume) => resume(state, command)
-    case (state: OpenState, command: Close) => close(state, command)
-    case (state: _, command: Cancel) => cancel(state, command)
-    case (state: _, command: GetState) => tellState(state, command)
-    case (state, command) => 
-      Effect.reply(command.replyTo)(_ => RequestUnaccepted(s"[$command] is not allowed upon state [$state]"))
+  def handleCommands(state: State, command: Command): ReplyEffect[Event, State] = 
+    (state, command) match { 
+    case (state: Uninitialized, command: Initialize) => init(state, command)
+    case (state: Initialized,  command: Update) => update(state, command) 
+    case (state: Initialized,  command: Open) => open(state, command)
+    case (state: OpenState,  command: Update) => update(state, command) 
+    case (state: OpenState,  command: Suspend) => suspend(state, command)
+    case (state: SuspendedState,  command: Open) => open(state, command)
+    case ( _,  command: Close) => close(state, command)
+    case ( _,  command: GetState) => tell(state, command)
+    case _ => invalid(state, command)
   }
 
-  def init(state: State, command: Created): ReplyEffect[Response] = { 
-    val created = Created(state.marketId, command.fixture, command.odds)
-    Effect.persist(created).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def update(state: State, command: Update): ReplyEffect[Response] = { 
-    val updated = Updated(state.marketId,command.odds)
-    Effect.persist(updated).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def open(state: State, command: Open): ReplyEffect[Response] = { 
-    Effect.persist(Opened()).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def suspend(state: State, command: Suspend): ReplyEffect[Response] = { 
-    val suspended = Suspended(state.marketId, command.reason)
-    Effect.persist(suspended).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def resume(state: State, command: Suspend): ReplyEffect[Response] = { 
-    val resumed = Resumed(state.marketId, command.reason)
-    Effect.persist(resumed).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def close(state: State, command: Suspend): ReplyEffect[Response] = { 
-    val closed = Closed(state.marketId)
-    Effect.persist(closed).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def cancel(state: State, command: Suspend): ReplyEffect[Response] = { 
-    val cancelled = Cancelled(state.marketId, command.reason)
-    Effect.persist(cancelled).thenReply(command.replyTo)(_ => Accepted(state.marketId, command))
-  }
-
-  def tellState(state: State, command: Created): ReplyEffect[Response] = { 
-    Effect.reply(command.replyTo)(_ => CurrentState(state))
-  }
+  sealed trait Event
+  case class Initialized(marketId: String, fixture: Fixture, odds: Odds) extends Event
+  case class Opened(marketId: String) extends Event
+  case class Updated(marketId: String, odds: Odds) extends Event
+  case class Closed(marketId: String, at: OffsetDateTime) extends Event
+  case class Suspended(marketId: String, reason: String, at: OffsetDateTime) extends Event
 
 
   def handleEvents(state: State, event: Event): State = {
-    event match {
-      case Initialized(marketId, fixture, odds) => 
-         Initialized(Status(marketId, fixture, odds)))
-      case Updated(marketId, fixture, odds) => 
-         state.copy(status = Status(marketId, fixture, odds)))
-      case Open(marketId, fixture, odds) => 
-         OpenState(marketId, fixture, odds)
-      case Suspended(marketId, fixture, odds) => 
-         SuspendedState(marketId, fixture, odds)
-      case Resumed(marketId, fixture, odds) => 
-         ResumedState(marketId, fixture, odds)
-      case Closed(marketId, fixture, odds) => 
-         ClosedState(marketId, fixture, odds)
-      case Cancelled(marketId, fixture, odds) => 
-         CancelledState(marketId, fixture, odds)
+    (state, event) match {
+      case (_, Initialized(marketId, fixture, odds)) => 
+         InitializedState(Status(marketId, fixture, odds))
+      case (state: OpenState, Updated(_, odds)) => 
+         state.copy(status = Status(state.status.marketId, state.status.fixture, odds))
+      case (_, Opened(marketId)) => 
+         OpenState(state.status)
+      case (_, Suspended(marketId, fixture, odds)) => 
+         SuspendedState(state.status)
+      case (_, Closed(marketId, _)) => 
+         ClosedState(state.status)
     }
   } 
+
+  def init(state: State, command: Initialize): ReplyEffect[Initialized, State] = { 
+    val initialized = Initialized(state.status.marketId, command.fixture, command.odds)
+    Effect.persist(initialized).thenReply(command.replyTo)(_ => Accepted(state.status.marketId, command))
+  }
+
+  def update(state: State, command: Update): ReplyEffect[Updated, State] = { 
+    val updated = Updated(state.status.marketId, command.odds)
+    Effect.persist(updated).thenReply(command.replyTo)(_ => Accepted(state.status.marketId, command))
+  }
+
+  def open(state: State, command: Open): ReplyEffect[Opened, State] = { 
+    Effect.persist(Opened(state.status.marketId)).thenReply(command.replyTo)(_ => Accepted(state.status.marketId, command))
+  }
+
+  def suspend(state: State, command: Suspend): ReplyEffect[Suspended, State] = { 
+    val suspended = Suspended(state.status.marketId, command.reason, command.at)
+    Effect.persist(suspended).thenReply(command.replyTo)(_ => Accepted(state.status.marketId, command))
+  }
+
+  def close(state: State, command: Close): ReplyEffect[Closed, State] = { 
+    val closed = Closed(state.status.marketId, OffsetDateTime.now(ZoneId.of("UTC")))
+    Effect.persist(closed).thenReply(command.replyTo)(_ => Accepted(state.status.marketId, command))
+  }
+
+  def tell(state: State, command: GetState): ReplyEffect[Event, State] = { 
+    Effect.none.thenReply(command.replyTo)(_ => CurrentState(state))
+  }
+
+def invalid(
+      state: State,
+      command: Command): ReplyEffect[Event, State] = {
+    Effect.none.thenReply(command.replyTo)(_ => RequestUnaccepted(s"[$command] is not allowed upon state [$state]"))
+ }
+  
 
 
 }
