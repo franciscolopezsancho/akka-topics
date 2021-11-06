@@ -36,7 +36,7 @@ object Market {
   case class Open(replyTo: ActorRef[Response]) extends Command
   case class Close(replyTo: ActorRef[Response]) extends Command
   case class Suspend(marketId: String, reason: String, at: OffsetDateTime, replyTo: ActorRef[Response]) extends Command // while a goal scores and odds needs to be recalculated
-  case class Cancel(marketId: String, reason: String) extends Command
+  case class Cancel(marketId: String, reason: String, replyTo: ActorRef[Response]) extends Command
   case class GetState(replyTo: ActorRef[Response]) extends Command
   // case class Resolution() in cases when a Jury needs to review the result. Like in horse races. 
 
@@ -92,10 +92,10 @@ object Market {
     (state, event) match {
       case (_, Initialized(marketId, fixture, odds)) => 
          InitializedState(Status(marketId, fixture, odds))
-      case (state: OpenState, Updated(_, odds)) => 
-         state.copy(status = Status(state.status.marketId, state.status.fixture, odds))
       case (_, Opened(marketId)) => 
          OpenState(state.status)
+      case (state: OpenState, Updated(_, odds)) => 
+         state.copy(status = Status(state.status.marketId, state.status.fixture, odds))
       case (_, Suspended(marketId, fixture, odds)) => 
          SuspendedState(state.status)
       case (_, Closed(marketId, _)) => 

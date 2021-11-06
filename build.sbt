@@ -309,6 +309,7 @@ lazy val `betting-house` = project
     .in(file("betting-house"))
     .enablePlugins(AkkaGrpcPlugin)
     .settings(
+      scalafmtOnCompile := true,
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,

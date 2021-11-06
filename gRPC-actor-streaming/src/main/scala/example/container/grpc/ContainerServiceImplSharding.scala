@@ -40,7 +40,7 @@ class ContainerServiceImplSharding(
   def askFlow(
       ref: EntityRef[Container.Command],
       cargo: CargoEntity): Flow[String, Int, NotUsed] =
-    ActorFlow.ask(ref)(makeMessage = (el, replyTo: ActorRef[Int]) =>
+    ActorFlow.ask(ref)(makeMessage = (el: String, replyTo: ActorRef[Int]) =>
       Container
         .AddCargo(Container.Cargo(cargo.kind, cargo.size), replyTo))
 
