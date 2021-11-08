@@ -318,12 +318,12 @@ lazy val `betting-house` = project
         "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
         "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
-       "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
-      "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
-      "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
-      "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
-      "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
-      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
+        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
+        "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
+        "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
       ))
 
