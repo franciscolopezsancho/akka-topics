@@ -47,20 +47,19 @@ object Bet {
   val TypeKey = EntityTypeKey[Command]("bet")
 
   sealed trait Command
-  trait ReplyCommand extends Command {
+  trait ReplyCommand extends Command with CborSerializable {
     def replyTo: ActorRef[Response]
   }
   case class Open(
       walletId: String,
       marketId: String,
-      odds: Int,
+      odds: Double,
       stake: Int,
+      result: Int,
       replyTo: ActorRef[Response])
       extends ReplyCommand
   //probably want a local class not to depend on Market? see Market.State below
-  case class Settle(
-      marketInfo: Market.State,
-      replyTo: ActorRef[Response])
+  case class Settle(result: Int, replyTo: ActorRef[Response])
       extends ReplyCommand
   case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends ReplyCommand
@@ -73,16 +72,25 @@ object Bet {
   private case class Fail(reason: String) extends Command
   private case class Close(reason: String) extends Command
 
+  sealed trait Response
+  case object Accepted extends Response
+  case object BetVerifying extends Response
+  case class RequestUnaccepted(reason: String) extends Response
+  case class MarketChanged(betId: String, newPrice: Int)
+      extends Response
+
   //how do I know I bet to the winner or the looser or draw??
   case class Status(
       betId: String,
       walletId: String,
-      odds: Int,
-      stake: Int)
+      odds: Double,
+      stake: Int,
+      result: Int)
+      extends CborSerializable
   object Status {
-    def empty(marketId: String) = Status(marketId, "", -1, -1)
+    def empty(marketId: String) = Status(marketId, "", -1, -1, 0)
   }
-  sealed trait State {
+  sealed trait State extends CborSerializable {
     def status: Status
   }
   case class UninitializedState(status: Status) extends State
@@ -96,17 +104,36 @@ object Bet {
   case class FailedState(status: Status) extends State
   case class ClosedState(status: Status) extends State
 
-  def apply(marketId: String): Behavior[Command] = {
+  def apply(betId: String): Behavior[Command] = {
     Behaviors.withTimers { timer =>
-      Behaviors.setup { context =>
-        val sharding = ClusterSharding(context.system)
-        EventSourcedBehavior[Command, Event, State](
-          PersistenceId(TypeKey.name, marketId),
-          UninitializedState(Status.empty(marketId)),
-          commandHandler = (state, command) =>
-            handleCommands(state, command, sharding, context, timer),
-          eventHandler = handleEvents)
-      }
+      Behaviors
+        .setup[Command] { context =>
+          val sharding = ClusterSharding(context.system)
+          EventSourcedBehavior[Command, Event, State](
+            PersistenceId(TypeKey.name, betId),
+            UninitializedState(Status.empty(betId)),
+            commandHandler = (state, command) =>
+              handleCommands(
+                state,
+                command,
+                sharding,
+                context,
+                timer),
+            eventHandler = handleEvents)
+        // .withTagger {
+        //   case _ => Set(calculateTag(betId, tags))
+        // }
+        // .withRetention(
+        //   RetentionCriteria
+        //     .snapshotEvery(
+        //       numberOfEvents = 100,
+        //       keepNSnapshots = 2))
+        // .onPersistFailure(
+        //   SupervisorStrategy.restartWithBackoff(
+        //     minBackoff = 10.seconds,
+        //     maxBackoff = 60.seconds,
+        //     randomFactor = 0.1))
+        }
     }
   }
 
@@ -136,24 +163,38 @@ object Bet {
     }
   }
 
-  sealed trait Event
-  case class MarketConfirmed(state: OpenState) extends Event
-  case class FundsGranted(state: OpenState) extends Event
-  case class ValidationsPassed(state: OpenState) extends Event
+  sealed trait Event extends CborSerializable
+  case class MarketConfirmed(state: OpenState)
+      extends Event
+      with CborSerializable
+  case class FundsGranted(state: OpenState)
+      extends Event
+      with CborSerializable
+  case class ValidationsPassed(state: OpenState)
+      extends Event
+      with CborSerializable
   case class Opened(
       betId: String,
       marketId: String,
       walletId: String,
-      odds: Int,
-      stake: Int)
+      odds: Double,
+      stake: Int,
+      result: Int)
       extends Event
-  case class Settled(betId: String) extends Event
-  case class Cancelled(betId: String, reason: String) extends Event
-  case class Failed(betId: String, reason: String) extends Event
-  case object Closed extends Event
+      with CborSerializable
+  case class Settled(betId: String)
+      extends Event
+      with CborSerializable
+  case class Cancelled(betId: String, reason: String)
+      extends Event
+      with CborSerializable
+  case class Failed(betId: String, reason: String)
+      extends Event
+      with CborSerializable
+  case object Closed extends Event with CborSerializable
 
   def handleEvents(state: State, event: Event): State = event match {
-    case Opened(betId, marketId, walletId, odds, stake) =>
+    case Opened(betId, marketId, walletId, odds, stake, result) =>
       OpenState(state.status, None, None)
     case MarketConfirmed(state) =>
       state.copy(marketConfirmed = Some(true))
@@ -171,12 +212,6 @@ object Bet {
       FailedState(state.status)
   }
 
-  sealed trait Response
-  case object Accepted extends Response
-  case class RequestUnaccepted(reason: String) extends Response
-  case class MarketChanged(betId: String, newPrice: Int)
-      extends Response
-
   def open(
       sta: UninitializedState,
       com: Open,
@@ -192,7 +227,8 @@ object Bet {
       com.marketId,
       com.walletId,
       com.odds,
-      com.stake)
+      com.stake,
+      com.result)
     Effect
       .persist(open)
       .thenRun((_: State) =>
@@ -237,10 +273,10 @@ object Bet {
       sharding.entityRefFor(Market.TypeKey, command.marketId)
 
     implicit val timeout: Timeout = Timeout(3, SECONDS)
-    //Q what's the use of entityRef.ask??
+    //Q what's the use of entityRef.ask?? in the gRPC!
     context.ask(marketRef, Market.GetState) {
       case Success(Market.CurrentState(marketState)) =>
-        if (oddsDoMatch(marketState, state.status.odds)) {
+        if (oddsDoMatch(marketState, state.status)) {
           CheckMarketOdds(true)
         } else {
           CheckMarketOdds(false)
@@ -294,15 +330,24 @@ object Bet {
     }
   }
 
-  def oddsDoMatch(marketState: Market.State, odds: Int): Boolean = {
-    true
+  def oddsDoMatch(
+      marketStatus: Market.Status,
+      betStatus: Bet.Status): Boolean = {
+    marketStatus.result match {
+      case 0 => marketStatus.odds.draw == betStatus.odds
+      case x if x > 0 =>
+        marketStatus.odds.winHome == betStatus.odds
+      case x if x < 0 =>
+        marketStatus.odds.winAway == betStatus.odds
+    }
   }
 
   def checkFunds(stake: Int, fundsId: String): Boolean = {
     true
   }
 
-  def isWinner(state: State, marketInfo: Market.State): Boolean = {
+  def isWinner(state: State, result: Int): Boolean = {
+    // marketState.status.result == result
     true
   }
 
@@ -317,7 +362,7 @@ object Bet {
       sharding: ClusterSharding,
       context: ActorContext[Command]): Effect[Event, State] = {
     implicit val timeout = Timeout(10, SECONDS)
-    if (isWinner(state, command.marketInfo)) {
+    if (isWinner(state, command.result)) {
       val walletRef =
         sharding.entityRefFor(Wallet.TypeKey, state.status.walletId)
       context.ask(walletRef, auxCreateRequest(state.status.stake)) {
@@ -365,6 +410,17 @@ object Bet {
     context.log.error(
       s"Implementation error. Unimplemented command [$command] in state [$state]  ")
     Effect.none
+  }
+
+  //TODO read 3 from properties
+  val tags = Vector.tabulate(3)(i => s"market-tag-$i")
+
+  def calculateTag(
+      entityId: String,
+      tags: Vector[String] = tags): String = {
+    val tagIndex =
+      math.abs(entityId.hashCode % tags.size)
+    tags(tagIndex)
   }
 
 }

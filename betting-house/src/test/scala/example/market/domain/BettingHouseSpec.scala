@@ -1,4 +1,4 @@
-package example.market
+package example.betting
 
 import akka.actor.testkit.typed.scaladsl.{
   LogCapturing,
@@ -29,6 +29,8 @@ import akka.cluster.sharding.typed.scaladsl.{
 }
 import akka.cluster.sharding.typed.ShardingEnvelope
 
+import java.time.OffsetDateTime
+
 class BettingHouseSpec
     extends ScalaTestWithActorTestKit(
       EventSourcedBehaviorTestKit.config.withFallback(
@@ -47,39 +49,39 @@ class BettingHouseSpec
   // 	- Ann bets Market3 and gets rejected
   // 	- bets get resolved and pays off to users and betting houses.
 
-  "a persistent entity with sharding" should {
+  "a market" should {
 
-    "be able to add container" in {
-      val sharding = ClusterSharding(system)
+    "get initialized" in {
 
-      val shardRegion: ActorRef[ShardingEnvelope[Market.Command]] =
-        sharding.init(
-          Entity(Market.TypeKey)(createBehavior = entityContext =>
-            Market(entityContext.entityId)))
+      val market = EventSourcedBehaviorTestKit[
+        Market.Command,
+        Market.Event,
+        Market.State](system, Market("id1"))
 
-      val marketId = "id-1"
-
-      val fixture = MarketActor.Fixtures(
+      val fixture = Market.Fixture(
         id = "fixtureID1",
-        sport = "football",
         homeTeam = "ManchesterUnited",
         awayTeam = "RealMadrid")
 
-      val odds = Odds(winHome = 1.25, loseHome = 1.70, tie = 1.05)
+      val odds =
+        Market.Odds(winHome = 1.25, winAway = 1.70, draw = 1.05)
 
-      val probe =
-        createTestProbe[Market.Persisted]()
+      val opensAt = OffsetDateTime.now();
 
-      shardRegion ! ShardingEnvelope(
-        marketId,
-        Market.Init(fixture, odds, probe.ref))
+      def auxInitialize(
+          fixture: Market.Fixture,
+          odds: Market.Odds,
+          opensAt: OffsetDateTime)(
+          replyTo: ActorRef[Market.Response]) =
+        Market.Initialize(fixture, odds, opensAt, replyTo)
 
-      probe.expectMessage(Persisted)
+      val result = market.runCommand[Market.Response](
+        auxInitialize(fixture, odds, opensAt))
 
+      result.reply shouldBe (Market.Accepted)
     }
 
   }
-
   //     Scenario 1.1
   // t0 - Fixture Real Madrid vs Manchester United.
   // t1 - Market1 created.

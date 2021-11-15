@@ -16,7 +16,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 import spray.json.{ JsonFormat, RootJsonFormat }
 
-object ContainerApp {
+object ContainerAppHttpServer {
 
   def main(args: Array[String]): Unit = {
     implicit val container = ActorSystem(Container(), "simple-api")

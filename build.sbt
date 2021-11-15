@@ -307,10 +307,15 @@ lazy val alpakka = project
 
 lazy val `betting-house` = project
     .in(file("betting-house"))
-    .enablePlugins(AkkaGrpcPlugin)
+    .enablePlugins(AkkaGrpcPlugin, JavaAppPackaging, DockerPlugin)
     .settings(
+      version := "0.1.2-SNAPSHOT",
+      dockerUsername := Some("franciscolopezsancho"), // assumes docker.io by default
       scalafmtOnCompile := true,
+      Compile / mainClass := Some("example.betting.Main"), // uncomment to build docker image. docker:publishLocal
       scalaVersion := ScalaVersion,
+      dockerExposedPorts := Seq(8558, 2552, 9000, 9001),
+      dockerBaseImage := "adoptopenjdk:11-jre-hotspot",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
         "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
@@ -319,12 +324,22 @@ lazy val `betting-house` = project
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
         "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,
         "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
-        "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
+        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion, //needed?
         "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
         "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
         "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
         "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
+        "org.postgresql" % "postgresql" % "42.2.18",
+        "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
+        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
+        "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
+        "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % AkkaManagementVersion,
+        "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
+        "org.scalatest" %% "scalatest" % ScalaTest % Test, 
+
+
       ))
 
 

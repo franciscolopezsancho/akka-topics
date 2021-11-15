@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_package = "example.bet.grpc";
+option java_outer_classname = "BetProto";
+
+
+message Bet {
+  string betId = 1;
+  string marketId = 2;
+  string walletId = 3;
+  double odds = 4;
+  int32 stake = 5; 
+  int32 result = 6;
+}
+
+message SettleMessage {
+	string betId = 1;
+	int32 result = 2;
+}
+
+message BetId {
+	string betId = 1;
+}
+
+message CancelMessage {
+  string betId = 1;
+  string reason = 2;
+}
+
+message BetResponse {
+  string message = 1; 
+} 
+
+
+service BetService {
+
+  rpc Open(Bet) returns (BetResponse){}
+  rpc Settle(SettleMessage) returns (BetResponse){}
+  rpc Cancel(CancelMessage) returns (BetResponse) {}
+}

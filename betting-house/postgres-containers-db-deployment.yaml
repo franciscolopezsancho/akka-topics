@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml
+    kompose.version: 1.24.0 (4a2a0458)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: postgres-containers-db
+  name: postgres-containers-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: postgres-containers-db
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml
+        kompose.version: 1.24.0 (4a2a0458)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: postgres-containers-db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_PASSWORD
+              value: betting
+            - name: POSTGRES_USER
+              value: betting
+          image: postgres:latest
+          name: postgres-containers-db
+          ports:
+            - containerPort: 5432
+          resources: {}
+      restartPolicy: Always
+status: {}
