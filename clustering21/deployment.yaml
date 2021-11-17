@@ -27,7 +27,7 @@ spec:
       - name: testing-bootstrap21
         image: franciscolopezsancho/clustering21:0.1.3-SNAPSHOT
         # Remove for a real project, the image is picked up locally for the integratio test
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: IfNotPresent # this prevents new images with same tags to be picked
         #health
         livenessProbe:
           httpGet:

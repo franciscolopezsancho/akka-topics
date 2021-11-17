@@ -8,6 +8,14 @@ grpcurl -d  '{
 
 grpcurl -d '{"marketId": "1243"}' -plaintext localhost:9000 MarketService/GetState
 
+grpcurl -d  '{ 
+  "marketId": "1243",
+  "odds": {"winHome": 1.80, "winAway": 1.05, "tie": 1.40 },
+  "opensAt": 123,
+  "result": 0
+}' -plaintext localhost:9000 MarketService/Update
+
+
 
 
 curl "localhost:9001/wallet/add?walletId=123"
@@ -17,8 +25,6 @@ curl -XPOST "localhost:9001/wallet/add?walletId=123&funds=222"
 
 
 curl -XPOST "localhost:9001/wallet/remove?walletId=123&funds=333"
-
-
 
 
 

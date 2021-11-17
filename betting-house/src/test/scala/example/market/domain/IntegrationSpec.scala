@@ -32,6 +32,7 @@ import akka.cluster.typed.{ Cluster, Join }
 import java.time.OffsetDateTime
 
 import scala.concurrent.duration._
+import org.scalatest.concurrent.Eventually
 
 object IntegrationSpec {
   val config = ConfigFactory.parseString(
@@ -53,6 +54,7 @@ class IntegrationSpec
     extends ScalaTestWithActorTestKit(IntegrationSpec.config)
     with AnyWordSpecLike
     with Matchers
+    with Eventually
     with LogCapturing {
 
   private val sharding = ClusterSharding(system)
@@ -75,7 +77,7 @@ class IntegrationSpec
   }
 
   "a bet" should {
-    "be able to relate to a market and a wallet" in {
+    "fail if the odds from the market are less than the bet ones" in {
 
       val walletProbe = createTestProbe[Wallet.Response]
 
@@ -97,7 +99,7 @@ class IntegrationSpec
 
       marketProbe.expectMessage(10.seconds, Market.Accepted)
 
-      val bet = sharding.entityRefFor(Bet.TypeKey, "betId")
+      val bet = sharding.entityRefFor(Bet.TypeKey, "betId1")
 
       val betProbe = createTestProbe[Bet.Response]
 
@@ -109,10 +111,70 @@ class IntegrationSpec
         0,
         betProbe.ref)
 
-      betProbe.expectMessage(Bet.Accepted)
+      betProbe.expectMessage(Bet.Registered)
 
+      eventually {
+
+        bet ! Bet.GetState(betProbe.ref)
+
+        val expected = Bet.FailedState(
+          Bet
+            .Status("betId1", "walletId1", "marketId1", 1.26, 100, 0),
+          "market odds not available")
+
+        betProbe.expectMessage(Bet.CurrentState(expected))
+      }
     }
+  }
 
+  "a bet" should {
+    "pass if the odds from the market are higher than the bet ones" in {
+
+      val walletId = "walletId2"
+      val marketId = "marketId2"
+      val betId = "betId2"
+
+      val walletProbe = createTestProbe[Wallet.Response]
+
+      val wallet = sharding.entityRefFor(Wallet.TypeKey, walletId)
+
+      wallet ! Wallet.AddFunds(100, walletProbe.ref)
+
+      walletProbe.expectMessage(Wallet.Accepted)
+
+      val marketProbe = createTestProbe[Market.Response]
+
+      val market = sharding.entityRefFor(Market.TypeKey, marketId)
+
+      market ! Market.Initialize(
+        Market.Fixture("fixtureId1", "RM", "MU"),
+        Market.Odds(1.25, 1.75, 1.05),
+        OffsetDateTime.now,
+        marketProbe.ref)
+
+      marketProbe.expectMessage(10.seconds, Market.Accepted)
+
+      val bet = sharding.entityRefFor(Bet.TypeKey, betId)
+
+      val betProbe = createTestProbe[Bet.Response]
+
+      bet ! Bet.Open(walletId, marketId, 1.05, 100, 0, betProbe.ref)
+
+      betProbe.expectMessage(Bet.Registered)
+
+      eventually {
+
+        bet ! Bet.GetState(betProbe.ref)
+
+        val expected = Bet.OpenState(
+          Bet
+            .Status(betId, walletId, marketId, 1.05, 100, 0),
+          Some(true),
+          Some(true))
+
+        betProbe.expectMessage(Bet.CurrentState(expected))
+      }
+    }
   }
 
 }

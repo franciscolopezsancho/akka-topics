@@ -63,6 +63,7 @@ object Bet {
       extends ReplyCommand
   case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends ReplyCommand
+  case class GetState(replyTo: ActorRef[Response]) extends Command
   private case class CheckMarketOdds(available: Boolean)
       extends Command
   private case class RequestWalletFunds(
@@ -74,21 +75,21 @@ object Bet {
 
   sealed trait Response
   case object Accepted extends Response
-  case object BetVerifying extends Response
+  case object Registered extends Response
   case class RequestUnaccepted(reason: String) extends Response
-  case class MarketChanged(betId: String, newPrice: Int)
-      extends Response
+  case class CurrentState(state: State) extends Response
 
   //how do I know I bet to the winner or the looser or draw??
   case class Status(
       betId: String,
       walletId: String,
+      marketId: String,
       odds: Double,
       stake: Int,
       result: Int)
       extends CborSerializable
   object Status {
-    def empty(marketId: String) = Status(marketId, "", -1, -1, 0)
+    def empty(marketId: String) = Status(marketId, "", "", -1, -1, 0)
   }
   sealed trait State extends CborSerializable {
     def status: Status
@@ -101,11 +102,11 @@ object Bet {
       extends State // the ask user when market no longer available
   case class SettledState(status: Status) extends State
   case class CancelledState(status: Status) extends State
-  case class FailedState(status: Status) extends State
+  case class FailedState(status: Status, reason: String) extends State
   case class ClosedState(status: Status) extends State
 
   def apply(betId: String): Behavior[Command] = {
-    Behaviors.withTimers { timer =>
+    Behaviors.withTimers { timers =>
       Behaviors
         .setup[Command] { context =>
           val sharding = ClusterSharding(context.system)
@@ -118,7 +119,7 @@ object Bet {
                 command,
                 sharding,
                 context,
-                timer),
+                timers),
             eventHandler = handleEvents)
         // .withTagger {
         //   case _ => Set(calculateTag(betId, tags))
@@ -156,6 +157,8 @@ object Bet {
         settle(state, command, sharding, context)
       case (state: OpenState, command: Close) =>
         finish(state, command)
+      case (state: State, command: GetState) =>
+        getState(state, command.replyTo)
       case (_, command: Cancel)       => cancel(state, command)
       case (_, command: ReplyCommand) => reject(state, command)
       case (_, command: Fail)         => fail(state, command)
@@ -195,7 +198,10 @@ object Bet {
 
   def handleEvents(state: State, event: Event): State = event match {
     case Opened(betId, marketId, walletId, odds, stake, result) =>
-      OpenState(state.status, None, None)
+      OpenState(
+        Status(betId, walletId, marketId, odds, stake, result),
+        None,
+        None)
     case MarketConfirmed(state) =>
       state.copy(marketConfirmed = Some(true))
     case FundsGranted(state) =>
@@ -208,34 +214,34 @@ object Bet {
       SettledState(state.status)
     case Cancelled(betId, reason) =>
       CancelledState(state.status)
-    case Failed(betId, reason) =>
-      FailedState(state.status)
+    case Failed(_, reason) =>
+      FailedState(state.status, reason)
   }
 
   def open(
-      sta: UninitializedState,
-      com: Open,
-      sha: ClusterSharding,
-      con: ActorContext[Command],
-      tim: TimerScheduler[Command]): ReplyEffect[Opened, State] = {
-    tim.startSingleTimer(
+      state: UninitializedState,
+      command: Open,
+      sharding: ClusterSharding,
+      context: ActorContext[Command],
+      timers: TimerScheduler[Command]): ReplyEffect[Opened, State] = {
+    timers.startSingleTimer(
       "lifespan",
       ValidationsTimedOut(10), // this would read from configuration
       10.seconds)
     val open = Opened(
-      sta.status.betId,
-      com.marketId,
-      com.walletId,
-      com.odds,
-      com.stake,
-      com.result)
+      state.status.betId,
+      command.marketId,
+      command.walletId,
+      command.odds,
+      command.stake,
+      command.result)
     Effect
       .persist(open)
       .thenRun((_: State) =>
-        requestMarketStatus(OpenState(sta.status), com, sha, con))
+        requestMarketStatus(command, sharding, context))
       .thenRun((_: State) =>
-        requestFundsReservation(OpenState(sta.status), com, sha, con))
-      .thenReply(com.replyTo)(_ => Accepted)
+        requestFundsReservation(command, sharding, context))
+      .thenReply(command.replyTo)(_ => Registered)
   }
 
   def validateMarket(
@@ -265,7 +271,6 @@ object Bet {
   //change we need to take this decision quickly. If the Market is not available
   // we fail fast.
   def requestMarketStatus(
-      state: OpenState,
       command: Open,
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
@@ -273,10 +278,9 @@ object Bet {
       sharding.entityRefFor(Market.TypeKey, command.marketId)
 
     implicit val timeout: Timeout = Timeout(3, SECONDS)
-    //Q what's the use of entityRef.ask?? in the gRPC!
     context.ask(marketRef, Market.GetState) {
       case Success(Market.CurrentState(marketState)) =>
-        if (oddsDoMatch(marketState, state.status)) {
+        if (oddsDoMatch(marketState, command)) {
           CheckMarketOdds(true)
         } else {
           CheckMarketOdds(false)
@@ -302,7 +306,6 @@ object Bet {
   /// I would need an adapter
 
   def requestFundsReservation(
-      state: OpenState,
       command: Open,
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
@@ -332,14 +335,19 @@ object Bet {
 
   def oddsDoMatch(
       marketStatus: Market.Status,
-      betStatus: Bet.Status): Boolean = {
+      command: Bet.Open): Boolean = {
+    // if better odds are available the betting house it takes the bet
+    // for a lesser benefit to the betting customer. This is why compares
+    // with gt
     marketStatus.result match {
-      case 0 => marketStatus.odds.draw == betStatus.odds
+      case 0 =>
+        marketStatus.odds.draw >= command.odds
       case x if x > 0 =>
-        marketStatus.odds.winHome == betStatus.odds
+        marketStatus.odds.winHome >= command.odds
       case x if x < 0 =>
-        marketStatus.odds.winAway == betStatus.odds
+        marketStatus.odds.winAway >= command.odds
     }
+
   }
 
   def checkFunds(stake: Int, fundsId: String): Boolean = {
@@ -351,10 +359,6 @@ object Bet {
     true
   }
 
-  def auxCreateRequest(stake: Int)(
-      replyTo: ActorRef[Wallet.Response]): Wallet.AddFunds =
-    Wallet.AddFunds(stake, replyTo)
-
   //one way to avoid adding funds twice is asking
   def settle(
       state: State,
@@ -362,6 +366,11 @@ object Bet {
       sharding: ClusterSharding,
       context: ActorContext[Command]): Effect[Event, State] = {
     implicit val timeout = Timeout(10, SECONDS)
+
+    def auxCreateRequest(stake: Int)(
+        replyTo: ActorRef[Wallet.Response]): Wallet.AddFunds =
+      Wallet.AddFunds(stake, replyTo)
+
     if (isWinner(state, command.result)) {
       val walletRef =
         sharding.entityRefFor(Wallet.TypeKey, state.status.walletId)
@@ -378,7 +387,7 @@ object Bet {
     Effect.none
   }
 
-  def fail(state: State, command: Command): Effect[Event, State] =
+  def fail(state: State, command: Command): Effect[Event, State] = //FIXME
     Effect.persist(Failed(
       state.status.betId,
       s"Reimbursment unsuccessfull. For wallet [${state.status.walletId}]"))
@@ -393,6 +402,12 @@ object Bet {
           state.status.betId,
           s"validation in process when life span expired after [$time] seconds"))
     }
+  }
+
+  def getState(
+      state: State,
+      replyTo: ActorRef[Response]): Effect[Event, State] = {
+    Effect.none.thenReply(replyTo)(_ => CurrentState(state))
   }
 
   def reject(

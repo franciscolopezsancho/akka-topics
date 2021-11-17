@@ -38,9 +38,9 @@ object Market {
       extends Command
 
   case class Update(
-      odds: Odds,
-      opensAt: OffsetDateTime,
-      result: Int, //+ winHome, - winAway, 0 draw
+      odds: Option[Odds],
+      opensAt: Option[OffsetDateTime],
+      result: Option[Int], //+ winHome, - winAway, 0 draw
       replyTo: ActorRef[Response])
       extends Command
 
@@ -73,7 +73,8 @@ object Market {
   case class Uninitialized(status: Status) extends State
 
   case class InitializedState(status: Status) extends State
-
+  // I might get rid of Initialized State and open it all
+  // at once and then changed opensAt to startsAt
   case class OpenState(status: Status) extends State
 
   case class ClosedState(status: Status) extends State
@@ -109,10 +110,6 @@ object Market {
         open(state, command)
       case (state: OpenState, command: Update) =>
         update(state, command)
-      // case (state: SuspendedState, command: Update) =>
-      //   update(state, command)
-      // case (state: SuspendedState, command: Open) =>
-      //  open(state, command)
       case (state: OpenState, command: Close) => close(state, command)
       case (_, command: Cancel)               => cancel(state, command)
       case (_, command: GetState)             => tell(state, command)
@@ -128,7 +125,10 @@ object Market {
 
   case class Opened(marketId: String) extends Event
 
-  case class Updated(marketId: String, odds: Odds, result: Int)
+  case class Updated(
+      marketId: String,
+      odds: Option[Odds],
+      result: Option[Int])
       extends Event
 
   case class Closed(marketId: String, at: OffsetDateTime)
@@ -146,8 +146,14 @@ object Market {
         state.copy(status = Status(
           state.status.marketId,
           state.status.fixture,
-          odds,
-          result))
+          odds.getOrElse(state.status.odds),
+          result.getOrElse(state.status.result)))
+      case (state: InitializedState, Updated(_, odds, result)) =>
+        state.copy(status = Status(
+          state.status.marketId,
+          state.status.fixture,
+          odds.getOrElse(state.status.odds),
+          result.getOrElse(state.status.result)))
       case (_, Closed(marketId, _)) =>
         ClosedState(state.status)
       case (_, Cancelled(marketId, reason)) =>

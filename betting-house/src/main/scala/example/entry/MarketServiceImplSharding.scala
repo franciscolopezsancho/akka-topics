@@ -17,6 +17,7 @@ import scala.util.{ Failure, Success, Try }
 
 import akka.stream.scaladsl.Flow
 import akka.NotUsed
+import akka.stream.typed.scaladsl.ActorFlow
 
 class MarketServiceImplSharding(implicit sharding: ClusterSharding)
     extends MarketService {
@@ -88,32 +89,39 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
     }
 
   }
+
   override def initialize(in: example.market.grpc.MarketData)
       : scala.concurrent.Future[example.market.grpc.Response] = {
     val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
-    val fixture = in.fixture match {
-      case Some(FixtureData(id, homeTeam, awayTeam, _)) =>
-        Market.Fixture(id, homeTeam, awayTeam)
-      //TODO case or for comprehensions
+
+    def auxInit(in: MarketData)(
+        replyTo: ActorRef[Market.Response]) = {
+
+      val fixture = in.fixture match {
+        case Some(FixtureData(id, homeTeam, awayTeam, _)) =>
+          Market.Fixture(id, homeTeam, awayTeam)
+        case None =>
+          throw new IllegalArgumentException(
+            "Fixture is empty. Not allowed")
+      }
+
+      val odds = in.odds match {
+        case Some(OddsData(winHome, winAway, tie, _)) =>
+          Market.Odds(winHome, winAway, tie)
+        case None =>
+          throw new IllegalArgumentException(
+            "Odds are empty. Not allowed")
+      }
+
+      val opensAt = OffsetDateTime
+        .ofInstant(Instant.ofEpochMilli(in.opensAt), ZoneId.of("UTC"))
+
+      Market.Initialize(fixture, odds, opensAt, replyTo)
+
     }
-
-    val odds = in.odds match {
-      case Some(OddsData(winHome, winAway, tie, _)) =>
-        Market.Odds(winHome, winAway, tie)
-      //TODO case or for comprehensions
-    }
-
-    val opensAt = OffsetDateTime
-      .ofInstant(Instant.ofEpochMilli(in.opensAt), ZoneId.of("UTC"))
-
-    def initMessage(
-        f: Market.Fixture,
-        o: Market.Odds,
-        opensAt: OffsetDateTime)(replyTo: ActorRef[Market.Response]) =
-      Market.Initialize(f, o, opensAt, replyTo)
 
     market
-      .ask(initMessage(fixture, odds, opensAt))
+      .ask(auxInit(in))
       .mapTo[Market.Response]
       .map { response =>
         response match {
@@ -142,6 +150,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
         }
       }
   }
+
   override def update(
       in: akka.stream.scaladsl.Source[
         example.market.grpc.MarketData,
@@ -149,17 +158,47 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
     example.market.grpc.Response,
     akka.NotUsed] = {
 
-    def auxAskFlow(
-        marketData: MarketData,
-        marketRef: ActorRef[Market.Command])
-        : Flow[Int, Int, NotUsed] = ???
+    def auxUpdate(marketData: MarketData)(
+        replyTo: ActorRef[Market.Response]): Market.Update = {
 
-    // in.mapConcat { marketData =>
-    //   val marketRef =
-    //     sharding.entityRefFor(Market.TypeKey, marketData.marketId)
-    //   (marketData, marketRef)
-    // }
-    ???
+      val odds = marketData.odds.map(m =>
+        Market.Odds(m.winHome, m.winAway, m.tie))
+
+      val opensAt = marketData.opensAt match {
+        case 0L => None
+        case x =>
+          Some(
+            OffsetDateTime
+              .ofInstant(Instant.ofEpochMilli(x), ZoneId.of("UTC")))
+      }
+
+      val result = marketData.result match {
+        case MarketData.Result.DEFAULT => None
+        case x                         => Some(x.value)
+      }
+
+      Market.Update(odds, opensAt, result, replyTo)
+
+    }
+
+    in.mapAsync(10) { marketData =>
+      val marketRef =
+        sharding.entityRefFor(Market.TypeKey, marketData.marketId)
+
+      marketRef
+        .ask(auxUpdate(marketData))
+        .mapTo[Market.Response]
+        .map { response =>
+          response match {
+            case Market.Accepted =>
+              example.market.grpc.Response("Updated")
+            case Market.RequestUnaccepted(reason) =>
+              example.market.grpc
+                .Response(s"market NOT updated because [$reason]")
+          }
+        }
+    }
+
   }
 
 }

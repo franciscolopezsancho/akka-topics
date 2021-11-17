@@ -53,7 +53,7 @@ object Wallet {
       case ReserveFunds(amount, replyTo) =>
         //it might need to check with an external service to
         // prove the customer is not betting such it can be considered addiction.
-        if (amount > state.balance)
+        if (amount <= state.balance)
           Effect
             .persist(FundsReserved(amount))
             .thenReply(replyTo)(state => Accepted)
