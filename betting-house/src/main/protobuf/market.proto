@@ -46,9 +46,7 @@ message CancelMarket {
 
 service MarketService {
 
-	rpc Initialize(MarketData) returns (Response){}
-
-	rpc Open(MarketId) returns (Response) {}
+	rpc Open(MarketData) returns (Response) {}
 
 	rpc Update(stream MarketData) returns (stream Response) {}
 

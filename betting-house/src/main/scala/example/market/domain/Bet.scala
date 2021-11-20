@@ -121,19 +121,19 @@ object Bet {
                 context,
                 timers),
             eventHandler = handleEvents)
-        // .withTagger {
-        //   case _ => Set(calculateTag(betId, tags))
-        // }
-        // .withRetention(
-        //   RetentionCriteria
-        //     .snapshotEvery(
-        //       numberOfEvents = 100,
-        //       keepNSnapshots = 2))
-        // .onPersistFailure(
-        //   SupervisorStrategy.restartWithBackoff(
-        //     minBackoff = 10.seconds,
-        //     maxBackoff = 60.seconds,
-        //     randomFactor = 0.1))
+            .withTagger {
+              case _ => Set(calculateTag(betId, tags))
+            }
+            .withRetention(
+              RetentionCriteria
+                .snapshotEvery(
+                  numberOfEvents = 100,
+                  keepNSnapshots = 2))
+            .onPersistFailure(
+              SupervisorStrategy.restartWithBackoff(
+                minBackoff = 10.seconds,
+                maxBackoff = 60.seconds,
+                randomFactor = 0.1))
         }
     }
   }
@@ -350,13 +350,8 @@ object Bet {
 
   }
 
-  def checkFunds(stake: Int, fundsId: String): Boolean = {
-    true
-  }
-
-  def isWinner(state: State, result: Int): Boolean = {
-    // marketState.status.result == result
-    true
+  def isWinner(state: State, resultFromMarket: Int): Boolean = {
+    state.status.result == resultFromMarket
   }
 
   //one way to avoid adding funds twice is asking
@@ -428,7 +423,7 @@ object Bet {
   }
 
   //TODO read 3 from properties
-  val tags = Vector.tabulate(3)(i => s"market-tag-$i")
+  val tags = Vector.tabulate(3)(i => s"bet-tag-$i")
 
   def calculateTag(
       entityId: String,

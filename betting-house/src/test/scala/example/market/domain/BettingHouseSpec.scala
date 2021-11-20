@@ -73,7 +73,7 @@ class BettingHouseSpec
           odds: Market.Odds,
           opensAt: OffsetDateTime)(
           replyTo: ActorRef[Market.Response]) =
-        Market.Initialize(fixture, odds, opensAt, replyTo)
+        Market.Open(fixture, odds, opensAt, replyTo)
 
       val result = market.runCommand[Market.Response](
         auxInitialize(fixture, odds, opensAt))

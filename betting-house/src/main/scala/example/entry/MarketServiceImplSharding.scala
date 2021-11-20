@@ -90,7 +90,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
 
   }
 
-  override def initialize(in: example.market.grpc.MarketData)
+  override def open(in: example.market.grpc.MarketData)
       : scala.concurrent.Future[example.market.grpc.Response] = {
     val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
 
@@ -116,7 +116,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
       val opensAt = OffsetDateTime
         .ofInstant(Instant.ofEpochMilli(in.opensAt), ZoneId.of("UTC"))
 
-      Market.Initialize(fixture, odds, opensAt, replyTo)
+      Market.Open(fixture, odds, opensAt, replyTo)
 
     }
 
@@ -130,23 +130,6 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
           case Market.RequestUnaccepted(reason) =>
             example.market.grpc
               .Response(s"market NOT initialized because [$reason]")
-        }
-      }
-  }
-  override def open(in: example.market.grpc.MarketId)
-      : scala.concurrent.Future[example.market.grpc.Response] = {
-    val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
-
-    market
-      .ask(Market.Open)
-      .mapTo[Market.Response]
-      .map { response =>
-        response match {
-          case Market.Accepted =>
-            example.market.grpc.Response("initialized")
-          case Market.RequestUnaccepted(reason) =>
-            example.market.grpc
-              .Response(s"market NOT opened because [$reason]")
         }
       }
   }

@@ -91,7 +91,7 @@ class IntegrationSpec
 
       val market = sharding.entityRefFor(Market.TypeKey, "marketId1")
 
-      market ! Market.Initialize(
+      market ! Market.Open(
         Market.Fixture("fixtureId1", "RM", "MU"),
         Market.Odds(1.25, 1.75, 1.05),
         OffsetDateTime.now,
@@ -146,7 +146,7 @@ class IntegrationSpec
 
       val market = sharding.entityRefFor(Market.TypeKey, marketId)
 
-      market ! Market.Initialize(
+      market ! Market.Open(
         Market.Fixture("fixtureId1", "RM", "MU"),
         Market.Odds(1.25, 1.75, 1.05),
         OffsetDateTime.now,

@@ -30,7 +30,7 @@ object Market {
   sealed trait Command extends CborSerializable {
     def replyTo: ActorRef[Response]
   }
-  case class Initialize(
+  case class Open(
       fixture: Fixture,
       odds: Odds,
       opensAt: OffsetDateTime,
@@ -43,8 +43,6 @@ object Market {
       result: Option[Int], //+ winHome, - winAway, 0 draw
       replyTo: ActorRef[Response])
       extends Command
-
-  case class Open(replyTo: ActorRef[Response]) extends Command
 
   case class Close(replyTo: ActorRef[Response]) extends Command
 
@@ -72,9 +70,6 @@ object Market {
   }
   case class Uninitialized(status: Status) extends State
 
-  case class InitializedState(status: Status) extends State
-  // I might get rid of Initialized State and open it all
-  // at once and then changed opensAt to startsAt
   case class OpenState(status: Status) extends State
 
   case class ClosedState(status: Status) extends State
@@ -87,9 +82,9 @@ object Market {
       Uninitialized(Status.empty(marketId)),
       commandHandler = handleCommands,
       eventHandler = handleEvents)
-    // .withTagger {
-    //   case _ => Set(calculateTag(marketId, tags))
-    // }
+      .withTagger {
+        case _ => Set(calculateTag(marketId, tags))
+      }
       .withRetention(RetentionCriteria
         .snapshotEvery(numberOfEvents = 100, keepNSnapshots = 2))
       .onPersistFailure(
@@ -102,11 +97,7 @@ object Market {
       state: State,
       command: Command): ReplyEffect[Event, State] =
     (state, command) match {
-      case (state: Uninitialized, command: Initialize) =>
-        init(state, command)
-      case (state: InitializedState, command: Update) =>
-        update(state, command)
-      case (state: InitializedState, command: Open) =>
+      case (state: Uninitialized, command: Open) =>
         open(state, command)
       case (state: OpenState, command: Update) =>
         update(state, command)
@@ -117,13 +108,8 @@ object Market {
     }
 
   sealed trait Event extends CborSerializable
-  case class Initialized(
-      marketId: String,
-      fixture: Fixture,
-      odds: Odds)
+  case class Opened(marketId: String, fixture: Fixture, odds: Odds)
       extends Event
-
-  case class Opened(marketId: String) extends Event
 
   case class Updated(
       marketId: String,
@@ -131,45 +117,35 @@ object Market {
       result: Option[Int])
       extends Event
 
-  case class Closed(marketId: String, at: OffsetDateTime)
+  case class Closed(marketId: String, result: Int, at: OffsetDateTime)
       extends Event
 
   case class Cancelled(marketId: String, reason: String) extends Event
 
   def handleEvents(state: State, event: Event): State = {
     (state, event) match {
-      case (_, Initialized(marketId, fixture, odds)) =>
-        InitializedState(Status(marketId, fixture, odds, 0))
-      case (_, Opened(marketId)) =>
-        OpenState(state.status)
+      case (_, Opened(marketId, fixture, odds)) =>
+        OpenState(Status(marketId, fixture, odds, 0))
       case (state: OpenState, Updated(_, odds, result)) =>
         state.copy(status = Status(
           state.status.marketId,
           state.status.fixture,
           odds.getOrElse(state.status.odds),
           result.getOrElse(state.status.result)))
-      case (state: InitializedState, Updated(_, odds, result)) =>
-        state.copy(status = Status(
-          state.status.marketId,
-          state.status.fixture,
-          odds.getOrElse(state.status.odds),
-          result.getOrElse(state.status.result)))
-      case (_, Closed(marketId, _)) =>
-        ClosedState(state.status)
+      case (state: OpenState, Closed(marketId, result, _)) =>
+        ClosedState(state.status.copy(result = result))
       case (_, Cancelled(marketId, reason)) =>
         CancelledState(state.status)
     }
   }
 
-  def init(
+  def open(
       state: State,
-      command: Initialize): ReplyEffect[Initialized, State] = {
-    val initialized = Initialized(
-      state.status.marketId,
-      command.fixture,
-      command.odds)
+      command: Open): ReplyEffect[Opened, State] = {
+    val opened =
+      Opened(state.status.marketId, command.fixture, command.odds)
     Effect
-      .persist(initialized)
+      .persist(opened)
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
@@ -183,19 +159,12 @@ object Market {
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
-  def open(
-      state: State,
-      command: Open): ReplyEffect[Opened, State] = {
-    Effect
-      .persist(Opened(state.status.marketId))
-      .thenReply(command.replyTo)(_ => Accepted)
-  }
-
   def close(
       state: State,
       command: Close): ReplyEffect[Closed, State] = {
     val closed = Closed(
       state.status.marketId,
+      state.status.result,
       OffsetDateTime.now(ZoneId.of("UTC")))
     Effect
       .persist(closed)

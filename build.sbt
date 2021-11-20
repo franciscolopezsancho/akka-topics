@@ -1,4 +1,4 @@
-val AkkaVersion = "2.6.16"
+val AkkaVersion = "2.6.17+65-7e059fad+20211117-1807-SNAPSHOT"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"

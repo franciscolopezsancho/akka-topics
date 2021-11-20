@@ -3,7 +3,7 @@ grpcurl -d  '{
   "fixture": {"id": "id1", "homeTeam": "RM", "awayTeam": "MU"},
   "odds": {"winHome": 1.25, "winAway": 1.70, "tie": 1.10 },
   "opensAt": 123
-}' -plaintext localhost:9000 MarketService/Initialize
+}' -plaintext localhost:9000 MarketService/Open
 
 
 grpcurl -d '{"marketId": "1243"}' -plaintext localhost:9000 MarketService/GetState
@@ -16,7 +16,7 @@ grpcurl -d  '{
 }' -plaintext localhost:9000 MarketService/Update
 
 
-
+grpcurl -d '{"marketId": "1243"}' -plaintext localhost:9000 MarketService/GetState
 
 curl "localhost:9001/wallet/add?walletId=123"
 
