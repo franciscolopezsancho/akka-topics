@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "example.bet.grpc";
+
+message MarketId {
+	string marketId = 1;
+}
+
+message SumStake{
+	int64 total = 1;
+}
+
+service BetService {
+	rpc GetBetByMarket(MarketId) returns (SumStake) {}
+}

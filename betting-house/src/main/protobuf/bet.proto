@@ -6,8 +6,8 @@ option java_outer_classname = "BetProto";
 
 message Bet {
   string betId = 1;
-  string marketId = 2;
-  string walletId = 3;
+  string walletId = 2;
+  string marketId = 3;
   double odds = 4;
   int32 stake = 5; 
   int32 result = 6;

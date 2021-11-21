@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] [%logger] [%marker] [%thread] - %msg %n </pattern>
+        </encoder>
+    </appender>
+
+   <logger name="slick.jdbc.JdbcBackend.statementAndParameter" level="debug" />
+   <logger name="akka.projection" level="info" />
+   <logger name="scalikejdbc" level="debug" />
+   <logger name="example.projection" level="debug" />
+
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

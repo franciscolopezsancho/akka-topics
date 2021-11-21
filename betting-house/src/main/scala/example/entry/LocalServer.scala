@@ -15,6 +15,8 @@ import example.market.grpc.{
   MarketServiceImplSharding
 }
 
+import example.bet.grpc.{ BetServiceHandler, BetServiceImplSharding }
+
 import scala.io.StdIn
 
 object LocalServer extends App {
@@ -29,27 +31,36 @@ object LocalServer extends App {
 
   implicit val ec: ExecutionContext = system.executionContext
 
-  val service: HttpRequest => Future[HttpResponse] =
+  val marketService: HttpRequest => Future[HttpResponse] =
     MarketServiceHandler.withServerReflection(
       new MarketServiceImplSharding())
 
-  val bindingFuture: Future[Http.ServerBinding] =
-    Http().newServerAt("0.0.0.0", 9000).bind(service)
+  val betService: HttpRequest => Future[HttpResponse] =
+    BetServiceHandler.withServerReflection(
+      new BetServiceImplSharding())
+
+  val bindingFutureMarket: Future[Http.ServerBinding] =
+    Http().newServerAt("0.0.0.0", 9000).bind(marketService)
+
+  val bindingFutureBet: Future[Http.ServerBinding] =
+    Http().newServerAt("0.0.0.0", 9001).bind(betService)
 
   val bindingFutureWallet =
     Http()
-      .newServerAt("0.0.0.0", 9001)
+      .newServerAt("0.0.0.0", 9002)
       .bind(new WalletService().route)
 
   println(
-    s"servers at localhost:9000 and localhost:9001 \nPress RETURN to stop")
+    s"servers at localhost:9000, localhost:9001, and localhost:9002 \nPress RETURN to stop")
   StdIn.readLine()
   val res = for {
-    s1 <- bindingFuture
+    s1 <- bindingFutureMarket
     u1 <- s1.unbind
-    s2 <- bindingFutureWallet
+    s2 <- bindingFutureBet
     u2 <- s2.unbind
-  } yield (u1, u2)
+    s3 <- bindingFutureWallet
+    u3 <- s3.unbind
+  } yield (u1, u2, u3)
 
   res.onComplete(_ => system.terminate())
 }

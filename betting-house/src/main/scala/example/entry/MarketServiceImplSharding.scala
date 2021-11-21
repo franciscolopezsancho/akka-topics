@@ -26,9 +26,8 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
   implicit val executionContext: ExecutionContext =
     ExecutionContext.global
 
-  val shardingRegion =
-    sharding.init(Entity(Market.TypeKey)(entityContext =>
-      Market(entityContext.entityId)))
+  sharding.init(Entity(Market.TypeKey)(entityContext =>
+    Market(entityContext.entityId)))
 
   override def cancel(in: example.market.grpc.CancelMarket)
       : scala.concurrent.Future[example.market.grpc.Response] = {

@@ -22,6 +22,9 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
   implicit val executionContext: ExecutionContext =
     ExecutionContext.global
 
+  sharding.init(
+    Entity(Bet.TypeKey)(entityContext => Bet(entityContext.entityId)))
+
   def cancel(in: example.bet.grpc.CancelMessage)
       : scala.concurrent.Future[example.bet.grpc.BetResponse] = {
     val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)

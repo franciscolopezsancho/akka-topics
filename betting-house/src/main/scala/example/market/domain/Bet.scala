@@ -75,7 +75,6 @@ object Bet {
 
   sealed trait Response
   case object Accepted extends Response
-  case object Registered extends Response
   case class RequestUnaccepted(reason: String) extends Response
   case class CurrentState(state: State) extends Response
 
@@ -178,8 +177,8 @@ object Bet {
       with CborSerializable
   case class Opened(
       betId: String,
-      marketId: String,
       walletId: String,
+      marketId: String,
       odds: Double,
       stake: Int,
       result: Int)
@@ -197,7 +196,7 @@ object Bet {
   case object Closed extends Event with CborSerializable
 
   def handleEvents(state: State, event: Event): State = event match {
-    case Opened(betId, marketId, walletId, odds, stake, result) =>
+    case Opened(betId, walletId, marketId, odds, stake, result) =>
       OpenState(
         Status(betId, walletId, marketId, odds, stake, result),
         None,
@@ -241,7 +240,7 @@ object Bet {
         requestMarketStatus(command, sharding, context))
       .thenRun((_: State) =>
         requestFundsReservation(command, sharding, context))
-      .thenReply(command.replyTo)(_ => Registered)
+      .thenReply(command.replyTo)(_ => Accepted)
   }
 
   def validateMarket(
