@@ -37,4 +37,5 @@ service BetService {
   rpc Open(Bet) returns (BetResponse){}
   rpc Settle(SettleMessage) returns (BetResponse){}
   rpc Cancel(CancelMessage) returns (BetResponse) {}
+  rpc GetState(BetId) returns (Bet) {}
 }

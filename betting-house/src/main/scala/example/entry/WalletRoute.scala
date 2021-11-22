@@ -39,9 +39,8 @@ class WalletService(implicit sharding: ClusterSharding) {
       : RootJsonFormat[Wallet.CurrentBalance] =
     jsonFormat1(Wallet.CurrentBalance)
 
-  private val shardingRegion =
-    sharding.init(Entity(Wallet.TypeKey)(entityContext =>
-      Wallet(entityContext.entityId)))
+  sharding.init(Entity(Wallet.TypeKey)(entityContext =>
+    Wallet(entityContext.entityId)))
 
   val route: Route =
     pathPrefix("wallet") {

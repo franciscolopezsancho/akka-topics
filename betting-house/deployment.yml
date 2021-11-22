@@ -48,6 +48,8 @@ spec:
           # name: management
         - containerPort: 9000
         - containerPort: 9001
+        - containerPort: 9002
+        - containerPort: 9003
         env:
         # The Kubernetes API discovery will use this service name to look for
         # nodes with this value in the 'app' label.

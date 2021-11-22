@@ -14,33 +14,54 @@ import example.market.grpc.{
   MarketServiceImplSharding
 }
 
+import example.bet.grpc.BetServiceServer
+
 import scala.io.StdIn
+
+import example.bet.akka.http.WalletServiceServer
+import example.repository.scalike.BetRepositoryImpl
+import betting.house.projection.{
+  BetProjection,
+  BetProjectionServer,
+  MarketProjection
+}
+
+import com.typesafe.config.ConfigFactory
+import org.slf4j.LoggerFactory
+import scala.util.control.NonFatal
+import example.repository.scalike.ScalikeJdbcSetup
 
 object Main {
 
+  val log = LoggerFactory.getLogger(Main + "")
+
   def main(args: Array[String]): Unit = {
-
     implicit val system =
-      ActorSystem(Behaviors.empty, "betting-house")
+      ActorSystem[Nothing](Behaviors.empty, "betting-house")
+    try {
 
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
+      implicit val sharding = ClusterSharding(system)
+      implicit val ec: ExecutionContext = system.executionContext
 
-    implicit val sharding = ClusterSharding(system)
+      AkkaManagement(system).start()
+      ClusterBootstrap(system).start()
+      ScalikeJdbcSetup.init(system)
 
-    implicit val ec: ExecutionContext = system.executionContext
+      BetServiceServer.init(system, sharding, ec)
+      MarketServiceServer.init(system, sharding, ec)
+      WalletServiceServer.init(system, sharding, ec)
+      val betRepository = new BetRepositoryImpl()
 
-    val service: HttpRequest => Future[HttpResponse] =
-      MarketServiceHandler.withServerReflection(
-        new MarketServiceImplSharding())
+      BetProjectionServer.init(betRepository)
+      BetProjection.init(system, betRepository)
+      MarketProjection.init(system)
+    } catch {
+      case NonFatal(ex) =>
+        log.error(
+          s"Terminating Betting App because [${ex.getMessage}]")
+        system.terminate
+    }
 
-    val bindingFuture: Future[Http.ServerBinding] =
-      Http().newServerAt("0.0.0.0", 9000).bind(service)
-
-    val bindingFutureWallet =
-      Http()
-        .newServerAt("0.0.0.0", 9001)
-        .bind(new WalletService().route)
   }
 
 }

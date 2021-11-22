@@ -94,4 +94,23 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
     }
   }
 
+  def getState(in: example.bet.grpc.BetId)
+      : scala.concurrent.Future[example.bet.grpc.Bet] = {
+    val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)
+
+    bet.ask(Bet.GetState).mapTo[Bet.Response].map { response =>
+      response match {
+        case Bet.CurrentState(state) =>
+          val status = state.status
+          example.bet.grpc.Bet(
+            status.betId,
+            status.walletId,
+            status.marketId,
+            status.odds,
+            status.stake,
+            status.result)
+      }
+    }
+  }
+
 }

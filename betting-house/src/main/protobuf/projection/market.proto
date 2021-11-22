@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "betting.house.projection.proto";
+
+message MarketClosed {
+	string marketId = 1;
+	int32 result = 2;
+}
+
+message MarketOpened {
+	string marketId = 1;
+} 
+
+message MarketCancelled {
+	string marketId = 1;
+	string reason = 2;
+}

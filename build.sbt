@@ -2,7 +2,7 @@ val AkkaVersion = "2.6.17+65-7e059fad+20211117-1807-SNAPSHOT"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
-val AkkaProjectionVersion = "1.1.0"
+val AkkaProjectionVersion = "1.2.2"
 val ScalikeJdbcVersion = "3.5.0"
 val AkkaHttpVersion = "10.2.4"
 val AkkaGRPC = "2.0.0"
@@ -312,9 +312,9 @@ lazy val `betting-house` = project
       version := "0.1.2-SNAPSHOT",
       dockerUsername := Some("franciscolopezsancho"), // assumes docker.io by default
       scalafmtOnCompile := true,
-      // Compile / mainClass := Some("example.betting.Main"), // uncomment to build docker image. docker:publishLocal
+      Compile / mainClass := Some("example.betting.Main"), 
       scalaVersion := ScalaVersion,
-      dockerExposedPorts := Seq(8558, 2552, 9000, 9001),
+      dockerExposedPorts := Seq(8558, 2552, 9000, 9001, 9002, 9003),
       dockerBaseImage := "adoptopenjdk:11-jre-hotspot",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
@@ -330,19 +330,90 @@ lazy val `betting-house` = project
         "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
         "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
-        "org.postgresql" % "postgresql" % "42.2.18",
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
         "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
         "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
         "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % AkkaManagementVersion,
-        "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
         "org.scalatest" %% "scalatest" % ScalaTest % Test, 
+          "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
+      "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
+      "org.postgresql" % "postgresql" % "42.2.18",
+       "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
+      "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion,
 
 
       ))
 
-
-
-
+lazy val `betting-db-projection` = project
+  .in(file("betting-db-projection"))
+  .dependsOn(`betting-house`)
+  .enablePlugins(AkkaGrpcPlugin)
+  .settings(
+      scalafmtOnCompile := true,
+    scalaVersion := ScalaVersion,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.lightbend.akka.management" %% "akka-management" % AkkaManagementVersion,
+      "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
+      "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
+      "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-testkit" % AkkaProjectionVersion,
+      "com.typesafe.akka" %% "akka-persistence-query" % AkkaVersion,
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
+      "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion ,
+      "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
+      "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
+      "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
+      "org.postgresql" % "postgresql" % "42.2.18",
+    ))
+  lazy val `betting-kafka-projection` = project
+  .in(file("betting-kafka-projection"))
+  .dependsOn(`betting-house`)
+  .enablePlugins(AkkaGrpcPlugin)
+  .settings(
+      scalafmtOnCompile := true,
+    scalaVersion := ScalaVersion,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-cluster-sharding-typed" % AkkaVersion,         
+      "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test,
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.lightbend.akka.management" %% "akka-management" % AkkaManagementVersion,
+      "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
+      "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
+      "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-testkit" % AkkaProjectionVersion,
+      "com.typesafe.akka" %% "akka-persistence-query" % AkkaVersion,
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.0",
+      "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion ,
+      "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
+      "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
+      "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
+      "org.postgresql" % "postgresql" % "42.2.18",
+      "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
+    )
+ ) 
+  
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger

@@ -1,6 +1,6 @@
--- DROP TABLE IF EXISTS public.event_tag;
--- DROP TABLE IF EXISTS public.event_journal;
--- DROP TABLE IF EXISTS public.snapshot;
+DROP TABLE IF EXISTS public.event_tag;
+DROP TABLE IF EXISTS public.event_journal;
+DROP TABLE IF EXISTS public.snapshot;
 
 CREATE TABLE IF NOT EXISTS public.event_journal(
   ordering BIGSERIAL,

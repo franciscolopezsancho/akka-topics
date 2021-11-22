@@ -68,7 +68,7 @@ object Market {
     def empty(marketId: String) =
       Status(marketId, Fixture("", "", ""), Odds(-1, -1, -1), 0)
   }
-  case class Uninitialized(status: Status) extends State
+  final case class Uninitialized(status: Status) extends State
 
   case class OpenState(status: Status) extends State
 
@@ -93,7 +93,7 @@ object Market {
           maxBackoff = 60.seconds,
           randomFactor = 0.1))
 
-  def handleCommands(
+  private def handleCommands(
       state: State,
       command: Command): ReplyEffect[Event, State] =
     (state, command) match {
@@ -107,7 +107,9 @@ object Market {
       case _                                  => invalid(state, command)
     }
 
-  sealed trait Event extends CborSerializable
+  sealed trait Event extends CborSerializable {
+    def marketId: String
+  }
   case class Opened(marketId: String, fixture: Fixture, odds: Odds)
       extends Event
 
@@ -122,7 +124,7 @@ object Market {
 
   case class Cancelled(marketId: String, reason: String) extends Event
 
-  def handleEvents(state: State, event: Event): State = {
+  private def handleEvents(state: State, event: Event): State = {
     (state, event) match {
       case (_, Opened(marketId, fixture, odds)) =>
         OpenState(Status(marketId, fixture, odds, 0))
@@ -139,7 +141,7 @@ object Market {
     }
   }
 
-  def open(
+  private def open(
       state: State,
       command: Open): ReplyEffect[Opened, State] = {
     val opened =
@@ -149,7 +151,7 @@ object Market {
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
-  def update(
+  private def update(
       state: State,
       command: Update): ReplyEffect[Updated, State] = {
     val updated =
@@ -159,7 +161,7 @@ object Market {
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
-  def close(
+  private def close(
       state: State,
       command: Close): ReplyEffect[Closed, State] = {
     val closed = Closed(
@@ -171,7 +173,7 @@ object Market {
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
-  def cancel(
+  private def cancel(
       state: State,
       command: Cancel): ReplyEffect[Cancelled, State] = {
     val cancelled = Cancelled(state.status.marketId, command.reason)
@@ -180,14 +182,14 @@ object Market {
       .thenReply(command.replyTo)((_: State) => Accepted)
   }
 
-  def tell(
+  private def tell(
       state: State,
       command: GetState): ReplyEffect[Event, State] = {
     Effect.none.thenReply(command.replyTo)(_ =>
       CurrentState(state.status))
   }
 
-  def invalid(
+  private def invalid(
       state: State,
       command: Command): ReplyEffect[Event, State] = {
     Effect.none.thenReply(command.replyTo)(
@@ -199,7 +201,7 @@ object Market {
   //TODO read 3 from properties
   val tags = Vector.tabulate(3)(i => s"market-tag-$i")
 
-  def calculateTag(
+  private def calculateTag(
       entityId: String,
       tags: Vector[String] = tags): String = {
     val tagIndex =

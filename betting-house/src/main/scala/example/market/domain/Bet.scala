@@ -27,20 +27,6 @@ import scala.util.{ Failure, Success }
 import akka.util.Timeout
 
 /**
- * Lifecycle of a bet
- * Some user finds, looking at a market projection, a good price and decides to make a bet with those odds
- * Or rather the user decides any odds and then this checks against the market.
- *    Q -> how the projection of the market affect its odds
- * Q -> is it necessary somebody takes the bet? meaning I bet to market1, 10$, at 1.25. Who is betting against? so this bet can be paid if its counterpart looses?
- *
- * Q -> if the states are prematch, checking, active, cancelled and reimbursement. What changes/ messages do I want to avoid with these states?
- *
- *
- * Q -> to awake or pay every Bet do we rely on the recepcionist?
- *
- *
- *
- *
  */
 object Bet {
 
@@ -64,7 +50,9 @@ object Bet {
   case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends ReplyCommand
   case class GetState(replyTo: ActorRef[Response]) extends Command
-  private case class CheckMarketOdds(available: Boolean)
+  private case class MarketOddsAvailable(
+      available: Boolean,
+      marketOdds: Option[Double])
       extends Command
   private case class RequestWalletFunds(
       response: Wallet.UpdatedResponse)
@@ -146,7 +134,7 @@ object Bet {
     (state, command) match {
       case (state: UninitializedState, command: Open) =>
         open(state, command, sharding, context, timer)
-      case (state: OpenState, command: CheckMarketOdds) =>
+      case (state: OpenState, command: MarketOddsAvailable) =>
         validateMarket(state, command)
       case (state: OpenState, command: RequestWalletFunds) =>
         validateFunds(state, command)
@@ -217,7 +205,7 @@ object Bet {
       FailedState(state.status, reason)
   }
 
-  def open(
+  private def open(
       state: UninitializedState,
       command: Open,
       sharding: ClusterSharding,
@@ -229,8 +217,8 @@ object Bet {
       10.seconds)
     val open = Opened(
       state.status.betId,
-      command.marketId,
       command.walletId,
+      command.marketId,
       command.odds,
       command.stake,
       command.result)
@@ -243,18 +231,20 @@ object Bet {
       .thenReply(command.replyTo)(_ => Accepted)
   }
 
-  def validateMarket(
+  private def validateMarket(
       state: OpenState,
-      command: CheckMarketOdds): Effect[Event, State] = {
+      command: MarketOddsAvailable): Effect[Event, State] = {
     if (command.available) {
       Effect.persist(MarketConfirmed(state))
     } else {
       Effect.persist(
-        Failed(state.status.betId, "market odds not available"))
+        Failed(
+          state.status.betId,
+          s"market odds [${command.marketOdds}] not available"))
     }
   }
 
-  def validateFunds(
+  private def validateFunds(
       state: OpenState,
       command: RequestWalletFunds): Effect[Event, State] = {
     command.response match {
@@ -269,7 +259,7 @@ object Bet {
   //market changes very fast even if our system haven't register the
   //change we need to take this decision quickly. If the Market is not available
   // we fail fast.
-  def requestMarketStatus(
+  private def requestMarketStatus(
       command: Open,
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
@@ -279,21 +269,15 @@ object Bet {
     implicit val timeout: Timeout = Timeout(3, SECONDS)
     context.ask(marketRef, Market.GetState) {
       case Success(Market.CurrentState(marketState)) =>
-        if (oddsDoMatch(marketState, command)) {
-          CheckMarketOdds(true)
-        } else {
-          CheckMarketOdds(false)
-        }
+        val matched = oddsDoMatch(marketState, command)
+        MarketOddsAvailable(
+          matched.doMatch,
+          Option(matched.marketOdds))
       case Failure(ex) =>
         context.log.error(ex.getMessage())
-        CheckMarketOdds(false)
+        MarketOddsAvailable(false, None)
     }
   }
-
-  //shall I use Shard or ShardRegion?
-  // val walletShardRegion: ActorRef[ShardingEnvelope[Wallet.Command]] =
-  //    sharding.init(Entity[Wallet.TypeKey])(createBehavior = entityContext =>
-  //     Market(entityContext.entityId))
 
   /// if I already have asks why do I need a global time out?
   ///I could use that global time out and then indirectly let the Wallet grant the Bet otherwise will be cancelled.
@@ -304,7 +288,7 @@ object Bet {
   /// a bad practice.
   /// I would need an adapter
 
-  def requestFundsReservation(
+  private def requestFundsReservation(
       command: Open,
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
@@ -318,7 +302,7 @@ object Bet {
       walletResponseMapper)
   }
 
-  def checkValidations(
+  private def checkValidations(
       state: OpenState,
       command: ValidationsTimedOut): Effect[Event, State] = {
     (state.marketConfirmed, state.fundsConfirmed) match {
@@ -326,35 +310,44 @@ object Bet {
         Effect.persist(ValidationsPassed(state))
       case _ =>
         Effect.persist(
-          Cancelled(
+          Failed(
             state.status.betId,
             s"validations didn't passed [${state}]"))
     }
   }
 
-  def oddsDoMatch(
+  private case class Match(doMatch: Boolean, marketOdds: Double)
+
+  private def oddsDoMatch(
       marketStatus: Market.Status,
-      command: Bet.Open): Boolean = {
+      command: Bet.Open): Match = {
     // if better odds are available the betting house it takes the bet
     // for a lesser benefit to the betting customer. This is why compares
     // with gt
     marketStatus.result match {
       case 0 =>
-        marketStatus.odds.draw >= command.odds
+        Match(
+          marketStatus.odds.draw >= command.odds,
+          marketStatus.odds.draw)
       case x if x > 0 =>
-        marketStatus.odds.winHome >= command.odds
+        Match(
+          marketStatus.odds.winHome >= command.odds,
+          marketStatus.odds.winHome)
       case x if x < 0 =>
-        marketStatus.odds.winAway >= command.odds
+        Match(
+          marketStatus.odds.winAway >= command.odds,
+          marketStatus.odds.winAway)
     }
-
   }
 
-  def isWinner(state: State, resultFromMarket: Int): Boolean = {
+  private def isWinner(
+      state: State,
+      resultFromMarket: Int): Boolean = {
     state.status.result == resultFromMarket
   }
 
   //one way to avoid adding funds twice is asking
-  def settle(
+  private def settle(
       state: State,
       command: Settle,
       sharding: ClusterSharding,
@@ -381,15 +374,21 @@ object Bet {
     Effect.none
   }
 
-  def fail(state: State, command: Command): Effect[Event, State] = //FIXME
+  private def fail(
+      state: State,
+      command: Command): Effect[Event, State] = //FIXME
     Effect.persist(Failed(
       state.status.betId,
       s"Reimbursment unsuccessfull. For wallet [${state.status.walletId}]"))
 
-  def finish(state: State, command: Close): Effect[Event, State] =
+  private def finish(
+      state: State,
+      command: Close): Effect[Event, State] =
     Effect.persist(Closed)
 
-  def cancel(state: State, command: Command): Effect[Event, State] = {
+  private def cancel(
+      state: State,
+      command: Command): Effect[Event, State] = {
     command match {
       case ValidationsTimedOut(time) =>
         Effect.persist(Cancelled(
@@ -398,33 +397,33 @@ object Bet {
     }
   }
 
-  def getState(
+  private def getState(
       state: State,
       replyTo: ActorRef[Response]): Effect[Event, State] = {
     Effect.none.thenReply(replyTo)(_ => CurrentState(state))
   }
 
-  def reject(
+  private def reject(
       state: State,
       command: ReplyCommand): Effect[Event, State] = {
     Effect.none.thenReply(command.replyTo)(_ =>
       RequestUnaccepted(
-        s"[$command] is not allowed upon the current state [$state]"))
+        s"[$command] has been rejected upon the current state [$state]"))
   }
 
-  def invalid(
+  private def invalid(
       state: State,
       command: Command,
       context: ActorContext[Command]): Effect[Event, State] = {
     context.log.error(
-      s"Implementation error. Unimplemented command [$command] in state [$state]  ")
+      s"Invalid command [$command] in state [$state]  ")
     Effect.none
   }
 
   //TODO read 3 from properties
   val tags = Vector.tabulate(3)(i => s"bet-tag-$i")
 
-  def calculateTag(
+  private def calculateTag(
       entityId: String,
       tags: Vector[String] = tags): String = {
     val tagIndex =
