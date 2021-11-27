@@ -58,7 +58,7 @@ object Main {
     } catch {
       case NonFatal(ex) =>
         log.error(
-          s"Terminating Betting App because [${ex.getMessage}]")
+          s"Terminating Betting App. Caused By [${ex.getMessage}]")
         system.terminate
     }
 

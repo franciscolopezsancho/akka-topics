@@ -80,7 +80,7 @@ object PContainer {
         state.copy(cargos = cargo +: state.cargos)
     }
 
-  //TODO read from properties
+  //TODO read 3 from properties
   val tags = Vector.tabulate(3)(i => s"container-tag-$i")
 
   def calculateTag(

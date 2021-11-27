@@ -5,7 +5,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 import example.repository.scalike.{
   BetRepository,
-  ScalikeJdbcSession
+  ScalikeJdbcSession,
+  StakePerResult
 }
 
 class BetProjectionServiceImpl(
@@ -19,12 +20,15 @@ class BetProjectionServiceImpl(
         "akka.projection.jdbc.blocking-jdbc-dispatcher"))
 
   def getBetByMarket(
-      in: MarketIdsBet): scala.concurrent.Future[SumStake] = {
+      in: MarketIdsBet): scala.concurrent.Future[SumStakes] = {
     Future {
       ScalikeJdbcSession.withSession { session =>
-        val result: Option[Long] = betRepository
+        val sumStakes = betRepository
           .getBetPerMarketTotalStake(in.marketId, session)
-        SumStake(result.getOrElse(0))
+          .map { each =>
+            SumStake(each.sum, each.result)
+          }
+        SumStakes(sumStakes)
       }
     }
   }

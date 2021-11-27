@@ -33,7 +33,7 @@ object BetProjection {
       repository: BetRepository): Unit = {
     ShardedDaemonProcess(system).init(
       name = "bet-projection",
-      3,
+      Bet.tags.size,
       index =>
         ProjectionBehavior(
           BetProjection

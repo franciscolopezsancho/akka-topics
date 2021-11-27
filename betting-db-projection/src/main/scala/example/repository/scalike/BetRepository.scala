@@ -1,7 +1,7 @@
 package example.repository.scalike
 
 import scalikejdbc._
-//TODO abstract to at least JdbcConection
+
 trait BetRepository {
 
   def addBet(
@@ -15,7 +15,7 @@ trait BetRepository {
       session: ScalikeJdbcSession): Option[Long]
 
 }
-//and fixture
+
 class BetRepositoryImpl extends BetRepository {
 
   override def addBet(
@@ -33,7 +33,6 @@ class BetRepositoryImpl extends BetRepository {
 
   }
 
-  //Q -> using a projection as an interface to DB?
   override def getBetPerMarketTotalStake(
       marketId: String,
       session: ScalikeJdbcSession): Option[Long] = {

@@ -24,7 +24,6 @@ import betting.house.projection.proto.{
 import example.repository.scalike.BetRepository
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.io.StdIn
 
 object BetProjectionServer {
 

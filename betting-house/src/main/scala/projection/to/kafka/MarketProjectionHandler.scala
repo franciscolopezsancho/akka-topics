@@ -34,11 +34,10 @@ class MarketProjectionHandler(
     val event = envelope.event
     val record =
       new ProducerRecord(topic, event.marketId, serialize(event))
-    val sent = producer.send(record).map { _ =>
+    producer.send(record).map { _ =>
       log.debug(s"published event [$event] to topic [$topic]}")
       Done
     }
-    sent
   }
 
   def serialize(event: Market.Event): Array[Byte] = {
@@ -50,8 +49,8 @@ class MarketProjectionHandler(
       case Market.Cancelled(marketId, reason) =>
         projection.proto.MarketCancelled(marketId, reason)
       ///FIXME I'd like to ignore some messages
+      // shall I use empty?
     }
-
     PbAny.pack(proto, "market-projection").toByteArray
   }
 

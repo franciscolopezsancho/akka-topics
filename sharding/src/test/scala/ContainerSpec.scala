@@ -1,3 +1,5 @@
+package example.sharding
+
 import akka.actor.testkit.typed.scaladsl.{
   LogCapturing,
   ScalaTestWithActorTestKit
@@ -45,7 +47,7 @@ class ContainerSpec
       val container: EntityRef[Container.Command] =
         sharding.entityRefFor(Container.TypeKey, containerId)
 
-      container ! Container.GetCargos(probe.ref)
+      shardRegion ! ShardingEnvelope(containerId, Container.GetCargos(probe.ref))
       probe.expectMessage(List(cargo))
 
     }

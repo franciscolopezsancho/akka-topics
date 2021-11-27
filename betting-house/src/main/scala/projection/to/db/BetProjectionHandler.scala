@@ -30,8 +30,21 @@ class BetProjectionHandler(repository: BetRepository)
       session: ScalikeJdbcSession,
       envelope: EventEnvelope[Bet.Event]): Unit = {
     envelope.event match {
-      case Bet.Opened(betId, walletId, marketId, _, stake, _) =>
-        repository.addBet(betId, walletId, marketId, stake, session)
+      case Bet.Opened(
+          betId,
+          walletId,
+          marketId,
+          odds,
+          stake,
+          result) =>
+        repository.addBet(
+          betId,
+          walletId,
+          marketId,
+          odds,
+          stake,
+          result,
+          session)
       case x =>
         logger.debug("ignoring event {} in projection", x)
 
