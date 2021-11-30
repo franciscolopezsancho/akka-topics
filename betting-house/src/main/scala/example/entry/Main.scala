@@ -50,15 +50,15 @@ object Main {
       BetServiceServer.init(system, sharding, ec)
       MarketServiceServer.init(system, sharding, ec)
       WalletServiceServer.init(system, sharding, ec)
-      val betRepository = new BetRepositoryImpl()
 
+      val betRepository = new BetRepositoryImpl()
       BetProjectionServer.init(betRepository)
       BetProjection.init(system, betRepository)
       MarketProjection.init(system)
     } catch {
       case NonFatal(ex) =>
         log.error(
-          s"Terminating Betting App. Caused By [${ex.getMessage}]")
+          s"Terminating Betting App. Reason [${ex.getMessage}]")
         system.terminate
     }
 

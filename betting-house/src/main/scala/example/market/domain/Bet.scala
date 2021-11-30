@@ -49,7 +49,8 @@ object Bet {
       extends ReplyCommand
   case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends ReplyCommand
-  case class GetState(replyTo: ActorRef[Response]) extends Command
+  case class GetState(replyTo: ActorRef[Response])
+      extends ReplyCommand
   private case class MarketOddsAvailable(
       available: Boolean,
       marketOdds: Option[Double])
@@ -76,7 +77,8 @@ object Bet {
       result: Int)
       extends CborSerializable
   object Status {
-    def empty(marketId: String) = Status(marketId, "", "", -1, -1, 0)
+    def empty(marketId: String) =
+      Status(marketId, "uninitialized", "uninitialized", -1, -1, 0)
   }
   sealed trait State extends CborSerializable {
     def status: Status
@@ -154,15 +156,9 @@ object Bet {
   }
 
   sealed trait Event extends CborSerializable
-  case class MarketConfirmed(state: OpenState)
-      extends Event
-      with CborSerializable
-  case class FundsGranted(state: OpenState)
-      extends Event
-      with CborSerializable
-  case class ValidationsPassed(state: OpenState)
-      extends Event
-      with CborSerializable
+  case class MarketConfirmed(state: OpenState) extends Event
+  case class FundsGranted(state: OpenState) extends Event
+  case class ValidationsPassed(state: OpenState) extends Event
   case class Opened(
       betId: String,
       walletId: String,
@@ -171,17 +167,10 @@ object Bet {
       stake: Int,
       result: Int)
       extends Event
-      with CborSerializable
-  case class Settled(betId: String)
-      extends Event
-      with CborSerializable
-  case class Cancelled(betId: String, reason: String)
-      extends Event
-      with CborSerializable
-  case class Failed(betId: String, reason: String)
-      extends Event
-      with CborSerializable
-  case object Closed extends Event with CborSerializable
+  case class Settled(betId: String) extends Event
+  case class Cancelled(betId: String, reason: String) extends Event
+  case class Failed(betId: String, reason: String) extends Event
+  case object Closed extends Event
 
   def handleEvents(state: State, event: Event): State = event match {
     case Opened(betId, walletId, marketId, odds, stake, result) =>
@@ -266,7 +255,8 @@ object Bet {
     val marketRef =
       sharding.entityRefFor(Market.TypeKey, command.marketId)
 
-    implicit val timeout: Timeout = Timeout(3, SECONDS)
+    implicit val timeout
+        : Timeout = Timeout(3, SECONDS) //FIXME read from properties
     context.ask(marketRef, Market.GetState) {
       case Success(Market.CurrentState(marketState)) =>
         val matched = oddsDoMatch(marketState, command)

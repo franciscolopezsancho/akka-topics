@@ -25,7 +25,7 @@ object Market {
   case class Fixture(id: String, homeTeam: String, awayTeam: String)
       extends CborSerializable
   case class Odds(winHome: Double, winAway: Double, draw: Double)
-      extends CborSerializable //Q - its total sum must be 2?
+      extends CborSerializable
 
   sealed trait Command extends CborSerializable {
     def replyTo: ActorRef[Response]
@@ -40,7 +40,7 @@ object Market {
   case class Update(
       odds: Option[Odds],
       opensAt: Option[OffsetDateTime],
-      result: Option[Int], //+ winHome, - winAway, 0 draw
+      result: Option[Int], //1 =  winHome, 2 = winAway, 0 = draw
       replyTo: ActorRef[Response])
       extends Command
 
@@ -68,18 +68,15 @@ object Market {
     def empty(marketId: String) =
       Status(marketId, Fixture("", "", ""), Odds(-1, -1, -1), 0)
   }
-  final case class Uninitialized(status: Status) extends State
-
+  final case class UninitializedState(status: Status) extends State
   case class OpenState(status: Status) extends State
-
   case class ClosedState(status: Status) extends State
-
   case class CancelledState(status: Status) extends State
 
   def apply(marketId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
       PersistenceId(TypeKey.name, marketId),
-      Uninitialized(Status.empty(marketId)),
+      UninitializedState(Status.empty(marketId)),
       commandHandler = handleCommands,
       eventHandler = handleEvents)
       .withTagger {
@@ -97,7 +94,7 @@ object Market {
       state: State,
       command: Command): ReplyEffect[Event, State] =
     (state, command) match {
-      case (state: Uninitialized, command: Open) =>
+      case (state: UninitializedState, command: Open) =>
         open(state, command)
       case (state: OpenState, command: Update) =>
         update(state, command)
@@ -112,16 +109,13 @@ object Market {
   }
   case class Opened(marketId: String, fixture: Fixture, odds: Odds)
       extends Event
-
   case class Updated(
       marketId: String,
       odds: Option[Odds],
       result: Option[Int])
       extends Event
-
   case class Closed(marketId: String, result: Int, at: OffsetDateTime)
       extends Event
-
   case class Cancelled(marketId: String, reason: String) extends Event
 
   private def handleEvents(state: State, event: Event): State = {

@@ -76,7 +76,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
         val (
           marketId,
           Market.Fixture(id, homeTeam, awayTeam),
-          Market.Odds(winHome, winAway, tie)) = (
+          Market.Odds(winHome, winAway, draw)) = (
           state.status.marketId,
           state.status.fixture,
           state.status.odds)
@@ -84,7 +84,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
         MarketData(
           marketId,
           Some(FixtureData(id, homeTeam, awayTeam)),
-          Some(OddsData(winHome, winAway, tie)))
+          Some(OddsData(winHome, winAway, draw)))
     }
 
   }

@@ -87,7 +87,7 @@ kompose convert -f docker-compose.yaml
 
 
 
- kafkacat -C -b 127.0.0.1:9092 -t bet-projection
+
 
 
 ## minikube
@@ -115,8 +115,29 @@ kubectl apply -f postgres-containers-db-service.yaml
   --name=betting-service
 
 ### link local ports to kubernetes pods
-k port-forward svc/postgres-containers-db 5432:5432
+k port-forward svc/postgres-containers-db 5432:5432 -n akka-cluster
 
-k port-forward svc/my-cluster-kafka-bootstrap 9092:9092
+k port-forward svc/my-cluster-kafka-bootstrap 9092:9092 -n akka-cluster
 
-k port-forward svc/betting-service 9000:9000 9001:9001 9002:9002 9003:9003
+k port-forward svc/betting-service 9000:9000 9001:9001 9002:9002 9003:9003 -n akka-cluster
+
+
+
+ kafkacat -C -b 127.0.0.1:9092 -t bet-projection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####
+prove settle
