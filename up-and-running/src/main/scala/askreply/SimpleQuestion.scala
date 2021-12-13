@@ -1,31 +1,30 @@
 package ask.simple
 
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
 import scala.concurrent.duration.SECONDS
 import akka.util.Timeout
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Random, Success }
 
-object ManangerWorkerApp extends App {
+object SimpleQuestion extends App {
 
   val system: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "example-ask-without-content")
-  system ! Guardian.Start(
-    List("task-a", "task-b", "task-c", "task-d"))
+  system ! Guardian.Start(List("file-a", "file-b", "file-c"))
 }
 
 object Guardian {
 
   sealed trait Command
-  case class Start(tasks: List[String]) extends Command
+  case class Start(files: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-1")
       Behaviors.receiveMessage {
-        case Start(tasks) =>
-          manager ! Manager.Delegate(tasks)
+        case Start(files) =>
+          manager ! Manager.Delegate(files)
           Behaviors.same
       }
     }
@@ -34,7 +33,7 @@ object Guardian {
 object Manager {
 
   sealed trait Command
-  case class Delegate(tasks: List[String]) extends Command
+  case class Delegate(files: List[String]) extends Command
   case class Report(description: String) extends Command
 
   def apply(): Behavior[Command] =
@@ -43,17 +42,16 @@ object Manager {
 
       Behaviors.receiveMessage { message =>
         message match {
-          case Delegate(tasks) =>
-            tasks.map { task =>
-              val worker: ActorRef[Worker.Command] =
-                context.spawn(Worker(), s"worker-$task")
-              context.ask(worker, Worker.Do) {
-                case Success(Worker.Done) =>
-                  Report(
-                    s"$task has been finished by ${worker.path.name}")
+          case Delegate(files) =>
+            files.map { file =>
+              val reader: ActorRef[Reader.Command] =
+                context.spawn(Reader(file), s"reader-$file")
+              context.ask(reader, Reader.Read) {
+                case Success(Reader.Done) =>
+                  Report(s"$file read by ${reader.path.name}")
                 case Failure(ex) =>
                   Report(
-                    s"task '$task' has failed with [${ex.getMessage()}")
+                    s"reading '$file' has failed with [${ex.getMessage()}")
               }
             }
             Behaviors.same
@@ -65,28 +63,32 @@ object Manager {
     }
 }
 
-object Worker {
+object Reader {
 
   sealed trait Command
-  case class Do(replyTo: ActorRef[Worker.Response]) extends Command
+  case class Read(replyTo: ActorRef[Reader.Response]) extends Command
 
   sealed trait Response
   case object Done extends Response
 
-  def apply(): Behavior[Command] =
+  def apply(file: String): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Do(replyTo) =>
-          doing(scala.util.Random.between(2000, 4000))
-          context.log.info(
-            s"My name is '${context.self.path.name}'. And I've done my task")
-          replyTo ! Worker.Done
+        case Read(replyTo) =>
+          fakeReading(file)
+          prettyPrint(context, "done")
+          replyTo ! Reader.Done
           Behaviors.same
       }
     }
 
-  def doing(duration: Int): Unit = {
-    val endTime = System.currentTimeMillis + duration
+  def fakeReading(file: String): Unit = {
+    val endTime =
+      System.currentTimeMillis + Random.between(2000, 4000)
     while (endTime > System.currentTimeMillis) {}
+  }
+
+  def prettyPrint(context: ActorContext[_], message: String): Unit = {
+    context.log.info(s"${context.self.path.name}: $message")
   }
 }

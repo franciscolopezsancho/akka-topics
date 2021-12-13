@@ -1,6 +1,6 @@
 package com.manning.fsm
 
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
 
 object FSMApp extends App {
@@ -34,33 +34,30 @@ object Manager {
 
   sealed trait Command
   final case class Delegate(task: String) extends Command
-  final case class Done(task: String) extends Command
-  final case class AdapterWorkerResponse(message: Worker.Response)
+  final case class AdapterPrinterResponse(message: Printer.Response)
       extends Command
 
   def apply(manPower: Int): Behavior[Command] =
     Behaviors.setup { context =>
 
-      val workers: Seq[ActorRef[Worker.Command]] =
+      val printers: Seq[ActorRef[Printer.Command]] =
         (0 to manPower).map(num =>
-          context.spawn(Worker(), s"worker-$num"))
-      val adapter: ActorRef[Worker.Response] =
-        context.messageAdapter(rsp => AdapterWorkerResponse(rsp))
+          context.spawn(Printer(), s"printer-$num"))
+      val adapter: ActorRef[Printer.Response] =
+        context.messageAdapter(rsp => AdapterPrinterResponse(rsp))
 
       Behaviors.receiveMessage { message =>
         message match {
           case Delegate(task) =>
-            val worker =
-              workers(scala.util.Random.nextInt(workers.size))
-            worker ! Worker.Do(adapter, task)
-          case Done(task) =>
-            context.log.info(s"task '$task' has been finished")
-          case AdapterWorkerResponse(response) => {
+            val printer =
+              printers(scala.util.Random.nextInt(printers.size))
+            printer ! Printer.Do(adapter, task)
+          case AdapterPrinterResponse(response) => {
             response match {
-              case Worker.Cleaning(task) =>
+              case Printer.Cleaning(task) =>
                 context.self ! Delegate(task)
-              case Worker.JobDone(task) =>
-                context.self ! Done(task)
+              case Printer.JobDone(task) =>
+                context.log.info(s"task '$task' has been finished")
             }
           }
         }
@@ -69,59 +66,66 @@ object Manager {
     }
 }
 
-object Worker {
+object Printer {
 
   sealed trait Command
   final case class Do(
-      replyTo: ActorRef[Worker.Response],
+      replyTo: ActorRef[Printer.Response],
       task: String)
       extends Command
-  final case object Clean extends Command
+  private final case object Clean extends Command
 
   sealed trait Response
   final case class Cleaning(task: String) extends Response
   final case class JobDone(task: String) extends Response
 
   def apply(): Behavior[Command] =
-    idle(0)
+    ready(0)
 
   def cleaning(jobsDone: Int): Behavior[Command] =
     Behaviors.receive[Command] { (context, message) =>
       message match {
         case Do(manager, task) =>
-          context.log.info(
-            s"${context.self.path.name}: can't do '$task' now. I need to clean first")
+          prettyPrint(context, s"can't do [$task]. Cleaning needed")
           manager ! Cleaning(task)
           Behaviors.same
         case Clean =>
-          doing(1000) // this represent some work
-          context.log.info(
-            s"${context.self.path.name}: I'm DONE cleaning")
-          idle(jobsDone)
+          doing(
+            1000,
+            context,
+            "I'm DONE cleaning"
+          ) // this represent some work
+          ready(jobsDone)
       }
     }
 
-  def idle(jobsDone: Int): Behavior[Command] =
+  def ready(jobsDone: Int): Behavior[Command] =
     Behaviors.receive[Command] { (context, message) =>
       message match {
         case Do(manager, task) =>
-          doing(999) // this represent some work
-          val jobSoFar = jobsDone + 1
-          context.log.info(
-            s"${context.self.path.name}': I've done '$jobSoFar' job(s) so far")
+          doing(
+            999,
+            context,
+            s"Done [${jobsDone + 1}] job(s)"
+          ) // this represent some work
           manager ! JobDone(task)
           context.self ! Clean
-          cleaning(jobSoFar)
-        case Clean =>
-          context.log.info(
-            s"${context.self.path.name} : nothing to clean yet")
-          Behaviors.same
+          cleaning(jobsDone + 1)
+        case Clean => Behaviors.unhandled
       }
     }
 
-  def doing(duration: Int): Unit = {
+  def doing(
+      duration: Int,
+      context: ActorContext[_],
+      message: String): Unit = {
     val endTime = System.currentTimeMillis + duration
     while (endTime > System.currentTimeMillis) {}
+    prettyPrint(context, message)
+  }
+
+  def prettyPrint(context: ActorContext[_], message: String): Unit = {
+    context.log.info(s"${context.self.path.name}': $message")
   }
 
 }

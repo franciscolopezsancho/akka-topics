@@ -13,6 +13,7 @@ lazy val `up-and-running` = project
   .in(file("up-and-running"))
   .settings(
     scalaVersion := ScalaVersion,
+    scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
