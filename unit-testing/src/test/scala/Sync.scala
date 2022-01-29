@@ -28,8 +28,8 @@ object SyncTestingExampleSpec {
     case class Create(name: String) extends Command
     case class Proxy(message: String, sendTo: ActorRef[String])
         extends Command
-    case object ScheduleDone extends Command
-    case object Done extends Command
+    case object ScheduleLog extends Command
+    case object Log extends Command
 
     def apply(): Behaviors.Receive[Command] =
       Behaviors.receive { (context, message) =>
@@ -38,12 +38,12 @@ object SyncTestingExampleSpec {
             context.spawn(dullActor, name)
             Behaviors.same
           case Proxy(message, sendTo) =>
-            sendTo ! message
+            sendTo ! s"processed$message"
             Behaviors.same
-          case ScheduleDone =>
-            context.scheduleOnce(1.seconds, context.self, Done)
+          case ScheduleLog =>
+            context.scheduleOnce(1.seconds, context.self, Log)
             Behaviors.same
-          case Done =>
+          case Log =>
             context.log.info(s"it's done")
             Behaviors.same
         }
@@ -64,17 +64,17 @@ class SyncTestingExampleSpec extends AnyWordSpec with Matchers {
       testKit.expectEffect(Spawned(dullActor, "child"))
     }
 
-    "child 'dullActor' received a message" in {
+    "child received a message" in {
       val testKit = BehaviorTestKit(Hello())
       val probe = TestInbox[String]()
       testKit.run(Hello.Proxy("hello", probe.ref))
-      probe.expectMessage("hello")
+      probe.expectMessage("processedhello")
       probe.hasMessages shouldBe false
     }
 
     "record the log" in {
       val testKit = BehaviorTestKit(Hello())
-      testKit.run(Hello.Done)
+      testKit.run(Hello.Log)
       testKit.logEntries() shouldBe Seq(
         CapturedLogEvent(Level.INFO, "it's done"))
     }
@@ -82,9 +82,9 @@ class SyncTestingExampleSpec extends AnyWordSpec with Matchers {
     "failing to schedule a message" in {
       intercept[TestFailedException] {
         val testKit = BehaviorTestKit(Hello())
-        testKit.run(Hello.ScheduleDone)
+        testKit.run(Hello.ScheduleLog)
         testKit.expectEffect(
-          Scheduled(1.seconds, testKit.ref, Hello.Done))
+          Scheduled(1.seconds, testKit.ref, Hello.Log))
         testKit.logEntries() shouldBe Seq(
           CapturedLogEvent(Level.INFO, "it's done"))
       }

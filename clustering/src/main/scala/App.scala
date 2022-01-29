@@ -40,7 +40,7 @@ object App {
 
         val cluster = Cluster(context.system)
         if (cluster.selfMember.hasRole("director")) {
-          // cluster.registerOnMemberUp
+          // instead of cluster.registerOnMemberUp now on typed
           Cluster(context.system).subscriptions ! Subscribe(
             context.self,
             classOf[SelfUp])

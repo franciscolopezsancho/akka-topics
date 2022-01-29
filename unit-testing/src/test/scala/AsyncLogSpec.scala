@@ -11,7 +11,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 import scala.concurrent.duration._
 
-class AsyncTestingExampleSpec
+class AsyncLogSpec
     extends ScalaTestWithActorTestKit
     with AnyWordSpecLike
     with Matchers {
@@ -48,6 +48,6 @@ object Listener {
   def apply(): Behavior[String] = Behaviors.receive {
     (context, message) =>
       context.log.info(s"message '$message', received")
-      Behaviors.stopped
+      Behaviors.same
   }
 }

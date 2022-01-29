@@ -8,11 +8,11 @@ object Counter {
   sealed trait Command
   final case object Increase extends Command
 
-  def apply(init: Int, max: Int): Behavior[Command] =
+  def apply(count: Int, max: Int): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
         case Increase =>
-          val current = init + 1
+          val current = count + 1
           if (current <= max) {
             context.log.info(s"increasing to $current")
             apply(current, max)

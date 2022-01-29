@@ -1,4 +1,4 @@
-val AkkaVersion = "2.6.17+65-7e059fad+20211117-1807-SNAPSHOT"
+val AkkaVersion = "2.6.18"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
@@ -25,6 +25,7 @@ lazy val `unit-testing` = project
   .in(file("unit-testing"))
   .settings(
     scalaVersion := ScalaVersion,
+        scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,

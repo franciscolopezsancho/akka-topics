@@ -12,36 +12,33 @@ import scala.concurrent.duration._
 class FishingSpec
     extends ScalaTestWithActorTestKit
     with AnyWordSpecLike
-    with Matchers
-    with LogCapturing {
+    with Matchers {
 
   "A timing test" must {
 
-    import Forward._
-
-    val interval = 1.seconds
+    val interval = 100.milliseconds
 
     "be able to cancel timer" in {
-      val probe = TestProbe[Event]("evt")
+      val probe = createTestProbe[Receiver.Command]()
       val timerKey = "key1234"
 
-      val behv = Behaviors.setup[Command] { context =>
-        context.log.info("testing")
-        Behaviors.withTimers[Command] { timer =>
-          timer.startTimerWithFixedDelay(timerKey, Tick(1), interval)
-          apply(probe.ref, timer)
+      val sender =
+        Behaviors.withTimers[Sender.Command] { timer =>
+          timer.startTimerAtFixedRate(timerKey, Sender.Tick, interval)
+          Sender.apply(probe.ref, timer)
         }
-      }
 
-      val ref = spawn(behv)
-      probe.expectMessage(Tock(1))
-      ref ! Cancel(timerKey)
+      val ref = spawn(sender)
+      probe.expectMessage(Receiver.Tock)
       probe.fishForMessage(3.seconds) {
         // we don't know that we will see exactly one tock
-        case _: Tock => FishingOutcomes.continue
+        case Receiver.Tock =>
+          if (scala.util.Random.nextInt(4) == 0)
+            ref ! Sender.Cancel(timerKey)
+          FishingOutcomes.continueAndIgnore
         // but we know that after we saw Cancelled we won't see any more
-        case Cancelled => FishingOutcomes.complete
-        case message =>
+        case Receiver.Cancelled => FishingOutcomes.complete
+        case message => // this could never happen if there's no warning at compilation time
           FishingOutcomes.fail(s"unexpected message: $message")
       }
       probe.expectNoMessage(interval + 100.millis.dilated)
@@ -49,27 +46,33 @@ class FishingSpec
   }
 }
 
-object Forward {
+object Receiver {
 
   sealed trait Command
-  case class Tick(n: Int) extends Command
+  case object Tock extends Command
+  case object Cancelled extends Command
+
+  def apply() = Behaviors.ignore
+
+}
+
+object Sender {
+
+  sealed trait Command
+  case object Tick extends Command
   case class Cancel(key: String) extends Command
 
-  sealed trait Event
-  case class Tock(n: Int) extends Event
-  case object Cancelled extends Event
-
   def apply(
-      forwardTo: ActorRef[Event],
+      forwardTo: ActorRef[Receiver.Command],
       timer: TimerScheduler[Command]): Behavior[Command] = {
     Behaviors
       .receiveMessage[Command] {
-        case Tick(n) =>
-          forwardTo ! Tock(n)
+        case Tick =>
+          forwardTo ! Receiver.Tock
           Behaviors.same
         case Cancel(key) =>
           timer.cancel(key)
-          forwardTo ! Cancelled
+          forwardTo ! Receiver.Cancelled
           Behaviors.same
       }
   }

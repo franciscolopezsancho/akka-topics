@@ -8,6 +8,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 import scala.concurrent.duration._
 import akka.actor.testkit.typed.scaladsl.FishingOutcomes
+import java.util.Base64
 
 class AsyncTestingExampleSpec
     extends AnyWordSpec
@@ -16,26 +17,26 @@ class AsyncTestingExampleSpec
 
   val testKit = ActorTestKit()
 
-  "Actor Echo" must {
+  "Actor Encoder" must {
 
     "return same string" in {
 
-      val echo = testKit.spawn(Echo(), "Akka")
+      val echo = testKit.spawn(Encoder(), "Akka")
       val probe = testKit.createTestProbe[String]()
       val content = "Heellooo"
-      echo ! Echo.Sound(content, probe.ref)
-      probe.expectMessage(content)
+      echo ! Encoder.Encode(content, probe.ref)
+      val encoded =
+        java.util.Base64.getEncoder().encode(content.getBytes)
+      probe.expectMessage(new String(encoded))
 
     }
   }
-
-  // override def afterAll(): Unit = testKit.shutdownTestKit()
 
   "A Counter" must {
 
     "Increase its value" in {
       val counter = testKit.spawn(Counter(0), "counter")
-      val probe = testKit.createTestProbe[Counter.Event]()
+      val probe = testKit.createTestProbe[Counter.State]()
       counter ! Counter.Increase
       counter ! Counter.GetState(probe.ref)
       probe.expectMessage(Counter.State(1))
@@ -66,13 +67,16 @@ class AsyncTestingExampleSpec
   }
 }
 
-object Echo {
+import java.util.Base64
 
-  case class Sound(content: String, from: ActorRef[String])
+object Encoder {
 
-  def apply(): Behavior[Sound] =
+  case class Encode(content: String, sendTo: ActorRef[String])
+
+  def apply(): Behavior[Encode] =
     Behaviors.receiveMessage { sound =>
-      sound.from ! sound.content
+      val encoded = Base64.getEncoder().encode(sound.content.getBytes)
+      sound.sendTo ! new String(encoded)
       Behaviors.same
     }
 }
@@ -80,11 +84,10 @@ object Echo {
 object Counter {
 
   sealed trait Command
-  case class GetState(replyTo: ActorRef[Event]) extends Command
+  case class GetState(replyTo: ActorRef[State]) extends Command
   case object Increase extends Command
 
-  sealed trait Event
-  case class State(count: Int) extends Event
+  case class State(count: Int)
 
   def apply(count: Int): Behavior[Command] =
     Behaviors.receiveMessage {
@@ -108,14 +111,14 @@ object AdditionProxy {
 
   private case class AdaptState(
       replyTo: ActorRef[AdditionProxy.Event],
-      state: Counter.Event)
+      state: Counter.State)
       extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
 
       def messageAdapter(replyTo: ActorRef[AdditionProxy.Event])
-          : ActorRef[Counter.Event] =
+          : ActorRef[Counter.State] =
         context.messageAdapter(rsp => AdaptState(replyTo, rsp))
 
       val counter = context.spawnAnonymous(Counter(0))
