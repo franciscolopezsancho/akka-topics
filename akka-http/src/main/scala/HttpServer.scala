@@ -29,7 +29,7 @@ object HttpServer {
       }
 
     val bindingFuture: Future[ServerBinding] =
-      Http().newServerAt("0.0.0.0", 8080).bind(route)
+      Http().newServerAt("0.0.0.0", 8013).bind(route)
 
     println(s"server at localhost:8080 \nPress RETURN to stop")
     StdIn.readLine()

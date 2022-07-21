@@ -16,6 +16,7 @@ import akka.actor.Cancellable
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
+import scala.util.Random
 
 class StreamsSpec
     extends ScalaTestWithActorTestKit
@@ -39,41 +40,47 @@ class StreamsSpec
 
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects | simplestest version" in {
-      var sideffect = 0
+      var fakeDB: List[Int] = List()
+      def storeDB(value: Int) = 
+        fakeDB = fakeDB :+ value
 
       val future = Source(List(1, 2, 3))
         .filter(_ % 2 == 0)
-        .runForeach(i => sideffect += i)
+        .runForeach(i => storeDB(i))
 
       Await.result(future, 1.seconds)
-      assert(sideffect == 2)
+      assert(fakeDB == List(2))
     }
   }
 
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects | simplest version" in {
-      var sideffect = 0
+      var fakeDB: List[Int] = List()
+      def storeDB(value: Int) = 
+        fakeDB = fakeDB :+ value
 
       val producer = Source(List(1, 2, 3))
       val processor = Flow[Int].filter(_ % 2 == 0)
 
       val future =
-        producer.via(processor).runForeach(i => sideffect += i)
+        producer.via(processor).runForeach(i => storeDB(i))
 
       Await.result(future, 1.seconds)
-      assert(sideffect == 2)
+      assert(fakeDB == List(2))
     }
   }
 
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects" in {
-      var sideffect = 0
+      var fakeDB: List[Int] = List()
+      def storeDB(value: Int) = 
+        fakeDB = fakeDB :+ value
 
       val producer: Source[Int, NotUsed] = Source(List(1, 2, 3))
       val processor: Flow[Int, Int, NotUsed] =
         Flow[Int].filter(_ % 2 == 0)
       val consumer: Sink[Int, Future[Done]] =
-        Sink.foreach(i => sideffect += i)
+        Sink.foreach(i => storeDB(i))
 
       // val composed: Source[Int, NotUsed] = producer.via(processor)
 
@@ -86,15 +93,18 @@ class StreamsSpec
 
       val future: Future[Done] = blueprint.run
       Await.result(future, 1.seconds)
-      assert(sideffect == 2)
+      assert(fakeDB == List(2))
     }
   }
+
 
   // "a infinite producer"
   // "alpakka?"
 
   "an infinite producer with a consumer creating side effect" should {
     "be cancellable" in {
+     
+
       val liveSource: Source[String, Cancellable] =
         Source.tick(1.second, 1.second, "Hello, World")
 
@@ -105,11 +115,33 @@ class StreamsSpec
 
       val dbFakeSink = Sink.foreach[String](dbFakeInsert)
 
-      val (cancel, future): (Cancellable, Future[Done]) =
+      val (cancelble, future): (Cancellable, Future[Done]) =
         liveSource.via(masking).toMat(dbFakeSink)(Keep.both).run
 
       Thread.sleep(3000)
-      cancel.cancel
+      cancelble.cancel
+
+      Await.result(future, 1.seconds)
+      assert(future.isCompleted)
+
+    }
+  }
+
+  "an infinite producer with a consumer creating side effect same filter" should {
+    "be cancellable" in {
+      var fakeDB: List[Int] = List()
+      def storeDB(value: Int) = 
+        fakeDB = fakeDB :+ value
+
+      val liveSource: Source[Int, Cancellable] =
+        Source.tick(1.second, 1.second, Random.nextInt(3))
+
+      val (cancelble, future): (Cancellable, Future[Done]) =
+        liveSource.filter(_ % 2 == 0)
+          .toMat(Sink.foreach(storeDB))(Keep.both).run
+
+      Thread.sleep(3000)
+      cancelble.cancel
 
       Await.result(future, 1.seconds)
       assert(future.isCompleted)

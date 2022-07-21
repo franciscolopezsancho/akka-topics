@@ -30,9 +30,6 @@ object ConsumerOne {
         new StringDeserializer())
         .withBootstrapServers("127.0.0.1:9092")
         .withGroupId("group01")
-        // .withProperty(
-        //   ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-        //   "earliest")
         .withProperty(
           ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
           "true")
@@ -41,7 +38,7 @@ object ConsumerOne {
       .plainSource(consumerSettings, Subscriptions.topics("test"))
       .map { msg: ConsumerRecord[String, String] =>
         println(
-          s"key = ${msg.key}, value = ${msg.value}, offset = ${msg.value}")
+          s"key = ${msg.key}, value = ${msg.value}, offset = ${msg.offset}")
       //side effect
       }
       .runWith(Sink.ignore)

@@ -25,10 +25,10 @@ import akka.actor.typed.SupervisorStrategy
 import scala.concurrent.duration._
 
 //TODO to have one to show sharding and another for projection
-object SContainer {
+object SPContainer {
 
   val TypeKey =
-    EntityTypeKey[SContainer.Command]("scontainer-type-key")
+    EntityTypeKey[SPContainer.Command]("scontainer-type-key")
 
   case class Cargo(id: String, kind: String, size: Int)
 

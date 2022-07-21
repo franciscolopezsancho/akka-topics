@@ -2,6 +2,7 @@ package logging
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.actor.testkit.typed.scaladsl.LoggingTestKit
+import akka.actor.testkit.typed.scaladsl.LogCapturing
 
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
@@ -16,15 +17,27 @@ class AsyncLogSpec
     with AnyWordSpecLike
     with Matchers {
 
-  "Actor Proxy" must {
+  // "Actor Proxy" must {
 
-    "redirect to Listener and log the content of the message" in {
-      val proxy = testKit.spawn(Proxy(), "reading-logs")
-      val reader = testKit.spawn(Listener(), "reader")
-      val message = "aloha"
+  //   "redirect to Listener and log the content of the message" in {
+  //     val proxy = testKit.spawn(Proxy(), "reading-logs")
+  //     val reader = testKit.spawn(Listener(), "reader")
+  //     val message = "aloha"
 
-      LoggingTestKit.info(s"message '$message', received").expect {
-        proxy ! Proxy.Send(s"$message", reader.ref)
+  //     LoggingTestKit.info(s"message '$message', received").expect {
+  //       proxy ! Proxy.Send(s"$message", reader.ref)
+  //     }
+  //   }
+  // }
+
+  "a Simplified Manager" must {
+
+    "be able to log 'it's done'" in {
+      val manager = testKit.spawn(SimplifiedManager(), "manager")
+
+      LoggingTestKit.info("it's done").expect {
+
+        manager ! SimplifiedManager.Log
       }
     }
   }
@@ -50,4 +63,20 @@ object Listener {
       context.log.info(s"message '$message', received")
       Behaviors.same
   }
+}
+
+object SimplifiedManager {
+
+  sealed trait Command
+  case object Log extends Command
+
+  def apply(): Behaviors.Receive[Command] =
+    Behaviors.receive { (context, message) =>
+      message match {
+        case Log =>
+          context.log.info(s"it's done")
+          Behaviors.same
+      }
+    }
+
 }

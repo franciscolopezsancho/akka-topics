@@ -45,9 +45,7 @@ object LoggerBehavior {
   def apply(tag: String): Behavior[Unit] = {
     Behaviors.setup { context =>
       context.log.info("spawned LoggerBehavior {}", tag)
-      Behaviors.receive {
-        case _ => Behaviors.same
-      }
+      Behaviors.ignore
     }
   }
 }

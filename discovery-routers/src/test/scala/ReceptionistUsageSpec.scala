@@ -22,51 +22,51 @@ class ReceptionistUsageSpec
     with LogCapturing {
 
   "An actor subscribed to a ServiceKey " should {
-    val wick = spawn(Guest(), "Mr.Wick")
+    val wick = spawn(VIPGuest(), "Mr.Wick")
     "get notified about all the actors each time an actor registers" in {
 
-      spawn(HotelDesk())
+      spawn(HotelConcierge())
       LoggingTestKit.info("Mr.Wick is in").expect {
-        wick ! Guest.EnterHotel
+        wick ! VIPGuest.EnterHotel
       }
-      val guest2 = spawn(Guest(), "Mr.Ious")
+      val guest2 = spawn(VIPGuest(), "Mr.Ious")
       LoggingTestKit.info("Mr.Ious is in").expect {
         LoggingTestKit.info("Mr.Wick is in").expect {
-          guest2 ! Guest.EnterHotel
+          guest2 ! VIPGuest.EnterHotel
         }
       }
     }
     //what if I do it independently? Stop the actor
     "find that the actor is registered, with basic Find usage" in {
-      val testProbe = TestProbe[ActorRef[Guest.Command]]()
+      val testProbe = TestProbe[ActorRef[VIPGuest.Command]]()
       val finder =
         spawn(GuestSearch("Mr.Wick", testProbe.ref), "searcher")
       finder ! GuestSearch.Find
-      testProbe.expectMessageType[ActorRef[Guest.Command]]
+      testProbe.expectMessageType[ActorRef[VIPGuest.Command]]
     }
     //This test would never pass, its oppossite, its negation
     // could be constructed
     "find that no actor is registered, with basic Find usage" ignore {
-      val testProbe = TestProbe[ActorRef[Guest.Command]]()
+      val testProbe = TestProbe[ActorRef[VIPGuest.Command]]()
       val finder =
         spawn(GuestSearch("NoOne", testProbe.ref), "searcher")
       LoggingTestKit.info("no one found").expect {
         finder ! GuestSearch.Find
       }
-      testProbe.expectMessageType[ActorRef[Guest.Command]]
+      testProbe.expectMessageType[ActorRef[VIPGuest.Command]]
     }
     "find that the actor is registered, with search params in Find" in {
-      val probe = TestProbe[ActorRef[Guest.Command]]()
+      val probe = TestProbe[ActorRef[VIPGuest.Command]]()
       val finder = spawn(GuestFinder(), "finder")
       finder ! GuestFinder.Find("Mr.Wick", probe.ref)
-      probe.expectMessageType[ActorRef[Guest.Command]]
+      probe.expectMessageType[ActorRef[VIPGuest.Command]]
     }
     "get notified only alive actors" in {
       intercept[AssertionError] {
-        val guest = spawn(Guest(), "Mrs.X")
+        val guest = spawn(VIPGuest(), "Mrs.X")
         testKit.stop(wick.ref)
         LoggingTestKit.info("Mr.Wick is in").expect {
-          guest ! Guest.EnterHotel
+          guest ! VIPGuest.EnterHotel
         }
       }
     }
@@ -82,7 +82,7 @@ import akka.util.Timeout
 import scala.util.{ Failure, Success }
 import scala.concurrent.duration._
 
-object Guest {
+object VIPGuest {
 
   sealed trait Command
   case object EnterHotel extends Command
@@ -92,21 +92,21 @@ object Guest {
     message match {
       case EnterHotel =>
         context.system.receptionist ! Receptionist
-          .Register(HotelDesk.GoldenKey, context.self)
+          .Register(HotelConcierge.GoldenKey, context.self)
         Behaviors.same
 
       case LeaveHotel =>
         context.system.receptionist ! Receptionist
-          .Deregister(HotelDesk.GoldenKey, context.self)
+          .Deregister(HotelConcierge.GoldenKey, context.self)
         Behaviors.same
     }
 
   }
 }
 
-object HotelDesk {
+object HotelConcierge {
 
-  val GoldenKey = ServiceKey[Guest.Command]("hotel-key")
+  val GoldenKey = ServiceKey[VIPGuest.Command]("concierge-key")
 
   sealed trait Command
   private case class ListingResponse(listing: Receptionist.Listing)
@@ -132,7 +132,7 @@ object HotelDesk {
 // object BadBehavior {
 
 //   sealed trait Command
-//   case object RemoveGuest extends Command
+//   case object RemoveVIPGuest extends Command
 
 //   private case class ListingResponse(listing: Receptionist.Listing)
 //       extends Command
@@ -143,14 +143,14 @@ object HotelDesk {
 //       context.messageAdapter[Receptionist.Listing](ListingResponse)
 
 //     Behaviors.receiveMessage {
-//       case RemoveGuest =>
+//       case RemoveVIPGuest =>
 //         context.system.receptionist ! Receptionist
-//           .Find(HotelDesk.GoldenKey, listingResponseAdapter)
+//           .Find(HotelConcierge.GoldenKey, listingResponseAdapter)
 //         Behaviors.same
-//       case ListingResponse(HotelDesk.GoldenKey.Listing(listings)) =>
+//       case ListingResponse(HotelConcierge.GoldenKey.Listing(listings)) =>
 //         listings
 //           .filter(_.path.name.contains(actorName))
-//           .foreach(actor => actor ! Guest.LeaveHotel)
+//           .foreach(actor => actor ! VIPGuest.LeaveHotel)
 //         Behaviors.same
 //     }
 //   }
@@ -166,7 +166,7 @@ object GuestSearch {
 
   def apply(
       actorName: String,
-      replyTo: ActorRef[ActorRef[Guest.Command]]) =
+      replyTo: ActorRef[ActorRef[VIPGuest.Command]]) =
     Behaviors.setup[Command] { context =>
 
       val listingResponseAdapter =
@@ -175,10 +175,10 @@ object GuestSearch {
       Behaviors.receiveMessage {
         case Find =>
           context.system.receptionist ! Receptionist
-            .Find(HotelDesk.GoldenKey, listingResponseAdapter)
+            .Find(HotelConcierge.GoldenKey, listingResponseAdapter)
           Behaviors.same
 
-        case ListingResponse(HotelDesk.GoldenKey.Listing(listings)) =>
+        case ListingResponse(HotelConcierge.GoldenKey.Listing(listings)) =>
           listings
             .filter(_.path.name.contains(actorName))
             .foreach(actor => replyTo ! actor)
@@ -193,7 +193,7 @@ object GuestFinder {
   sealed trait Command
   case class Find(
       actorName: String,
-      replyTo: ActorRef[ActorRef[Guest.Command]])
+      replyTo: ActorRef[ActorRef[VIPGuest.Command]])
       extends Command
 
   case object Void extends Command
@@ -205,8 +205,8 @@ object GuestFinder {
         case Find(actorName, replyTo) =>
           context.ask(
             context.system.receptionist,
-            Receptionist.Find(HotelDesk.GoldenKey)) {
-            case Success(HotelDesk.GoldenKey.Listing(listings)) =>
+            Receptionist.Find(HotelConcierge.GoldenKey)) {
+            case Success(HotelConcierge.GoldenKey.Listing(listings)) =>
               listings
                 .filter(_.path.name.contains(actorName))
                 .foreach(actor => replyTo ! actor)

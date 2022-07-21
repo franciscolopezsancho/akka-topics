@@ -67,39 +67,37 @@ class RoutingExamplesSpec
         Behaviors.monitor(probe1.ref, Behaviors.empty[String])
 
       system.receptionist ! Receptionist.Register(
-        GroupManager.serviceKey,
+        PhotoProcessor.Key,
         spawn(behavior1))
 
-      val groupRouter = spawn(GroupManager())
-      groupRouter ! 10
+      val groupRouter = spawn(Camera())
+      groupRouter ! Camera.Photo("hi")
 
       probe1.expectMessage("hi")
-      probe1.receiveMessages(10)
+      probe1.receiveMessages(1)
 
     }
-    "send messages to all worker registered at a key" in {
-      val probe1 = TestProbe[String]
-      val behavior1 = Behaviors.monitor(probe1.ref, Spawner())
+    "send messages to all photo processors registered" in {
+      val photoProcessor1 = TestProbe[String]
+      val pp1Monitor = Behaviors.monitor(photoProcessor1.ref, PhotoProcessor())
 
-      val probe2 = TestProbe[String]
-      val behavior2 = Behaviors.monitor(probe2.ref, Spawner())
+      val photoProcessor2 = TestProbe[String]
+      val pp2Monitor = Behaviors.monitor(photoProcessor2.ref, PhotoProcessor())
 
       system.receptionist ! Receptionist.Register(
-        GroupManager.serviceKey,
-        spawn(behavior1))
+        PhotoProcessor.Key,
+        spawn(pp1Monitor))
       system.receptionist ! Receptionist.Register(
-        GroupManager.serviceKey,
-        spawn(behavior2))
+        PhotoProcessor.Key,
+        spawn(pp2Monitor))
 
-      val groupRouter = spawn(GroupManager())
-      groupRouter ! 11
+      val camera = spawn(Camera())
+      camera ! Camera.Photo("A")
+      camera ! Camera.Photo("B")
 
-      probe1.expectMessage("hi")
-      probe1.receiveMessages(5)
+      photoProcessor1.receiveMessages(1)
 
-      probe2.expectMessage("hi")
-      probe2.receiveMessages(5)
-
+      photoProcessor2.receiveMessages(1)
     }
 
     "will send messages with same id to the same aggregator" in {
@@ -288,14 +286,7 @@ object Aggregator {
     }
 }
 
-object Spawner {
-  def apply(): Behavior[String] =
-    Behaviors.receive {
-      case (context, message) =>
-        //spawns actor
-        Behaviors.same
-    }
-}
+
 
 object Worker {
   def apply(monitor: ActorRef[String]): Behavior[String] =
@@ -372,25 +363,27 @@ object PostalOfficeManager {
     }
 }
 
-object GroupManager {
+object PhotoProcessor {
+  val Key = ServiceKey[String]("photo-procesor-key") 
+  def apply(): Behavior[String] = Behaviors.ignore
+}
 
-  val serviceKey = ServiceKey[String]("group-manager-key")
+object Camera {
 
-  def apply() = Behaviors.setup[Int] { context =>
+  case class Photo(content: String) 
+
+  def apply() = Behaviors.setup[Photo] { context =>
 
     val routingBehavior: GroupRouter[String] =
-      Routers.group(serviceKey).withRoundRobinRouting()
+      Routers.group(PhotoProcessor.Key)
     val router: ActorRef[String] =
-      context.spawn(routingBehavior, "test-pool")
+      context.spawn(routingBehavior, "photo-processor-pool")
 
     Behaviors.receiveMessage {
-      case number =>
-        (0 to number).foreach { n =>
-          router ! "hi"
-        }
-        Behaviors.same
+      case Photo(content) =>
+          router ! content
+          Behaviors.same
     }
-
   }
 }
 // import java.security.MessageDigest

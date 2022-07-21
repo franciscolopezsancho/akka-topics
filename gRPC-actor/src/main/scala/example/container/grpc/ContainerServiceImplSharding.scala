@@ -22,18 +22,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
 class ContainerServiceImplSharding(
-    implicit system: ActorSystem[Nothing])
+    sharding: ClusterSharding)(
+    implicit val executionContext: ExecutionContext)
     extends ContainerService {
-
-  implicit val timeout: Timeout = 3.seconds
-  implicit val executionContext: ExecutionContext =
-    system.executionContext
-
-  val sharding = ClusterSharding(system)
-
-  val shardingRegion =
-    sharding.init(Entity(Container.TypeKey)(entityContext =>
-      Container(entityContext.entityId)))
 
   override def addCargo(in: CargoEntity): Future[AddedCargo] = {
     val container =
@@ -42,6 +33,9 @@ class ContainerServiceImplSharding(
     container ! Container.AddCargo(Container.Cargo(in.kind, in.size))
     Future.successful(AddedCargo(true))
   }
+
+
+  implicit val timeout: Timeout = 3.seconds
 
   override def getCargos(in: EntityId): Future[Cargos] = {
     val container =

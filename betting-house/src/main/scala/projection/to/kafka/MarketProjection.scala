@@ -40,7 +40,8 @@ object MarketProjection { //BPM
   def init(system: ActorSystem[_]): Unit = {
     val producer = createProducer(system)
     val topic =
-      system.settings.config.getString("kafka.bet-projection.topic")
+      system.settings.config
+        .getString("kafka.market-projection.topic")
 
     ShardedDaemonProcess(system).init(
       name = "MarketProjection",

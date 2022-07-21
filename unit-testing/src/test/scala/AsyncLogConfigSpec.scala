@@ -18,8 +18,8 @@ import com.typesafe.config.{ Config, ConfigFactory }
 class AsyncLogConfigSpec
     extends ScalaTestWithActorTestKit(
       ConfigFactory
-        .parseString("""app.prefix = "otherPrefix"""")
-        .withFallback(ConfigFactory.load("lifting")))
+        .parseString("""akka.es-entity.journal-enabled  = false""")
+        .withFallback(ConfigFactory.load("in-memory")))
     with AnyWordSpecLike
     with Matchers {
 
@@ -43,26 +43,27 @@ class AsyncLogConfigSpec
       }
     }
 
-    "log the prefix from conf when receiving message" in {
-      val prefix = testKit.system.settings.config
-        .getString("app.prefix")
-      val suffix = testKit.system.settings.config
-        .getString("app.suffix")
+    "lift one property from conf" in {
+      val inmemory = testKit.system.settings.config
+      val journalenabled =
+        inmemory.getString("akka.es-entity.journal-enabled")
+      val readjournal =
+        inmemory.getString("akka.es-entity.read-journal")
 
       val loggerBehavior: Behavior[String] = Behaviors.receive {
         (context, message) =>
           message match {
             case message: String =>
-              context.log.info(s"$prefix '$message' $suffix")
+              context.log.info(s"$journalenabled $readjournal")
               Behaviors.same
           }
       }
 
       val loggerActor = spawn(loggerBehavior)
-      val message = "hi"
+      val message = "anymessage"
 
       LoggingTestKit
-        .info(s"otherPrefix '$message' initialSuffix")
+        .info("false inmem-read-journal")
         .expect {
           loggerActor.ref ! message
         }

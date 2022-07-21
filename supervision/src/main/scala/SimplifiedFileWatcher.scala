@@ -6,13 +6,12 @@ import akka.actor.typed.{
 }
 import akka.actor.typed.scaladsl.{ Behaviors }
 
-object Watcher {
+object SimplifiedFileWatcher {
 
   sealed trait Command
   case class Watch(ref: ActorRef[String]) extends Command
 
-  def apply(
-      children: List[ActorRef[String]] = List()): Behavior[Command] =
+  def apply(): Behavior[Command] =
     Behaviors
       .receive[Command] { (context, message) =>
         message match {
@@ -22,7 +21,7 @@ object Watcher {
         }
       }
       .receiveSignal {
-        case (context, ChildFailed(ref)) => //unreachable
+        case (context, ChildFailed(ref)) => 
           context.log.info("childFailed")
           Behaviors.same
         case (context, Terminated(ref)) =>

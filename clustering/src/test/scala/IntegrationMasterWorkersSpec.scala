@@ -52,6 +52,16 @@ class WordsSampleSpec
             "simulates" -> 1,
             "simple" -> 1,
             "stream" -> 2)))
+      probe.expectMessage(Master.Tick)
+      probe.expectMessage(
+        Master.CountedWords(
+          Map(
+            "this" -> 1,
+            "a" -> 2,
+            "very" -> 1,
+            "simulates" -> 1,
+            "simple" -> 1,
+            "stream" -> 2)))
     }
   }
 }

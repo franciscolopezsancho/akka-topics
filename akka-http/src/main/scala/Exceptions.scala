@@ -38,12 +38,10 @@ object HttpServerExceptions {
       handleExceptions(exceptionHandler) {
         path("imfeelinglucky") {
           get {
-            (1 / Random
-              .nextInt(2)).toString
             complete(
               HttpEntity(
                 ContentTypes.`application/json`,
-                "exactly the site you wanted"))
+                "exactly the site you wanted " + (1 / Random.nextInt(2))))
           }
         }
       }

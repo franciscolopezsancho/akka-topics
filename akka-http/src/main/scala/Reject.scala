@@ -20,17 +20,11 @@ object HttpServerReject {
       path("ping") {
         concat(
           get {
-            complete(
-              HttpResponse(
-                200,
-                entity = HttpEntity(
-                  ContentTypes.`application/json`,
-                  "pong")))
+            complete("pong")
           },
           post {
-            reject(
-              MissingCookieRejection(
-                "to pong, you have to give me a cookie"))
+            println("fake storing op")
+            complete("ping stored")
           })
       }
 

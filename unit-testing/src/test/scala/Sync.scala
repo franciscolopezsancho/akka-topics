@@ -6,27 +6,29 @@ import akka.actor.testkit.typed.CapturedLogEvent
 import akka.actor.testkit.typed.Effect.{
   NoEffects,
   Scheduled,
-  Spawned
+  Spawned,
+  Stopped
 }
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.exceptions.TestFailedException
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.ActorRef
 import org.slf4j.event.Level
 import scala.concurrent.duration.DurationInt
 
-object SyncTestingExampleSpec {
+object SyncTestingSpec {
 
-  val dullActor = Behaviors.receiveMessage[String] { _ =>
-    Behaviors.same[String]
+  object SimplifiedWorker {
+    def apply() = Behaviors.ignore[String]
   }
 
-  object Hello {
+  object SimplifiedManager {
 
     sealed trait Command
-    case class Create(name: String) extends Command
-    case class Proxy(message: String, sendTo: ActorRef[String])
+    case class CreateChild(name: String) extends Command
+    case class Forward(message: String, sendTo: ActorRef[String])
         extends Command
     case object ScheduleLog extends Command
     case object Log extends Command
@@ -34,11 +36,11 @@ object SyncTestingExampleSpec {
     def apply(): Behaviors.Receive[Command] =
       Behaviors.receive { (context, message) =>
         message match {
-          case Create(name) =>
-            context.spawn(dullActor, name)
+          case CreateChild(name) =>
+            context.spawn(SimplifiedWorker(), name)
             Behaviors.same
-          case Proxy(message, sendTo) =>
-            sendTo ! s"processed$message"
+          case Forward(text, sendTo) =>
+            sendTo ! text
             Behaviors.same
           case ScheduleLog =>
             context.scheduleOnce(1.seconds, context.self, Log)
@@ -51,40 +53,41 @@ object SyncTestingExampleSpec {
   }
 }
 
-class SyncTestingExampleSpec extends AnyWordSpec with Matchers {
+class SyncTestingSpec extends AnyWordSpec with Matchers {
 
-  import SyncTestingExampleSpec._
+  import SyncTestingSpec._
 
   "Typed actor synchronous testing" must {
 
     "record spawning" in {
-      val testKit = BehaviorTestKit(Hello())
+      val testKit = BehaviorTestKit(SimplifiedManager())
       testKit.expectEffect(NoEffects)
-      testKit.run(Hello.Create("child"))
-      testKit.expectEffect(Spawned(dullActor, "child"))
+      testKit.run(SimplifiedManager.CreateChild("adan"))
+      testKit.expectEffect(Spawned(SimplifiedWorker(), "adan"))
     }
 
-    "child received a message" in {
-      val testKit = BehaviorTestKit(Hello())
+    "actor received a message" in {
+      val testKit = BehaviorTestKit(SimplifiedManager())
       val probe = TestInbox[String]()
-      testKit.run(Hello.Proxy("hello", probe.ref))
-      probe.expectMessage("processedhello")
+      testKit.run(
+        SimplifiedManager.Forward("message-to-parse", probe.ref))
+      probe.expectMessage("message-to-parse")
       probe.hasMessages shouldBe false
     }
 
     "record the log" in {
-      val testKit = BehaviorTestKit(Hello())
-      testKit.run(Hello.Log)
+      val testKit = BehaviorTestKit(SimplifiedManager())
+      testKit.run(SimplifiedManager.Log)
       testKit.logEntries() shouldBe Seq(
         CapturedLogEvent(Level.INFO, "it's done"))
     }
 
-    "failing to schedule a message" in {
+    "failing to schedule a message. BehaviorTestKit can't deal with scheduling" in {
       intercept[TestFailedException] {
-        val testKit = BehaviorTestKit(Hello())
-        testKit.run(Hello.ScheduleLog)
+        val testKit = BehaviorTestKit(SimplifiedManager())
+        testKit.run(SimplifiedManager.ScheduleLog)
         testKit.expectEffect(
-          Scheduled(1.seconds, testKit.ref, Hello.Log))
+          Scheduled(1.seconds, testKit.ref, SimplifiedManager.Log))
         testKit.logEntries() shouldBe Seq(
           CapturedLogEvent(Level.INFO, "it's done"))
       }

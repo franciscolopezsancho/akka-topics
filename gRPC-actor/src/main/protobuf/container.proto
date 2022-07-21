@@ -8,11 +8,9 @@ message CargoEntity {
 	string kind = 2;
 	int32 size = 3;
 }
-
 message AddedCargo {
 	bool ok = 1;
 }
-
 message	EntityId {
 	string entityId = 1;	
 }

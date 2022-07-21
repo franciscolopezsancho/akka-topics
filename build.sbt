@@ -16,6 +16,7 @@ lazy val `up-and-running` = project
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-actor" % AkkaVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
@@ -55,6 +56,21 @@ lazy val `discovery-routers` = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
+lazy val `clustering-primitives` = project
+  .in(file("clustering-primitives"))
+  .settings(
+    scalaVersion := ScalaVersion,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,         
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.lightbend.akka.management" %% "akka-management" % AkkaManagementVersion,
+      "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
+      "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-discovery" % AkkaVersion
+
+    ),
+  )
+
 lazy val clustering = project
   .in(file("clustering"))
   .settings(
@@ -67,8 +83,9 @@ lazy val clustering = project
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
       "com.lightbend.akka.management" %% "akka-management" % AkkaManagementVersion,
       "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
-      "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-      "org.scalatest" %% "scalatest" % ScalaTest % Test,
+    "com.typesafe.akka" %% "akka-cluster-sharding" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-discovery" % AkkaVersion, 
+           "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ),
   )
 

@@ -1,3 +1,0 @@
-package stashing
-
-object Stasher {}

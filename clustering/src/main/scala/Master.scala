@@ -36,7 +36,7 @@ object Master {
 
       Behaviors.receiveMessage[Event] {
         case Tick =>
-          context.log.debug(s"receiving, current lag ${lag.size} ")
+          context.log.debug(s"tick, current lag ${lag.size} ")
 
           val text = "this simulates a stream, a very simple stream"
           val allTexts = lag :+ text
@@ -45,7 +45,7 @@ object Master {
           firstPart.map { text =>
             context.ask(workersRouter, Worker.Process(text, _)) {
               case Success(CountedWords(map)) =>
-                CountedWords(map) //weird
+                CountedWords(map) 
               case Failure(ex) =>
                 FailedJob(text)
             }

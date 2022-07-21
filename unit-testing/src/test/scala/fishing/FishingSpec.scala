@@ -44,6 +44,42 @@ class FishingSpec
       probe.expectNoMessage(interval + 100.millis.dilated)
     }
   }
+
+  "a monitor" must {
+
+    "intercept the messages" in {
+
+      val probe = createTestProbe[String]
+      val behavior = Behaviors.receiveMessage[String] { _ =>
+        Behaviors.ignore
+      }
+      val behaviorMonitored = Behaviors.monitor(probe.ref, behavior)
+      val actor = spawn(behaviorMonitored)
+
+      actor ! "checking"
+      probe.expectMessage("checking")
+
+    }
+  }
+
+  "An automated resuming counter" must {
+
+    "receive a resume after a pause" in {
+      val probe = createTestProbe[CounterTimer.Command]()
+      val counterMonitored =
+        Behaviors.monitor(probe.ref, CounterTimer())
+      val counter = spawn(counterMonitored)
+
+      counter ! CounterTimer.Pause(1)
+      probe.fishForMessage(3.seconds) {
+        case CounterTimer.Increase =>
+          FishingOutcomes.continueAndIgnore
+        case CounterTimer.Pause(_) =>
+          FishingOutcomes.continueAndIgnore
+        case CounterTimer.Resume => FishingOutcomes.complete
+      }
+    }
+  }
 }
 
 object Receiver {

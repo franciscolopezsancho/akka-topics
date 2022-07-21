@@ -40,7 +40,7 @@ object ConsumerTwo {
     val drainingControl: DrainingControl[_] = Consumer
       .committableSource(
         consumerSettings,
-        Subscriptions.topics("test"))
+        Subscriptions.topics("test2"))
       .map { msg: CommittableMessage[String, String] =>
         println(
           s"${msg.record.key} => ${msg.record.value.toUpperCase}")

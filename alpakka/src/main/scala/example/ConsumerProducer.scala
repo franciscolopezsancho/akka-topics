@@ -60,12 +60,12 @@ object ConsumerProducer {
     val drainingControl: Consumer.DrainingControl[_] = Consumer
       .committableSource(
         consumerSettings,
-        Subscriptions.topics("test")
+        Subscriptions.topics("test3")
       ) //we don't need commiter settings
       .map { msg: CommittableMessage[String, String] =>
         ProducerMessage.single(
           new ProducerRecord[String, String](
-            "test2",
+            "test4",
             msg.record.key,
             msg.record.value),
           msg.committableOffset)

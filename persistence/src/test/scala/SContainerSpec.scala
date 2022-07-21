@@ -29,7 +29,7 @@ import akka.cluster.sharding.typed.scaladsl.{
 }
 import akka.cluster.sharding.typed.ShardingEnvelope
 
-class SContainerSpec
+class SPContainerSpec
     extends ScalaTestWithActorTestKit(
       EventSourcedBehaviorTestKit.config.withFallback(
         ConfigFactory.load("application-test")))
@@ -43,23 +43,23 @@ class SContainerSpec
       val sharding = ClusterSharding(system)
 
       val shardRegion
-          : ActorRef[ShardingEnvelope[SContainer.Command]] =
+          : ActorRef[ShardingEnvelope[SPContainer.Command]] =
         sharding.init(
-          Entity(SContainer.TypeKey)(createBehavior = entityContext =>
-            SContainer(entityContext.entityId)))
+          Entity(SPContainer.TypeKey)(createBehavior = entityContext =>
+            SPContainer(entityContext.entityId)))
 
       val containerId = "id-1"
-      val cargo = SContainer.Cargo("id-c", "sack", 3)
+      val cargo = SPContainer.Cargo("id-c", "sack", 3)
 
       shardRegion ! ShardingEnvelope(
         containerId,
-        SContainer.AddCargo(cargo))
+        SPContainer.AddCargo(cargo))
 
       val probe =
-        createTestProbe[List[SContainer.Cargo]]()
-      val container: EntityRef[SContainer.Command] =
-        sharding.entityRefFor(SContainer.TypeKey, containerId)
-      container ! SContainer.GetCargos(probe.ref)
+        createTestProbe[List[SPContainer.Cargo]]()
+      val container: EntityRef[SPContainer.Command] =
+        sharding.entityRefFor(SPContainer.TypeKey, containerId)
+      container ! SPContainer.GetCargos(probe.ref)
 
       probe.expectMessage(List(cargo))
 
@@ -71,43 +71,43 @@ class SContainerSpec
   //     val sharding = ClusterSharding(system)
 
   //     val shardRegion: ActorRef[
-  //       ShardingEnvelope[SContainerFSM.Command]] =
+  //       ShardingEnvelope[SPContainerFSM.Command]] =
   //       sharding.init(
-  //         Entity(SContainerFSM.TypeKey)(createBehavior =
+  //         Entity(SPContainerFSM.TypeKey)(createBehavior =
   //           entityContext =>
-  //             SContainerFSM(entityContext.entityId)))
+  //             SPContainerFSM(entityContext.entityId)))
 
   //     val containerId = "id-2"
   //     val parcelCode = "ABC"
 
   //     shardRegion ! ShardingEnvelope(
   //       containerId,
-  //       SContainerFSM.Clean)
+  //       SPContainerFSM.Clean)
 
   //     shardRegion ! ShardingEnvelope(
   //       containerId,
-  //       SContainerFSM.AddParcel(parcelCode))
+  //       SPContainerFSM.AddParcel(parcelCode))
 
   //     shardRegion ! ShardingEnvelope(
   //       containerId,
-  //       SContainerFSM.AddParcel(parcelCode))
+  //       SPContainerFSM.AddParcel(parcelCode))
 
   //     val probe = createTestProbe[List[String]]()
-  //     val truck: EntityRef[SContainerFSM.Command] =
+  //     val truck: EntityRef[SPContainerFSM.Command] =
   //       sharding.entityRefFor(
-  //         SContainerFSM.TypeKey,
+  //         SPContainerFSM.TypeKey,
   //         containerId)
-  //     truck ! SContainerFSM.GetParcels(probe.ref)
+  //     truck ! SPContainerFSM.GetParcels(probe.ref)
 
   //     probe.expectMessage(List("no parcels, we're cleaning"))
 
   //   }
   // }
 }
-// object SContainerFSM {
+// object SPContainerFSM {
 
 //   val TypeKey =
-//     EntityTypeKey[SContainerFSM.Command](
+//     EntityTypeKey[SPContainerFSM.Command](
 //       "vehicle-type-key")
 
 //   sealed trait Command

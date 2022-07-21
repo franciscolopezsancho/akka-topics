@@ -2,10 +2,8 @@ syntax = "proto3";
 
 option java_package = "example.locator.grpc";
 option java_outer_classname = "LocatorProto";
+import "google/protobuf/empty.proto";
 
-message IoT {
-	string id = 1;
-}
 
 message Location {
 	double lat = 1;
@@ -14,5 +12,5 @@ message Location {
 
 service LocatorService {
 
-	rpc  Follow(IoT) returns (stream Location) {}
+	rpc  Follow(google.protobuf.Empty) returns (stream Location) {}
 } 

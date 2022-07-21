@@ -29,7 +29,7 @@ object Counter {
               s"I'm overloaded. Counting '$current' while max is '$max")
             Behaviors.stopped
           } else {
-            this
+            this //same as Behaviors.same
           }
       }
   }

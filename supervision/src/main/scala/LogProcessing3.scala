@@ -49,7 +49,7 @@ object LogProcessingGuardian {
       }
 }
 
-object FileWatcher extends FileWatchingAbilities {
+object FileWatcher extends FileListeningAbilities {
 
   sealed trait Command
   case class NewFile(file: File, timeAdded: Long) extends Command
@@ -84,7 +84,10 @@ object FileWatcher extends FileWatchingAbilities {
 }
 
 //provides File watching API
-trait FileWatchingAbilities
+trait FileListeningAbilities {
+
+  def register(uri: String) = ???
+}
 
 object LogProcessor {
 

@@ -1,6 +1,7 @@
 package async
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
+import akka.actor.testkit.typed.scaladsl.LoggingTestKit
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -30,6 +31,18 @@ class AsyncTestingExampleSpec
       probe.expectMessage(new String(encoded))
 
     }
+  }
+  "a Simplified Manager" must {
+
+    "actor received a message" in {
+      val manager = testKit.spawn(SimplifiedManager())
+      val probe = testKit.createTestProbe[String]()
+      manager ! SimplifiedManager.Forward(
+        "message-to-parse",
+        probe.ref)
+      probe.expectMessage("message-to-parse")
+    }
+
   }
 
   "A Counter" must {
@@ -65,6 +78,7 @@ class AsyncTestingExampleSpec
       reader.expectMessage(Reader.Read("hello"))
     }
   }
+
 }
 
 import java.util.Base64
@@ -170,4 +184,29 @@ object Reader {
           Behaviors.stopped
       }
   }
+}
+
+object SimplifiedManager {
+
+  sealed trait Command
+  case class CreateChild(name: String) extends Command
+  case class Forward(message: String, sendTo: ActorRef[String])
+      extends Command
+  case object ScheduleLog extends Command
+  case object Log extends Command
+
+  def apply(): Behaviors.Receive[Command] =
+    Behaviors.receive { (context, message) =>
+      message match {
+        case Forward(text, sendTo) =>
+          sendTo ! text
+          Behaviors.same
+        case ScheduleLog =>
+          context.scheduleOnce(1.seconds, context.self, Log)
+          Behaviors.same
+        case Log =>
+          context.log.info(s"it's done")
+          Behaviors.same
+      }
+    }
 }

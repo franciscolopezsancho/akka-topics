@@ -41,13 +41,13 @@ object Main {
   }
 
   def init(system: ActorSystem[_])
-      : ActorRef[ShardingEnvelope[SContainer.Command]] = {
+      : ActorRef[ShardingEnvelope[SPContainer.Command]] = {
     val sharding = ClusterSharding(system)
 
-    val shardRegion: ActorRef[ShardingEnvelope[SContainer.Command]] =
+    val shardRegion: ActorRef[ShardingEnvelope[SPContainer.Command]] =
       sharding.init(
-        Entity(SContainer.TypeKey)(createBehavior = entityContext =>
-          SContainer(entityContext.entityId)))
+        Entity(SPContainer.TypeKey)(createBehavior = entityContext =>
+          SPContainer(entityContext.entityId)))
 
     shardRegion
 
@@ -56,7 +56,7 @@ object Main {
   @tailrec
   private def commandLoop(
       system: ActorSystem[_],
-      shardRegion: ActorRef[ShardingEnvelope[SContainer.Command]])
+      shardRegion: ActorRef[ShardingEnvelope[SPContainer.Command]])
       : Unit = {
 
     print("please write:")
@@ -73,8 +73,8 @@ object Main {
             cargoSize) =>
           shardRegion ! ShardingEnvelope(
             containerId,
-            SContainer.AddCargo(
-              SContainer.Cargo(cargoId, cargoKind, cargoSize)))
+            SPContainer.AddCargo(
+              SPContainer.Cargo(cargoId, cargoKind, cargoSize)))
 
           commandLoop(system, shardRegion)
         case Command.Unknown(command) =>

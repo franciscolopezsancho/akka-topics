@@ -67,12 +67,12 @@ object EffectivelyOnce {
       Transactional
         .source(
           consumerSettings,
-          Subscriptions.topics("test")
+          Subscriptions.topics("test5")
         ) //we don't need commiter settings
         .map { msg: TransactionalMessage[String, String] =>
           ProducerMessage.single(
             new ProducerRecord[String, String](
-              "test2",
+              "test6",
               msg.record.key,
               msg.record.value),
             msg.partitionOffset)

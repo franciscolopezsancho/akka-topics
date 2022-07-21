@@ -5,24 +5,28 @@ import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
 
 object ErrorKernelApp extends App {
 
-  val system: ActorSystem[Guardian.Command] =
+  val guardian: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "error-kernel")
-  system ! Guardian.Start(List("one", "two"))
+  guardian ! Guardian.Start(List("-one-", "--two--"))
+
+  println("press ENTER to terminate")
+  scala.io.StdIn.readLine()
+  guardian.terminate()
 }
 
 object Guardian {
 
   sealed trait Command
-  case class Start(tasks: List[String]) extends Command
+  case class Start(texts: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
-      context.log.info("setting up")
+      context.log.info("setting up. Creating manager")
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-alpha")
       Behaviors.receiveMessage {
-        case Start(tasks) =>
-          manager ! Manager.Delegate(tasks)
+        case Start(texts) =>
+          manager ! Manager.Delegate(texts)
           Behaviors.same
       }
     }
@@ -31,8 +35,7 @@ object Guardian {
 object Manager {
 
   sealed trait Command
-  final case class Delegate(tasks: List[String]) extends Command
-  final case class Report(task: String)
+  final case class Delegate(texts: List[String]) extends Command
   private case class WorkerDoneAdapter(response: Worker.Response)
       extends Command
 
@@ -43,16 +46,16 @@ object Manager {
 
       Behaviors.receiveMessage { message =>
         message match {
-          case Delegate(tasks) =>
-            tasks.map { task =>
+          case Delegate(texts) =>
+            texts.map { text =>
               val worker: ActorRef[Worker.Command] =
-                context.spawn(Worker(), s"worker-$task")
-              context.log.info(s"sending task '$task' to $worker")
-              worker ! Worker.Do(adapter, task)
+                context.spawn(Worker(), s"worker$text")
+              context.log.info(s"sending text '${text}' to worker")
+              worker ! Worker.Parse(adapter, text)
             }
             Behaviors.same
-          case WorkerDoneAdapter(Worker.Done(task)) =>
-            context.log.info(s"task '$task' has been finished")
+          case WorkerDoneAdapter(Worker.Done(text)) =>
+            context.log.info(s"text '$text' has been finished")
             Behaviors.same
         }
       }
@@ -62,22 +65,27 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  final case class Do(
+  final case class Parse(
       replyTo: ActorRef[Worker.Response],
-      task: String)
+      text: String)
       extends Command
 
   sealed trait Response
-  final case class Done(task: String) extends Response
+  final case class Done(text: String) extends Response
 
   def apply(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Do(replyTo, task) =>
+        case Parse(replyTo, text) =>
+          val parsed = naiveParsing(text)
           context.log.info(
-            s"'${context.self.path}'. Done with '$task'")
-          replyTo ! Worker.Done(task)
+            s"'${context.self}' DONE!. Parsed result: $parsed")
+          replyTo ! Worker.Done(text)
           Behaviors.stopped
       }
     }
+
+  def naiveParsing(text: String): String =
+    text.replaceAll("-", "")
+
 }

@@ -19,28 +19,28 @@ class MonitoringExampleSpec
 
   "Among two actors, NO parent/child related, the watcher" must {
     "be able to be notified with Terminated when watched actor stops" in {
-      val watcher = spawn(Watcher())
-      val behavior = spawn(Behaviors.receiveMessagePartial[String] {
+      val watcher = spawn(SimplifiedFileWatcher())
+      val logprocessor  = spawn(Behaviors.receiveMessagePartial[String] {
         case "stop" =>
           Behaviors.stopped
       })
 
-      watcher.ref ! Watcher.Watch(behavior.ref)
+      watcher.ref ! SimplifiedFileWatcher.Watch(logprocessor .ref)
 
       LoggingTestKit.info("terminated").expect {
-        behavior ! "stop"
+        logprocessor  ! "stop"
       }
     }
     "be able to watch a non child failing actor but only getting Terminated" in {
-      val watcher = spawn(Watcher())
+      val watcher = spawn(SimplifiedFileWatcher())
       val behavior = spawn(Behaviors.receiveMessagePartial[String] {
         case "exception" =>
           throw new IllegalStateException()
       })
 
-      watcher.ref ! Watcher.Watch(behavior.ref)
+      watcher.ref ! SimplifiedFileWatcher.Watch(behavior.ref)
 
-      LoggingTestKit.info("terminated").expect {
+      LoggingTestKit.info("childFAiled").expect {
         behavior ! "exception"
       }
     }
