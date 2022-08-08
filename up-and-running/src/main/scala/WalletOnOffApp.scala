@@ -6,7 +6,7 @@ import akka.actor.typed.scaladsl.Behaviors
 object WalletOnOff {
 
   sealed trait Command
-  final case class Increase(dollars: Int) extends Command
+  final case class Increase(currency: Int) extends Command
   final case object Deactivate extends Command
   final case object Activate extends Command
 
@@ -16,8 +16,8 @@ object WalletOnOff {
   def activated(total: Int): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Increase(dollars) =>
-          val current = total + dollars
+        case Increase(currency) =>
+          val current = total + currency
           context.log.info(s"increasing to $current")
           activated(current)
         case Deactivate =>
@@ -30,7 +30,7 @@ object WalletOnOff {
   def deactivated(total: Int): Behavior[Command] = {
     Behaviors.receive { (context, message) =>
       message match {
-        case Increase =>
+        case Increase(_) =>
           context.log.info(s"wallet is deactivated. Can't increase")
           Behaviors.same
         case Deactivate =>
@@ -45,13 +45,13 @@ object WalletOnOff {
 
 object WalletOnOffApp extends App {
 
-  val guardian: ActorSystem[WalletActivate.Command] =
-    ActorSystem(WalletActivate(), "wallet-on-off")
-  guardian ! WalletActivate.Increase(1)
-  guardian ! WalletActivate.Deactivate
-  guardian ! WalletActivate.Increase(1)
-  guardian ! WalletActivate.Activate
-  guardian ! WalletActivate.Increase(1)
+  val guardian: ActorSystem[WalletOnOff.Command] =
+    ActorSystem(WalletOnOff(), "wallet-on-off")
+  guardian ! WalletOnOff.Increase(1)
+  guardian ! WalletOnOff.Deactivate
+  guardian ! WalletOnOff.Increase(1)
+  guardian ! WalletOnOff.Activate
+  guardian ! WalletOnOff.Increase(1)
 
   println("Press ENTER to terminate")
   scala.io.StdIn.readLine()

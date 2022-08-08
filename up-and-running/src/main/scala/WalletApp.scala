@@ -18,7 +18,7 @@ object WalletApp extends App {
 
 object Wallet {
 
-  def apply(): Behavior.Receive[String] =
+  def apply(): Behavior[Int] =
     Behaviors.receive { (context, message) =>
       context.log.info(s"received '$message' dollar(s)")
       Behaviors.same

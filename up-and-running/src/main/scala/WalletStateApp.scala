@@ -6,14 +6,14 @@ import akka.actor.typed.scaladsl.Behaviors
 object WalletState {
 
   sealed trait Command
-  final case class Increase(dollars: Int) extends Command
-  final case class Decrease(dollars: Int) extends Command
+  final case class Increase(currency: Int) extends Command
+  final case class Decrease(currency: Int) extends Command
 
   def apply(count: Int, max: Int): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Increase(dollars) =>
-          val current = count + dollars
+        case Increase(currency) =>
+          val current = count + currency
           if (current <= max) {
             context.log.info(s"increasing to $current")
             apply(current, max)
@@ -22,8 +22,8 @@ object WalletState {
               s"I'm overloaded. Counting '$current' while max is '$max. Stopping")
             Behaviors.stopped
           }
-        case Decrease(dollars) =>
-          val current = count - dollars
+        case Decrease(currency) =>
+          val current = count - currency
           if (current < 0) {
             context.log.info("Can't run below zero. Stopping.")
             Behaviors.stopped
