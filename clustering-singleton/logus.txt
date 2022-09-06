@@ -1,4 +1,0 @@
-NAME                                 READY   STATUS    RESTARTS   AGE
-testing-singleton-5cb6565cbf-2ssvb   0/1     Running   0          23s
-testing-singleton-5cb6565cbf-2tctc   0/1     Running   0          23s
-testing-singleton-5cb6565cbf-b22cs   0/1     Running   0          23s

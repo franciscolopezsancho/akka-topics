@@ -19,7 +19,7 @@ import example.repository.scalike.{
   ScalikeJdbcSession
 }
 
-import example.persistence.SContainer
+import example.persistence.SPContainer
 
 object CargosPerContainerProjection {
 
@@ -31,12 +31,12 @@ object CargosPerContainerProjection {
       repository: CargosPerContainerRepository,
       indexTag: Int): ExactlyOnceProjection[
     Offset,
-    EventEnvelope[SContainer.Event]] = {
+    EventEnvelope[SPContainer.Event]] = {
 
     val tag = "container-tag-" + indexTag
 
     val sourceProvider =
-      EventSourcedProvider.eventsByTag[SContainer.Event](
+      EventSourcedProvider.eventsByTag[SPContainer.Event](
         system = system,
         readJournalPluginId = JdbcReadJournal.Identifier,
         tag = tag)
@@ -52,16 +52,16 @@ object CargosPerContainerProjection {
 
 class CPCProjectionHandler(repository: CargosPerContainerRepository)
     extends JdbcHandler[
-      EventEnvelope[SContainer.Event],
+      EventEnvelope[SPContainer.Event],
       ScalikeJdbcSession] {
 
   val logger = LoggerFactory.getLogger(classOf[CPCProjectionHandler])
 
   override def process(
       session: ScalikeJdbcSession,
-      envelope: EventEnvelope[SContainer.Event]): Unit = {
+      envelope: EventEnvelope[SPContainer.Event]): Unit = {
     envelope.event match {
-      case SContainer.CargoAdded(containerId, cargo) =>
+      case SPContainer.CargoAdded(containerId, cargo) =>
         repository.addCargo(containerId, session)
       case x =>
         logger.debug("ignoring event {} in projection", x)

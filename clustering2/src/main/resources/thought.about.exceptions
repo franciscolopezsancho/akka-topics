@@ -1,0 +1,29 @@
+The basics
+
+ Don't forget finally or try-with-resource to avoid leaks 
+ 
+ Don't forget to chain exceptions to keep the trace. Taking the getCause of the initial Exception to the `Trowable cause` of the following one. 
+
+ Create your own business exceptions
+
+ Don't swallow, nor log and rethrow exception and don't nest try/catch
+
+Problems
+
+	Exceptions Behave like GOTO 
+	When running in different threads causes can't be chained directly. You need handler for that.
+
+	Performance wise are  expensive- the bigger the trace to more expensive is to pass it through. To instante them you need to collect the stach trace. They block the thread to recollect frames. 
+
+	See performance here :http://normanmaurer.me/blog/2013/11/09/The-hidden-performance-costs-of-instantiating-Throwables/
+
+
+Recommendation
+
+	Better follow functional approaches where exceptions are just a normal part of the flow. Where they are far from Exceptional. 
+		You can do this with libraries mainstream like vavr-io where you can do something like
+ 
+ 			from : List<User> getUsers(String like) throws IOException
+ 			to: Try<List<User>> getUsers(String like) 
+
+
