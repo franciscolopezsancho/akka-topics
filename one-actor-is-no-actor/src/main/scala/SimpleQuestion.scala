@@ -1,4 +1,4 @@
-package ask.simple
+package ask
 
 import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
@@ -76,7 +76,7 @@ object Worker {
       message match {
         case Parse(replyTo) =>
           fakeLengthyParsing(text)
-          prettyParse(context, "DONE!")
+          prettyPrint(context, "DONE!")
           replyTo ! Worker.Done
           Behaviors.same
       }
@@ -88,7 +88,7 @@ object Worker {
     while (endTime > System.currentTimeMillis) {}
   }
 
-  def prettyParse(context: ActorContext[_], message: String): Unit = {
+  def prettyPrint(context: ActorContext[_], message: String): Unit = {
     context.log.info(s"${context.self.path.name}: $message")
   }
 }

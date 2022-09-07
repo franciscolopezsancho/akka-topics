@@ -22,6 +22,21 @@ lazy val `up-and-running` = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
       )
     )
+
+lazy val `one-actor-is-no-actor` = project
+  .in(file("one-actor-is-no-actor"))
+  .settings(
+    scalaVersion := ScalaVersion,
+    scalafmtOnCompile := true,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-actor" % AkkaVersion,
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
+      )
+    )
+
 lazy val `unit-testing` = project
   .in(file("unit-testing"))
   .settings(
