@@ -1,4 +1,4 @@
-val AkkaVersion = "2.6.18"
+val AkkaVersion = "2.6.20"
 val LogbackVersion = "1.2.3"
 val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
@@ -9,8 +9,8 @@ val AkkaGRPC = "2.0.0"
 val ScalaTest = "3.1.4"
 val JacksonVersion = "2.11.4" 
 
-lazy val `up-and-running` = project
-  .in(file("up-and-running"))
+lazy val chapter02 = project
+  .in(file("chapter02"))
   .settings(
     scalaVersion := ScalaVersion,
     scalafmtOnCompile := true,
@@ -23,8 +23,8 @@ lazy val `up-and-running` = project
       )
     )
 
-lazy val `one-actor-is-no-actor` = project
-  .in(file("one-actor-is-no-actor"))
+lazy val chapter03 = project
+  .in(file("chapter03"))
   .settings(
     scalaVersion := ScalaVersion,
     scalafmtOnCompile := true,

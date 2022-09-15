@@ -1,4 +1,4 @@
-package state
+package com.manning
 
 import akka.actor.typed.{ ActorSystem, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
