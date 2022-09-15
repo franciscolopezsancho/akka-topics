@@ -37,8 +37,8 @@ lazy val chapter03 = project
       )
     )
 
-lazy val `akka-test-kit` = project
-  .in(file("akka-test-kit"))
+lazy val chapter04 = project
+  .in(file("chapter04"))
   .settings(
     scalaVersion := ScalaVersion,
         scalafmtOnCompile := true,

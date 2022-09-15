@@ -30,28 +30,17 @@ class AsyncTestingSpec
     }
   }
 
-  "a Simplified Manager" must {
-
-    "be able to log 'it's done'" in {
-      val manager = testKit.spawn(SimplifiedManager(), "manager")
-
-      LoggingTestKit.info("it's done").expect {
-        manager ! SimplifiedManager.Log
-      }
-    }
-  }
-
   "a monitor" must {
 
     "intercept the messages" in {
 
-      val probe = createTestProbe[String]
+      val probe = testKit.createTestProbe[String]
       val behaviorUnderTest = Behaviors.receiveMessage[String] { _ =>
         Behaviors.ignore
       }
       val behaviorMonitored =
         Behaviors.monitor(probe.ref, behaviorUnderTest)
-      val actor = testkit.spawn(behaviorMonitored)
+      val actor = testKit.spawn(behaviorMonitored)
 
       actor ! "checking"
       probe.expectMessage("checking")
@@ -63,19 +52,14 @@ class AsyncTestingSpec
 object SimplifiedManager {
 
   sealed trait Command
-  case class CreateChild(name: String) extends Command
   case class Forward(message: String, sendTo: ActorRef[String])
       extends Command
-  case object Log extends Command
 
   def apply(): Behaviors.Receive[Command] =
     Behaviors.receive { (context, message) =>
       message match {
         case Forward(text, sendTo) =>
           sendTo ! text
-          Behaviors.same
-        case Log =>
-          context.log.info(s"it's done")
           Behaviors.same
       }
     }

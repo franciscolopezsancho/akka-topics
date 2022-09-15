@@ -12,26 +12,21 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 import scala.concurrent.duration._
 
+import org.slf4j.event.Level
+
 class AsyncLogSpec
     extends ScalaTestWithActorTestKit
     with AnyWordSpecLike
     with Matchers {
 
-  "a monitor" must {
+  "a Simplified Manager" must {
 
-    "intercept the messages" in {
+    "be able to log 'it's done'" in {
+      val manager = testKit.spawn(SimplifiedManager(), "manager")
 
-      val probe = createTestProbe[String]
-      val behaviorUnderTest = Behaviors.receiveMessage[String] { _ =>
-        Behaviors.ignore
+      LoggingTestKit.info("it's done").expect {
+        manager ! SimplifiedManager.Log
       }
-      val behaviorMonitored =
-        Behaviors.monitor(probe.ref, behaviorUnderTest)
-      val actor = testkit.spawn(behaviorMonitored)
-
-      actor ! "checking"
-      probe.expectMessage("checking")
-
     }
   }
 
