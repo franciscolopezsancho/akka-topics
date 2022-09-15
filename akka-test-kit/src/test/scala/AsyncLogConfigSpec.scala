@@ -69,22 +69,5 @@ class AsyncLogConfigSpec
         }
     }
 
-    "log messages to dead letters" in {
-
-      val behavior: Behavior[String] =
-        Behaviors.stopped
-
-      val carl = spawn(behavior, "carl")
-
-      LoggingTestKit.empty
-        .withLogLevel(Level.INFO)
-        .withMessageRegex(
-          ".*Message.*to.*carl.*was not delivered.*2.*dead letters encountered")
-        .expect {
-          carl ! "Hello"
-          carl ! "Hello"
-        }
-    }
-
   }
 }

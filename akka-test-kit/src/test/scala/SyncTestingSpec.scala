@@ -66,7 +66,7 @@ class SyncTestingSpec extends AnyWordSpec with Matchers {
       testKit.expectEffect(Spawned(SimplifiedWorker(), "adan"))
     }
 
-    "actor received a message" in {
+    "actor gets forwarded message from manager" in {
       val testKit = BehaviorTestKit(SimplifiedManager())
       val probe = TestInbox[String]()
       testKit.run(

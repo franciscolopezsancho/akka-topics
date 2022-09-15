@@ -37,8 +37,8 @@ lazy val `one-actor-is-no-actor` = project
       )
     )
 
-lazy val `unit-testing` = project
-  .in(file("unit-testing"))
+lazy val `akka-test-kit` = project
+  .in(file("akka-test-kit"))
   .settings(
     scalaVersion := ScalaVersion,
         scalafmtOnCompile := true,
