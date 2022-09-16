@@ -60,8 +60,8 @@ lazy val chapter05 = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
-lazy val `discovery-routers` = project
-  .in(file("discovery-routers"))
+lazy val chapter06 = project
+  .in(file("chapter06"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
