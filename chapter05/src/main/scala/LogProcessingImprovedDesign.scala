@@ -1,4 +1,5 @@
-package aia.faulttolerance3
+package faulttolerance3
+//SECOND DESIGN. Figure 5.13 and 5.14
 
 import java.io.File
 import akka.actor.typed.scaladsl.{ Behaviors }

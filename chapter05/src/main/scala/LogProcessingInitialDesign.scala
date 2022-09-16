@@ -1,4 +1,5 @@
-package aia.faulttolerance2
+package faulttolerance2
+//INITIAL DESIGN. Figures 5.11 and 5.12
 
 import java.io.File
 import java.util.UUID

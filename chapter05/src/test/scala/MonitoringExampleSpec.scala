@@ -31,20 +31,6 @@ class MonitoringExampleSpec
         logprocessor  ! "stop"
       }
     }
-    "be able to watch a non child failing actor but only getting Terminated" in {
-      val watcher = spawn(SimplifiedFileWatcher())
-      val behavior = spawn(Behaviors.receiveMessagePartial[String] {
-        case "exception" =>
-          throw new IllegalStateException()
-      })
-
-      watcher.ref ! SimplifiedFileWatcher.Watch(behavior.ref)
-
-      LoggingTestKit.info("childFAiled").expect {
-        behavior ! "exception"
-      }
-    }
-
   }
 
   "Among two actors, parent/child related, the watcher " must {

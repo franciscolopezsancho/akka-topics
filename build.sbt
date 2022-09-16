@@ -49,8 +49,8 @@ lazy val chapter04 = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
-lazy val supervision = project
-  .in(file("supervision"))
+lazy val chapter05 = project
+  .in(file("chapter05"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
