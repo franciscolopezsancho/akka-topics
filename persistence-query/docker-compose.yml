@@ -1,9 +1,0 @@
-version: '2.2'
-services:
-  postgres-containers-db:
-    image: postgres:latest
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_USER: containers
-      POSTGRES_PASSWORD: containers

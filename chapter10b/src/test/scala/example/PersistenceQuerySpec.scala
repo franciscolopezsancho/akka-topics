@@ -18,7 +18,7 @@ import akka.NotUsed
 import akka.stream.testkit.scaladsl.{ TestSink }
 import akka.stream.testkit.TestSubscriber
 
-import example.persistence.SContainer
+import example.persistence.SPContainer
 
 class PersistenceQuerySpec
     extends ScalaTestWithActorTestKit
@@ -69,11 +69,20 @@ class PersistenceQuerySpec
       val s = probe.expectSubscription
       s.request(3)
       probe.expectNextUnordered(
-        "scontainer-type-key|9",
-        "scontainer-type-key|11")
+        "spcontainer-type-key|9",
+        "spcontainer-type-key|11")
 
     }
   }
+  //Bear in mind this test depends on the order you
+  // entered the items when following chapter09b/README.md 
+  // plus comparing to EventEnvelope is done with the following:
+      //  override def equals(obj: Any): Boolean = obj match {
+      //   case other: EventEnvelope =>
+      //     offset == other.offset && persistenceId == other.persistenceId && sequenceNr == other.sequenceNr &&
+      //     event == other.event // timestamp && metadata not included in equals for backwards compatibility
+      //   case _ => false
+      //  }
 
   "a persistence query" should {
     "retrieve the data from db by tag" in {
@@ -92,24 +101,22 @@ class PersistenceQuerySpec
         source.toMat(consumer)(Keep.right).run
 
       val s = probe.expectSubscription
-      s.request(1)
-      val c = SContainer.Cargo("1", "2", 3)
-
+      s.request(2)
       probe.expectNextUnordered(
         new EventEnvelope(
           akka.persistence.query.Sequence(1),
-          "scontainer-type-key|9",
+          "spcontainer-type-key|9",
           1L,
-          SContainer
-            .CargoAdded("9", SContainer.Cargo("456", "sack", 22)),
-          1622299422183L),
+          SPContainer
+            .CargoAdded("9", SPContainer.Cargo("456", "sack", 22)),
+          0L),
         new EventEnvelope(
-          akka.persistence.query.Sequence(1),
-          "scontainer-type-key|9",
-          1L,
-          SContainer
-            .CargoAdded("9", SContainer.Cargo("456", "sack", 22)),
-          1622299422183L))
+          akka.persistence.query.Sequence(2),
+          "spcontainer-type-key|9",
+          2L,
+          SPContainer
+            .CargoAdded("9", SPContainer.Cargo("459", "bigbag", 15)),
+          0L))
 
     }
   }

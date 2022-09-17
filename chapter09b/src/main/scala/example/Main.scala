@@ -25,7 +25,6 @@ import example.persistence.CommandLine.Command
 
 object Main {
 
-  //write
   val logger = LoggerFactory.getLogger(Main.getClass)
 
   def main(args: Array[String]): Unit = {

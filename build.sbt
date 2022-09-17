@@ -157,8 +157,8 @@ lazy val chapter09b = project
     )
   )
 
-lazy val projections = project
-  .in(file("projections"))
+lazy val chapter10c = project
+  .in(file("chapter10c"))
   .dependsOn(chapter09b)
   .settings(
     scalaVersion := ScalaVersion,
@@ -190,8 +190,8 @@ lazy val projections = project
     )
   )
 
-lazy val `akka-streams-one` = project
-    .in(file("akka-streams-one")) 
+lazy val chapter10a = project
+    .in(file("chapter10a")) 
     .settings(
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
@@ -201,8 +201,8 @@ lazy val `akka-streams-one` = project
         "org.scalatest" %% "scalatest" % ScalaTest % Test,
       ))
 
-lazy val `persistence-query` = project
-    .in(file("persistence-query"))
+lazy val chapter10b = project
+    .in(file("chapter10b"))
     .dependsOn(chapter09b)
     .settings(
         scalaVersion := ScalaVersion, 

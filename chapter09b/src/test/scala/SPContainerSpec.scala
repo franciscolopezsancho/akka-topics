@@ -48,7 +48,7 @@ class SPContainerSpec
           Entity(SPContainer.TypeKey)(createBehavior = entityContext =>
             SPContainer(entityContext.entityId)))
 
-      val containerId = "id-1"
+      val containerId = "123"
       val cargo = SPContainer.Cargo("id-c", "sack", 3)
 
       shardRegion ! ShardingEnvelope(
