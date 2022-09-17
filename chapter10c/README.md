@@ -1,19 +1,8 @@
-start database
-	$ docker-compose up
-to rerun persistence:
+Please note that the test on this project need you to follow chapter09b/README.md 
 
+Following those instructions you will start the database, set it up and send 3 pieces of data to it. 
 
-	$ psql -h 127.0.0.1 -d containers -U containers -f projections/persistence_create_tables.sql 
+After you need to add the necessary for the projections running the following scripts.
 
-	sbt && persistence/runMain example.persistence.PMain
-
-	Three inputs:
-$ 9 456 sack 22 
-$ 9 459 bigbag 15
-$ 11 499 barrel 120 
-
-
-
-run scripts
-	$  psql -h 127.0.0.1 -d containers -U containers -f projections/projection_cargos_per_container.sql 
-	$ psql -h 127.0.0.1 -d containers -U containers -f projections/projection_create_tables.sql
+	$  psql -h 127.0.0.1 -d containers -U containers -f projection_cargos_per_container.sql 
+	$ psql -h 127.0.0.1 -d containers -U containers -f projection_offset_store.sql
