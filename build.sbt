@@ -71,6 +71,17 @@ lazy val chapter06 = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
+lazy val chapter07 = project
+  .in(file("chapter07"))
+  .settings(
+    scalaVersion := ScalaVersion,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
+      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
+      "org.scalatest" %% "scalatest" % ScalaTest % Test,
+    ))
+
 lazy val `clustering-primitives` = project
   .in(file("clustering-primitives"))
   .settings(
