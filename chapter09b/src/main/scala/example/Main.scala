@@ -26,7 +26,7 @@ import example.persistence.CommandLine.Command
 object Main {
 
   //write
-  val logger = LoggerFactory.getLogger(Main + "")
+  val logger = LoggerFactory.getLogger(Main.getClass)
 
   def main(args: Array[String]): Unit = {
     val system = ActorSystem[Nothing](Behaviors.empty, "containers")

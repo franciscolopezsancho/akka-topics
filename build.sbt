@@ -115,8 +115,8 @@ lazy val chapter08b = project
     ),
   )
 
-lazy val sharding = project
-  .in(file("sharding"))
+lazy val chapter09a = project
+  .in(file("chapter09a"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
@@ -134,8 +134,8 @@ lazy val sharding = project
     )
   )
 
-lazy val persistence = project
-  .in(file("persistence"))
+lazy val chapter09b = project
+  .in(file("chapter09b"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
@@ -159,7 +159,7 @@ lazy val persistence = project
 
 lazy val projections = project
   .in(file("projections"))
-  .dependsOn(persistence)
+  .dependsOn(chapter09b)
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
@@ -203,7 +203,7 @@ lazy val `akka-streams-one` = project
 
 lazy val `persistence-query` = project
     .in(file("persistence-query"))
-    .dependsOn(persistence)
+    .dependsOn(chapter09b)
     .settings(
         scalaVersion := ScalaVersion, 
         libraryDependencies ++= Seq(
