@@ -82,8 +82,8 @@ lazy val chapter07 = project
       "org.scalatest" %% "scalatest" % ScalaTest % Test,
     ))
 
-lazy val `clustering-primitives` = project
-  .in(file("clustering-primitives"))
+lazy val chapter08a = project
+  .in(file("chapter08a"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(
@@ -97,8 +97,8 @@ lazy val `clustering-primitives` = project
     ),
   )
 
-lazy val clustering = project
-  .in(file("clustering"))
+lazy val chapter08b = project
+  .in(file("chapter08b"))
   .settings(
     scalaVersion := ScalaVersion,
     libraryDependencies ++= Seq(

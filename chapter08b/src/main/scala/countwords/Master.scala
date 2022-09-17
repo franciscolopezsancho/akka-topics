@@ -1,4 +1,4 @@
-package example.cluster
+package example.countwords
 
 import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
@@ -32,7 +32,7 @@ object Master {
       implicit val timeout: Timeout = 3.seconds
       val paralellism =
         context.system.settings.config
-          .getInt("example.cluster.delegation-parallelism")
+          .getInt("example.countwords.delegation-parallelism")
 
       Behaviors.receiveMessage[Event] {
         case Tick =>

@@ -1,4 +1,4 @@
-package example.cluster
+package example.countwords
 
 import akka.actor.testkit.typed.scaladsl.{
   LogCapturing,
@@ -15,7 +15,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 class WordsSampleSpec
     extends ScalaTestWithActorTestKit(
       ConfigFactory
-        .parseString("""example.cluster.workers-per-node = 5""")
+        .parseString("""example.countwords.workers-per-node = 5""")
         .withFallback(ConfigFactory.load("words")))
     with AnyWordSpecLike
     with Matchers
@@ -26,7 +26,7 @@ class WordsSampleSpec
       //>> emulating guardian
       val numberOfWorkers =
         system.settings.config
-          .getInt("example.cluster.workers-per-node")
+          .getInt("example.countwords.workers-per-node")
 
       for (i <- 0 to numberOfWorkers) {
         spawn(Worker(), s"worker-$i")

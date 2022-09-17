@@ -1,4 +1,4 @@
-package example.cluster
+package example.countwords
 
 import akka.cluster.typed.{ Cluster, Subscribe }
 import akka.cluster.typed.SelfUp
@@ -29,8 +29,7 @@ object App {
       """)
       .withFallback(ConfigFactory.load("words"))
 
-    ActorSystem(ClusteredGuardian(), "WordsCluster", config)
-
+    val guardian = ActorSystem(ClusteredGuardian(), "WordsCluster", config)
   }
 
   private object ClusteredGuardian {
@@ -48,7 +47,7 @@ object App {
         if (cluster.selfMember.hasRole("aggregator")) {
           val numberOfWorkers =
             context.system.settings.config
-              .getInt("example.cluster.workers-per-node")
+              .getInt("example.countwords.workers-per-node")
           for (i <- 0 to numberOfWorkers) {
             //with supervision resume
             context.spawn(Worker(), s"worker-$i")

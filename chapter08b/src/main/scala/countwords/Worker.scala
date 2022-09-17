@@ -1,4 +1,4 @@
-package example.cluster
+package example.countwords
 
 import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
