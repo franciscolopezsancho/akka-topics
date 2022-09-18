@@ -21,8 +21,7 @@ import example.container.domain.Container
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
-class ContainerServiceImplSharding(
-    sharding: ClusterSharding)(
+class ContainerServiceImplSharding(sharding: ClusterSharding)(
     implicit val executionContext: ExecutionContext)
     extends ContainerService {
 
@@ -33,7 +32,6 @@ class ContainerServiceImplSharding(
     container ! Container.AddCargo(Container.Cargo(in.kind, in.size))
     Future.successful(AddedCargo(true))
   }
-
 
   implicit val timeout: Timeout = 3.seconds
 

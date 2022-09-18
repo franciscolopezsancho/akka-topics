@@ -73,14 +73,16 @@ class RoutingExamplesSpec
 
     }
 
-    //TODO review this test may eventually fail. 
+    //TODO review this test may eventually fail.
     // becuase one photoProcessor takes all the messages.
     "send messages to all photo processors registered" in {
       val photoProcessor1 = TestProbe[String]
-      val pp1Monitor = Behaviors.monitor(photoProcessor1.ref, PhotoProcessor())
+      val pp1Monitor =
+        Behaviors.monitor(photoProcessor1.ref, PhotoProcessor())
 
       val photoProcessor2 = TestProbe[String]
-      val pp2Monitor = Behaviors.monitor(photoProcessor2.ref, PhotoProcessor())
+      val pp2Monitor =
+        Behaviors.monitor(photoProcessor2.ref, PhotoProcessor())
 
       system.receptionist ! Receptionist.Register(
         PhotoProcessor.Key,

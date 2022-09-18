@@ -47,7 +47,9 @@ class ContainerSpec
       val container: EntityRef[Container.Command] =
         sharding.entityRefFor(Container.TypeKey, containerId)
 
-      shardRegion ! ShardingEnvelope(containerId, Container.GetCargos(probe.ref))
+      shardRegion ! ShardingEnvelope(
+        containerId,
+        Container.GetCargos(probe.ref))
       probe.expectMessage(List(cargo))
 
     }

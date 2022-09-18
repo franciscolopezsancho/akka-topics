@@ -25,7 +25,8 @@ object GuestSearch {
             .Find(HotelConcierge.GoldenKey, listingResponseAdapter)
           Behaviors.same
 
-        case ListingResponse(HotelConcierge.GoldenKey.Listing(listings)) =>
+        case ListingResponse(
+            HotelConcierge.GoldenKey.Listing(listings)) =>
           listings
             .filter(_.path.name.contains(actorName))
             .foreach(actor => replyTo ! actor)

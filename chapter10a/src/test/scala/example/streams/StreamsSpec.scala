@@ -41,7 +41,7 @@ class StreamsSpec
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects | simplestest version" in {
       var fakeDB: List[Int] = List()
-      def storeDB(value: Int) = 
+      def storeDB(value: Int) =
         fakeDB = fakeDB :+ value
 
       val future = Source(List(1, 2, 3))
@@ -56,7 +56,7 @@ class StreamsSpec
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects | simplest version" in {
       var fakeDB: List[Int] = List()
-      def storeDB(value: Int) = 
+      def storeDB(value: Int) =
         fakeDB = fakeDB :+ value
 
       val producer = Source(List(1, 2, 3))
@@ -73,7 +73,7 @@ class StreamsSpec
   "a producer of fixed elements 1,2,3 and a function" should {
     "allow when consumed see the side effects" in {
       var fakeDB: List[Int] = List()
-      def storeDB(value: Int) = 
+      def storeDB(value: Int) =
         fakeDB = fakeDB :+ value
 
       val producer: Source[Int, NotUsed] = Source(List(1, 2, 3))
@@ -97,13 +97,11 @@ class StreamsSpec
     }
   }
 
-
   // "a infinite producer"
   // "alpakka?"
 
   "an infinite producer with a consumer creating side effect" should {
     "be cancellable" in {
-     
 
       val liveSource: Source[String, Cancellable] =
         Source.tick(1.second, 1.second, "Hello, World")
@@ -130,15 +128,17 @@ class StreamsSpec
   "an infinite producer with a consumer creating side effect same filter" should {
     "be cancellable" in {
       var fakeDB: List[Int] = List()
-      def storeDB(value: Int) = 
+      def storeDB(value: Int) =
         fakeDB = fakeDB :+ value
 
       val liveSource: Source[Int, Cancellable] =
         Source.tick(1.second, 1.second, Random.nextInt(3))
 
       val (cancelble, future): (Cancellable, Future[Done]) =
-        liveSource.filter(_ % 2 == 0)
-          .toMat(Sink.foreach(storeDB))(Keep.both).run
+        liveSource
+          .filter(_ % 2 == 0)
+          .toMat(Sink.foreach(storeDB))(Keep.both)
+          .run
 
       Thread.sleep(3000)
       cancelble.cancel

@@ -17,7 +17,7 @@ object ContainerServerSharding {
       ActorSystem(Behaviors.empty, "ContainerServer")
 
     implicit val ec: ExecutionContext = system.executionContext
-    val sharding: ClusterSharding = ClusterSharding(system) 
+    val sharding: ClusterSharding = ClusterSharding(system)
 
     val service: HttpRequest => Future[HttpResponse] =
       ContainerServiceHandler.withServerReflection(

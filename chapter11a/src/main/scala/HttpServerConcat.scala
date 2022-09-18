@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ MissingCookieRejection, Route }
 import scala.io.StdIn
 
-object HttpServerReject {
+object HttpServerConcat {
 
   def main(args: Array[String]): Unit = {
 
@@ -18,14 +18,12 @@ object HttpServerReject {
 
     val route: Route =
       path("ping") {
-        concat(
-          get {
-            complete("pong")
-          },
-          post {
-            println("fake storing op")
-            complete("ping stored")
-          })
+        concat(get {
+          complete("pong")
+        }, post {
+          println("fake storing op")
+          complete("ping stored")
+        })
       }
 
     val bindingFuture =

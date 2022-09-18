@@ -45,7 +45,7 @@ object Master {
           firstPart.map { text =>
             context.ask(workersRouter, Worker.Process(text, _)) {
               case Success(CountedWords(map)) =>
-                CountedWords(map) 
+                CountedWords(map)
               case Failure(ex) =>
                 FailedJob(text)
             }

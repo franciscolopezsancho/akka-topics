@@ -1,9 +1,6 @@
-package routers 
+package routers
 
-import akka.actor.typed.scaladsl.{
-  Behaviors,
-  Routers
-}
+import akka.actor.typed.scaladsl.{ Behaviors, Routers }
 
 import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.receptionist.{ Receptionist, ServiceKey }
@@ -98,4 +95,3 @@ object Aggregator {
       }
     }
 }
-

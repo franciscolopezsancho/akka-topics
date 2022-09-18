@@ -1,10 +1,6 @@
 package routers
 
-import akka.actor.typed.scaladsl.{
-  Behaviors,
-  PoolRouter,
-  Routers
-}
+import akka.actor.typed.scaladsl.{ Behaviors, PoolRouter, Routers }
 import akka.actor.typed.{ ActorRef, Behavior }
 
 object PostalOffice {

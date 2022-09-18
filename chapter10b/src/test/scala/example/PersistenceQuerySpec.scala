@@ -75,14 +75,14 @@ class PersistenceQuerySpec
     }
   }
   //Bear in mind this test depends on the order you
-  // entered the items when following chapter09b/README.md 
+  // entered the items when following chapter09b/README.md
   // plus comparing to EventEnvelope is done with the following:
-      //  override def equals(obj: Any): Boolean = obj match {
-      //   case other: EventEnvelope =>
-      //     offset == other.offset && persistenceId == other.persistenceId && sequenceNr == other.sequenceNr &&
-      //     event == other.event // timestamp && metadata not included in equals for backwards compatibility
-      //   case _ => false
-      //  }
+  //  override def equals(obj: Any): Boolean = obj match {
+  //   case other: EventEnvelope =>
+  //     offset == other.offset && persistenceId == other.persistenceId && sequenceNr == other.sequenceNr &&
+  //     event == other.event // timestamp && metadata not included in equals for backwards compatibility
+  //   case _ => false
+  //  }
 
   "a persistence query" should {
     "retrieve the data from db by tag" in {

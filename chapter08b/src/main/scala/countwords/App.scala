@@ -29,9 +29,11 @@ object App {
       """)
       .withFallback(ConfigFactory.load("words"))
 
-    val guardian = ActorSystem(ClusteredGuardian(), "WordsCluster", config)
-    
-    println("#################### press ENTER to terminate ###############")
+    val guardian =
+      ActorSystem(ClusteredGuardian(), "WordsCluster", config)
+
+    println(
+      "#################### press ENTER to terminate ###############")
     scala.io.StdIn.readLine()
     guardian.terminate()
   }

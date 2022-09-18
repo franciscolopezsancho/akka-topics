@@ -1,4 +1,4 @@
-package subscriptions 
+package subscriptions
 
 import akka.actor.typed.{ ActorSystem, PostStop }
 import akka.actor.typed.scaladsl.Behaviors

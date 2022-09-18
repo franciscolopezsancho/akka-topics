@@ -45,8 +45,8 @@ class SPContainerSpec
       val shardRegion
           : ActorRef[ShardingEnvelope[SPContainer.Command]] =
         sharding.init(
-          Entity(SPContainer.TypeKey)(createBehavior = entityContext =>
-            SPContainer(entityContext.entityId)))
+          Entity(SPContainer.TypeKey)(createBehavior =
+            entityContext => SPContainer(entityContext.entityId)))
 
       val containerId = "123"
       val cargo = SPContainer.Cargo("id-c", "sack", 3)

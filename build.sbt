@@ -249,8 +249,8 @@ lazy val clustering3 = project
       )
 )
 
-lazy val `akka-http` = project
-    .in(file("akka-http"))
+lazy val chapter11a = project
+    .in(file("chapter11a"))
     .settings(
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(

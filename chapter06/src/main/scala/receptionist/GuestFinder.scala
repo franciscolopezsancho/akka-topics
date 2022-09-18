@@ -7,7 +7,6 @@ import akka.util.Timeout
 import scala.util.{ Failure, Success }
 import scala.concurrent.duration._
 
-
 object GuestFinder {
 
   sealed trait Command
@@ -26,7 +25,8 @@ object GuestFinder {
           context.ask(
             context.system.receptionist,
             Receptionist.Find(HotelConcierge.GoldenKey)) {
-            case Success(HotelConcierge.GoldenKey.Listing(listings)) =>
+            case Success(
+                HotelConcierge.GoldenKey.Listing(listings)) =>
               listings
                 .filter(_.path.name.contains(actorName))
                 .foreach(actor => replyTo ! actor)
