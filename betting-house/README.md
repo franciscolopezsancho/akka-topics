@@ -1,12 +1,12 @@
 ## Run in local docker
 
-    
+    cd local-deployment
 
 ### start DB
 
     docker compose up
 
-Create tables in DB
+Create tables in DB. When prompt enter password `betting`
 
     psql -h 127.0.0.1 -d betting  -U betting -f bet-projection.sql
     psql -h 127.0.0.1 -d betting  -U betting -f akka-persistence.sql
@@ -92,20 +92,23 @@ kompose convert -f docker-compose.yaml
 
 ## minikube
 
-### create kafka cluster
+    cd k8s-deployment
+
+### create Kafka cluster
 
 kubectl create -f 'https://strimzi.io/install/latest?namespace=akka-cluster' -n akka-cluster
 
 kubectl apply -f https://strimzi.io/examples/latest/kafka/kafka-persistent-single.yaml -n akka-cluster
 
+#### create topic in Kafka cluster //TODO check topic.yml is not needed anymore
 kubectl -n akka-cluster run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.26.0-kafka-3.0.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic bet-projection --from-beginning
 
 ### create database
 
-kubectl apply -f postgres-containers-db-deployment.yaml 
-kubectl apply -f postgres-containers-db-service.yaml 
+kubectl apply -f postgres-betting-db-deployment.yaml 
+kubectl apply -f postgres-betting-db-service.yaml 
 
-### create betting-house and deploy
+### create betting-house image and deploy
 
  sbt docker:publish
 
@@ -115,7 +118,7 @@ kubectl apply -f postgres-containers-db-service.yaml
   --name=betting-service
 
 ### link local ports to kubernetes pods
-k port-forward svc/postgres-containers-db 5432:5432 -n akka-cluster
+k port-forward svc/postgres-betting-db 5432:5432 -n akka-cluster
 
 k port-forward svc/my-cluster-kafka-bootstrap 9092:9092 -n akka-cluster
 

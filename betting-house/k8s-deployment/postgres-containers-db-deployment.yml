@@ -6,13 +6,13 @@ metadata:
     kompose.version: 1.24.0 (4a2a0458)
   creationTimestamp: null
   labels:
-    io.kompose.service: postgres-containers-db
-  name: postgres-containers-db
+    io.kompose.service: postgres-betting-db
+  name: postgres-betting-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: postgres-containers-db
+      io.kompose.service: postgres-betting-db
   strategy: {}
   template:
     metadata:
@@ -21,7 +21,7 @@ spec:
         kompose.version: 1.24.0 (4a2a0458)
       creationTimestamp: null
       labels:
-        io.kompose.service: postgres-containers-db
+        io.kompose.service: postgres-betting-db
     spec:
       containers:
         - env:
@@ -30,7 +30,7 @@ spec:
             - name: POSTGRES_USER
               value: betting
           image: postgres:latest
-          name: postgres-containers-db
+          name: postgres-betting-db
           ports:
             - containerPort: 5432
           resources: {}

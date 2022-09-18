@@ -1,6 +1,6 @@
 version: '2.2'
 services:
-  postgres-containers-db:
+  postgres-betting-db:
     image: postgres:latest
     ports:
       - 5432:5432
