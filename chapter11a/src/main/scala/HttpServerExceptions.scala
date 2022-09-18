@@ -41,8 +41,8 @@ object HttpServerExceptions {
             complete(
               HttpEntity(
                 ContentTypes.`application/json`,
-                "exactly the site you wanted " + (Random.nextInt / Random.nextInt(
-                  2))))
+                "exactly the site you wanted " + (Random.nextInt / Random
+                  .nextInt(2))))
           }
         }
       }

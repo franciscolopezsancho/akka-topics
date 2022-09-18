@@ -4,7 +4,7 @@ val ScalaVersion = "2.13.1"
 val AkkaManagementVersion = "1.1.0"
 val AkkaProjectionVersion = "1.2.2"
 val ScalikeJdbcVersion = "3.5.0"
-val AkkaHttpVersion = "10.2.4"
+val AkkaHttpVersion = "10.2.9"
 val AkkaGRPC = "2.0.0"
 val ScalaTest = "3.1.4"
 val JacksonVersion = "2.11.4" 
@@ -262,8 +262,8 @@ lazy val chapter11a = project
         "ch.qos.logback" % "logback-classic" % LogbackVersion
         )
     )
-lazy val gRPC = project
-    .in(file("gRPC"))
+lazy val chapter11b = project
+    .in(file("chapter11b"))
     .enablePlugins(AkkaGrpcPlugin)
     .settings(
       scalaVersion := ScalaVersion,
@@ -277,8 +277,8 @@ lazy val gRPC = project
       ))
 
 
-lazy val `gRPC-actor` = project
-    .in(file("gRPC-actor"))
+lazy val chapter11c = project
+    .in(file("chapter11c"))
     .enablePlugins(AkkaGrpcPlugin)
     .settings(
       scalaVersion := ScalaVersion,

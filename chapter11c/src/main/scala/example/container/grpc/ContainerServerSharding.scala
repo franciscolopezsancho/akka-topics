@@ -7,6 +7,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 import akka.http.scaladsl.{ Http, HttpConnectionContext }
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 
+import example.container.domain.Container
+import akka.cluster.sharding.typed.scaladsl.Entity
+
 import scala.io.StdIn
 
 object ContainerServerSharding {
@@ -18,6 +21,10 @@ object ContainerServerSharding {
 
     implicit val ec: ExecutionContext = system.executionContext
     val sharding: ClusterSharding = ClusterSharding(system)
+
+    val shardingRegion =
+      sharding.init(Entity(Container.TypeKey)(entityContext =>
+        Container(entityContext.entityId)))
 
     val service: HttpRequest => Future[HttpResponse] =
       ContainerServiceHandler.withServerReflection(
