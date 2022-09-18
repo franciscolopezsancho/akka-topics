@@ -1,5 +1,3 @@
-package com.example
-
 import org.apache.kafka.common.serialization.{
   StringDeserializer,
   StringSerializer

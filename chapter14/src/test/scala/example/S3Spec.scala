@@ -44,7 +44,7 @@ class S3Spec
 
     val source: Source[ByteString, Future[akka.stream.IOResult]] =
       FileIO.fromPath(
-        fs.getPath("./alpakka/src/test/resources/characters.csv"))
+        fs.getPath("./chapter14/src/test/resources/characters.csv"))
 
     val result: Future[MultipartUploadResult] = source
       .runWith(S3.multipartUpload("franchuelo", "characters.csv"))

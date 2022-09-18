@@ -1,5 +1,3 @@
-package example
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
@@ -19,14 +17,14 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 
 import scala.util.Success
 
-class AlpakkaSpec
+class CSVSpec 
     extends AnyFlatSpec
     with Matchers
     with ScalaFutures
     with BeforeAndAfterAll {
 
   implicit val system =
-    ActorSystem(Behaviors.empty, "alpakkaExamples")
+    ActorSystem(Behaviors.empty, "csvExamples")
 
   implicit val ec: ExecutionContext =
     ExecutionContext.Implicits.global //not very recommendable. Explain
@@ -123,38 +121,12 @@ class AlpakkaSpec
     timeout = Span(9, Seconds),
     interval = Span(150, Millis))
 
-  // "A file" should "be able to be read" in {
-  //   val fs = FileSystems.getDefault
-  //   val linesSource: Source[ByteString, NotUsed] = FileTailSource
-  //     .lines(
-  //       path =
-  //         fs.getPath("./alpakka/src/test/resources/characters.csv"),
-  //       maxLineSize = 8192,
-  //       pollingInterval = 100.millis)
-  //     .map(each => ByteString(each))
-
-  //   val result = linesSource
-  //     .via(CsvParsing.lineScanner())
-  //     .via(CsvToMap.toMapAsStrings())
-  //     .map(println)
-  //     .runWith(Sink.seq)
-
-  //   val lines = result.futureValue
-  //   println("#####")
-  //   println(lines)
-  //   lines.head should be(
-  //     Map(
-  //       "name" -> "Alice",
-  //       "surename" -> "Pleasence",
-  //       "age" -> "19"))
-  // }
-
   "A file" should "be able to be read" in {
     val fs = FileSystems.getDefault
     val linesSource
         : Source[ByteString, Future[akka.stream.IOResult]] =
       FileIO.fromPath(
-        fs.getPath("./alpakka/src/test/resources/characters.csv"))
+        fs.getPath("./chapter14/src/test/resources/characters.csv"))
 
     val result = linesSource
       .via(CsvParsing.lineScanner())
@@ -177,7 +149,7 @@ class AlpakkaSpec
     val fs = FileSystems.getDefault
     val source: Source[ByteString, Future[akka.stream.IOResult]] =
       FileIO.fromPath(
-        fs.getPath("./alpakka/src/test/resources/characters.csv"))
+        fs.getPath("./chapter14/src/test/resources/characters.csv"))
 
     val filterAndGetValues
         : Flow[Map[String, String], Seq[String], NotUsed] =
@@ -195,7 +167,7 @@ class AlpakkaSpec
         CsvFormatting.format()
       ) //Flow[T, ByteString, NotUsed] T < Colletion[String]
       .runWith(FileIO.toPath(
-        fs.getPath("./alpakka/src/test/resources/result.csv")))
+        fs.getPath("./chapter14/src/test/resources/result.csv")))
 
   }
 

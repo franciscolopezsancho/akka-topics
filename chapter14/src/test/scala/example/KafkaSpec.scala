@@ -18,7 +18,7 @@ import akka.Done
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
-class ProducerSpec
+class KafkaSpec
     extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterAll {

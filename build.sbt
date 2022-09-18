@@ -314,21 +314,21 @@ lazy val `akka-streams-two` = project
        "ch.qos.logback" % "logback-classic" % LogbackVersion, 
       ))
 
-lazy val alpakka = project
-    .in(file("alpakka"))
+lazy val chapter14 = project
+    .in(file("chapter14"))
     .settings(
       scalafmtOnCompile := true,
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
         "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
-        "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "3.0.3",
-        "com.lightbend.akka" %% "akka-stream-alpakka-file" % "3.0.3",
-        "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "3.0.3",
+        "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "4.0.0",
+        "com.lightbend.akka" %% "akka-stream-alpakka-file" % "4.0.0",
+        "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "4.0.0",
         "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
         "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//
         "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion,// this is for solving dependency version mismatches
-        "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
+        "com.typesafe.akka" %% "akka-stream-kafka" % "3.0.1",
         "com.fasterxml.jackson.core" % "jackson-databind" % JacksonVersion, 
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
         "org.scalatest" %% "scalatest" % ScalaTest % Test, 
