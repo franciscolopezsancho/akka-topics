@@ -222,8 +222,8 @@ lazy val chapter10b = project
 
     )
 
-lazy val clustering2 = project
-  .in(file("clustering2"))
+lazy val chapter13a = project
+  .in(file("chapter13a"))
   .settings(
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
