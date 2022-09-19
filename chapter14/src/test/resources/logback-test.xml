@@ -14,7 +14,9 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="INFO">
+    <logger name="akka.stream.alpakka"/>
+
+    <root level="DEBUG">
         <appender-ref ref="ASYNC"/>
     </root>
 </configuration>

@@ -46,8 +46,6 @@ class KafkaSpec
 
   }
 
-  "a flexiflow" should "conditionally commit to Kafka en pass downstream "
-
   override def afterAll() =
     system.terminate()
 }

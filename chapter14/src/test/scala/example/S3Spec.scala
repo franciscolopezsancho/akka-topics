@@ -29,11 +29,11 @@ class S3Spec
   "alpakka s3" should "be able to upload data to S3" in {
 
     val result: Future[MultipartUploadResult] = Source
-      .single(ByteString("data"))
+      .single(ByteString("mydata"))
       .runWith(S3.multipartUpload("franchuelo", "bucketKey"))
 
     assert(result.futureValue.isInstanceOf[MultipartUploadResult])
-    result.map(println)
+    result.map(println) // having a look at the contents of MultipartUploadResult(...)
   }
 
   import akka.stream.scaladsl.FileIO

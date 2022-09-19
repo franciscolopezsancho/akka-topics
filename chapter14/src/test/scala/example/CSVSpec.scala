@@ -17,7 +17,7 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 
 import scala.util.Success
 
-class CSVSpec 
+class CSVSpec
     extends AnyFlatSpec
     with Matchers
     with ScalaFutures
