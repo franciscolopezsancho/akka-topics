@@ -1,4 +1,4 @@
-package examples.streams.two
+package example.streams.two
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -92,7 +92,7 @@ class SampleSpec
     }
   }
 
-  "calling to an external service" should {
+  "calling to a fake external service" should {
     "is faster unordered when duration is uneven" ignore {
 
       val init = System.currentTimeMillis
@@ -116,8 +116,7 @@ class SampleSpec
   import spray.json.DefaultJsonProtocol._
   import spray.json.RootJsonFormat
 
-  import example.streams.two.HttpServer
-  // Source.queue goes well with throttle?
+  import example.validation.HttpServer
   "calling to a real service" should {
     "work" ignore {
 
@@ -235,133 +234,10 @@ class SampleSpec
     }
   }
 
-  import akka.stream.scaladsl.RestartSource
-  import akka.stream.RestartSettings
-  import example.locator.grpc.{
-    Location,
-    LocatorService,
-    LocatorServiceClient
-  }
-  import akka.grpc.GrpcClientSettings
-  import com.google.protobuf.empty.Empty
-
-  "A Source" should {
-    "be able to keep consuming from a failed and restored service" ignore {
-
-      val clientSettings =
-        GrpcClientSettings
-          .connectToServiceAt("127.0.0.1", 8080)
-          .withTls(false)
-
-      val client: LocatorService =
-        LocatorServiceClient(clientSettings)
-
-      val restartSettings = RestartSettings(
-        minBackoff = 1.seconds,
-        maxBackoff = 3.seconds,
-        randomFactor = 0.2).withMaxRestarts(30, 3.minutes)
-
-      val restartSource = RestartSource.withBackoff(restartSettings) {
-        () =>
-          Source.futureSource {
-            val responseStream: Source[Location, NotUsed] =
-              client.follow(Empty.defaultInstance)
-            Future(responseStream)
-          }
-      }
-
-      val result =
-        restartSource
-          .map(println)
-          .run()
-
-      Await.result(result, 90.seconds)
-
-    }
-  }
-
-  import akka.stream.BoundedSourceQueue
-
-  "Source queue" should {
-    "allow adding elements to a stream" in {
-
-      val bufferSize = 2
-
-      val queue: BoundedSourceQueue[Int] = Source
-        .queue[Int](
-          bufferSize
-        ) // elements will may be dropped when the bufferSize is overflown
-        .map(x => 2 * x)
-        .toMat(Sink.foreach(x => println(s"processed $x")))(Keep.left)
-        .run()
-
-      (1 to 10).map(x => queue.offer(x))
-    }
-  }
-
-  import akka.stream.{ OverflowStrategy, QueueOfferResult }
-  import akka.stream.scaladsl.SourceQueue
-
-  "Source queue" should {
-    "allow to configure its overflow strategy" ignore {
-
-      val bufferSize = 4
-
-      val queue: SourceQueue[Int] = Source
-        .queue[Int](bufferSize, OverflowStrategy.dropHead)
-        .throttle(1, 100.millis)
-        .map(x => 2 * x)
-        .toMat(Sink.foreach(x => println(s"PROCESSED $x")))(Keep.left)
-        .run()
-
-      (1 to 10).map(x => queue.offer(x))
-
-      Thread.sleep(1000)
-    }
-  }
-
-  "Source queue" should {
-    "allow to configure its overflow strategy and print QueueOfferResult " ignore {
-
-      val bufferSize = 4
-
-      val queue: SourceQueue[Int] = Source
-        .queue[Int](bufferSize, OverflowStrategy.dropNew)
-        .throttle(1, 100.millis)
-        .map(x => 2 * x)
-        .toMat(Sink.foreach(x => println(s"PROCESSED $x")))(Keep.left)
-        .run()
-
-      (1 to 10)
-        .map(x => {
-          queue.offer(x).map {
-            case QueueOfferResult.Enqueued => println(s"enqueued $x")
-            case QueueOfferResult.Dropped  => println(s"dropped $x")
-          }
-        })
-
-      Thread.sleep(1000)
-    }
-  }
-
-  "Source with context" should {
-    "be able to deal with only the data" ignore {
-      def enrichData(value: Int): (Int, String) =
-        (value, "metadata_" + value)
-
-      val values: Seq[(String, Int)] =
-        Seq("eins" -> 1, "zwei" -> 2, "drei" -> 3)
-      val source = Source(values).map(_._1)
-
-      source.map(println).runWith(Sink.ignore)
-    }
-  }
-
   import scala.util.Random
 
   "an Exception" should {
-    "stop and log" ignore {
-
+    "stop the stream and log 'tried riskyHandle'" ignore {
       def riskyHandler(elem: Int): Int =
         100 / elem
 
@@ -432,7 +308,6 @@ class SampleSpec
     case _                      => Supervision.Stop
   }
 
-  //TODO find difference between Resume and Restart
   "an Exception" should {
     "be possible to overcome by continuing and restarting" ignore {
 
@@ -456,10 +331,6 @@ class SampleSpec
       println(state)
     }
   }
-
-  "Shall I tackle Either? does it has anything to do with FlowWithContext?"
-
-  ""
 
   "The invalid results" should {
     "be diverted to another Sink as soon as possible" ignore {
@@ -498,6 +369,117 @@ class SampleSpec
 
     }
   }
+
+  import akka.stream.scaladsl.RestartSource
+  import akka.stream.RestartSettings
+  import example.locator.grpc.{
+    Location,
+    LocatorService,
+    LocatorServiceClient
+  }
+  import akka.grpc.GrpcClientSettings
+  import com.google.protobuf.empty.Empty
+
+  "A Source" should {
+    "be able to keep consuming from a failed and restored service" ignore {
+
+      val clientSettings =
+        GrpcClientSettings
+          .connectToServiceAt("127.0.0.1", 8080)
+          .withTls(false)
+
+      val client: LocatorService =
+        LocatorServiceClient(clientSettings)
+
+      val restartSettings = RestartSettings(
+        minBackoff = 1.seconds,
+        maxBackoff = 3.seconds,
+        randomFactor = 0.2).withMaxRestarts(30, 3.minutes)
+
+      val restartSource = RestartSource.withBackoff(restartSettings) {
+        () =>
+          Source.futureSource {
+            val responseStream: Source[Location, NotUsed] =
+              client.follow(Empty.defaultInstance)
+            Future(responseStream)
+          }
+      }
+
+      val result =
+        restartSource
+          .map(println)
+          .run()
+
+      Await.result(result, 90.seconds)
+
+    }
+  }
+
+  import akka.stream.BoundedSourceQueue
+
+  "Source queue" should {
+    "allow adding elements to a stream" ignore {
+
+      val bufferSize = 10
+
+      val queue: BoundedSourceQueue[Int] = Source
+        .queue[Int](
+          bufferSize
+        ) // elements will may be dropped when the bufferSize is overflown
+        .map(x => 2 * x)
+        .toMat(Sink.foreach(x => println(s"processed $x")))(Keep.left)
+        .run()
+
+      (1 to 10).map(x => queue.offer(x))
+      Thread.sleep(1000)
+    }
+  }
+
+  import akka.stream.{ OverflowStrategy, QueueOfferResult }
+  import akka.stream.scaladsl.SourceQueue
+
+  "Source queue" should {
+    "allow to configure its overflow strategy" ignore {
+
+      val bufferSize = 4
+
+      val queue: SourceQueue[Int] = Source
+        .queue[Int](bufferSize, OverflowStrategy.dropHead)
+        .throttle(1, 100.millis)
+        .map(x => 2 * x)
+        .toMat(Sink.foreach(x => println(s"PROCESSED $x")))(Keep.left)
+        .run()
+
+      (1 to 10).map(x => queue.offer(x))
+
+      Thread.sleep(1000)
+    }
+  }
+
+  "Source queue" should {
+    "allow to configure its overflow strategy and print QueueOfferResult " ignore {
+
+      val bufferSize = 4
+
+      val queue: SourceQueue[Int] = Source
+        .queue[Int](bufferSize, OverflowStrategy.dropNew)
+        .throttle(1, 100.millis)
+        .map(x => 2 * x)
+        .toMat(Sink.foreach(x => println(s"PROCESSED $x")))(Keep.left)
+        .run()
+
+      (1 to 10)
+        .map(x => {
+          queue.offer(x).map {
+            case QueueOfferResult.Enqueued => println(s"enqueued $x")
+            case QueueOfferResult.Dropped  => println(s"dropped $x")
+          }
+        })
+
+      Thread.sleep(1000)
+    }
+  }
+
   //Internal call, CPU bounded
   //80000 takes about 1-3 seconds one call
   // load is cumulative and the more threads we run

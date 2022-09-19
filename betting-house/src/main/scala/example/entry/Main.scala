@@ -55,6 +55,10 @@ object Main {
       BetProjectionServer.init(betRepository)
       BetProjection.init(system, betRepository)
       MarketProjection.init(system)
+
+      println(s"####################### application starting \nPress RETURN to stop")
+      StdIn.readLine()
+      system.terminate()
     } catch {
       case NonFatal(ex) =>
         log.error(

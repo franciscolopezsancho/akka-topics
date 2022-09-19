@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import com.google.protobuf.any.{ Any => PbAny }
+import com.google.protobuf.empty.Empty
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -32,11 +33,16 @@ class MarketProjectionHandler(
       s"processing market event [$envelope] to topic [$topic]}")
 
     val event = envelope.event
-    val record =
-      new ProducerRecord(topic, event.marketId, serialize(event))
-    producer.send(record).map { _ =>
-      log.debug(s"published event [$event] to topic [$topic]}")
-      Done
+    val serializedEvent = serialize(event)
+    if (!serializedEvent.isEmpty) {
+      val record =
+        new ProducerRecord(topic, event.marketId, serializedEvent)
+      producer.send(record).map { _ =>
+        log.debug(s"published event [$event] to topic [$topic]}")
+        Done
+      }
+    } else {
+      Future.successful(Done)
     }
   }
 
@@ -48,8 +54,9 @@ class MarketProjectionHandler(
         projection.proto.MarketOpened(marketId)
       case Market.Cancelled(marketId, reason) =>
         projection.proto.MarketCancelled(marketId, reason)
-      ///FIXME I'd like to ignore some messages
-      // shall I use empty?
+      case x =>
+        log.info(s"ignoring event $x in projection")
+        Empty.defaultInstance
     }
     PbAny.pack(proto, "market-projection").toByteArray
   }

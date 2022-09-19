@@ -25,10 +25,13 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 import akka.util.Timeout
+import org.slf4j.LoggerFactory
 
 /**
  */
 object Bet {
+
+  val logger = LoggerFactory.getLogger(Bet.getClass())
 
   val TypeKey = EntityTypeKey[Command]("bet")
 
@@ -41,7 +44,7 @@ object Bet {
       marketId: String,
       odds: Double,
       stake: Int,
-      result: Int,
+      result: Int, //0 winHome, 1 winAway, 2 draw
       replyTo: ActorRef[Response])
       extends ReplyCommand
   //probably want a local class not to depend on Market? see Market.State below
@@ -256,7 +259,7 @@ object Bet {
       sharding.entityRefFor(Market.TypeKey, command.marketId)
 
     implicit val timeout
-        : Timeout = Timeout(3, SECONDS) //FIXME read from properties
+        : Timeout = Timeout(3, SECONDS) //TODO read from properties
     context.ask(marketRef, Market.GetState) {
       case Success(Market.CurrentState(marketState)) =>
         val matched = oddsDoMatch(marketState, command)
@@ -314,6 +317,8 @@ object Bet {
     // if better odds are available the betting house it takes the bet
     // for a lesser benefit to the betting customer. This is why compares
     // with gt
+    logger.debug(
+      s"checking marketStatus $marketStatus matches requested odds ${command.odds}")
     marketStatus.result match {
       case 0 =>
         Match(

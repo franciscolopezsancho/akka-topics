@@ -8,6 +8,8 @@
     </appender>
 
    <logger name="slick.jdbc.JdbcBackend.statementAndParameter" level="info" />
+
+   <logger name="example.betting" level="DEBUG" />
     <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>

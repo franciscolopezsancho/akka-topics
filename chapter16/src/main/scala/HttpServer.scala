@@ -1,4 +1,4 @@
-package example.streams.two
+package example.validation
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors

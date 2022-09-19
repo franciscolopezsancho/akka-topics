@@ -222,32 +222,7 @@ lazy val chapter10b = project
 
     )
 
-lazy val chapter13a = project
-  .in(file("chapter13a"))
-  .settings(
-      scalaVersion := ScalaVersion,
-      libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
-        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
-        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
-        "ch.qos.logback" % "logback-classic" % LogbackVersion,
-      )
-  )
 
-
-lazy val clustering3 = project
-  .in(file("clustering3"))
-  .settings(
-      scalaVersion := ScalaVersion,
-      libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
-        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
-        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
-        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
-        "ch.qos.logback" % "logback-classic" % LogbackVersion,
-      )
-)
 
 lazy val chapter11a = project
     .in(file("chapter11a"))
@@ -292,27 +267,18 @@ lazy val chapter11c = project
         "ch.qos.logback" % "logback-classic" % LogbackVersion,
       ))
 
-lazy val `akka-streams-two` = project
-    .in(file("akka-streams-two"))
-    .enablePlugins(AkkaGrpcPlugin)//grpc example
-    .settings(
-      scalafmtOnCompile := true,
+lazy val chapter13a = project
+  .in(file("chapter13a"))
+  .settings(
       scalaVersion := ScalaVersion,
       libraryDependencies ++= Seq(
-       "com.typesafe.akka" %% "akka-stream" % AkkaVersion, 
-       "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
-       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
-       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
-       "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
-       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,//grpc example
-       "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,//grpc example
-       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//grpc example
-       "org.scalikejdbc" %% "scalikejdbc" % "3.5.0",
-       "org.postgresql" % "postgresql" % "42.2.18" % Test, 
-       "org.scalikejdbc" %% "scalikejdbc-config"  % "3.5.0",
-       "org.scalatest" %% "scalatest" % ScalaTest % Test,
-       "ch.qos.logback" % "logback-classic" % LogbackVersion, 
-      ))
+        "com.typesafe.akka" %% "akka-cluster-typed" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,
+        "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
+        "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % AkkaManagementVersion,
+        "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      )
+  )
 
 lazy val chapter14 = project
     .in(file("chapter14"))
@@ -338,7 +304,7 @@ lazy val `betting-house` = project
     .in(file("betting-house"))
     .enablePlugins(AkkaGrpcPlugin, JavaAppPackaging, DockerPlugin)
     .settings(
-      version := "0.1.2-SNAPSHOT",
+      version := "0.1.0-SNAPSHOT",
       dockerUsername := Some("franciscolopezsancho"), // assumes docker.io by default
       scalafmtOnCompile := true,
       Compile / mainClass := Some("example.betting.Main"), 
@@ -372,6 +338,28 @@ lazy val `betting-house` = project
       "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion
+      ))
+
+lazy val chapter16 = project
+    .in(file("chapter16"))
+    .enablePlugins(AkkaGrpcPlugin)//grpc example
+    .settings(
+      scalafmtOnCompile := true,
+      scalaVersion := ScalaVersion,
+      libraryDependencies ++= Seq(
+       "com.typesafe.akka" %% "akka-stream" % AkkaVersion, 
+       "com.typesafe.akka" %% "akka-stream-typed" % AkkaVersion,
+       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion,
+       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+       "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
+       "com.typesafe.akka" %% "akka-discovery" % AkkaVersion,//grpc example
+       "com.typesafe.akka" %% "akka-http2-support" % AkkaHttpVersion,//grpc example
+       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,//grpc example
+       "org.scalikejdbc" %% "scalikejdbc" % "3.5.0",
+       "org.postgresql" % "postgresql" % "42.2.18" % Test, 
+       "org.scalikejdbc" %% "scalikejdbc-config"  % "3.5.0",
+       "org.scalatest" %% "scalatest" % ScalaTest % Test,
+       "ch.qos.logback" % "logback-classic" % LogbackVersion, 
       ))
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
