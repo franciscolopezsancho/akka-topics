@@ -1,4 +1,4 @@
-drop table if exists public.akka_projection_management;
+DROP table if exists public.akka_projection_management;
 
 DROP table if exists public.akka_projection_offset_store;
 

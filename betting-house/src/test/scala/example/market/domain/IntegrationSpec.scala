@@ -111,8 +111,6 @@ class IntegrationSpec
         0,
         betProbe.ref)
 
-      betProbe.expectMessage(Bet.Registered)
-
       eventually {
 
         bet ! Bet.GetState(betProbe.ref)
@@ -120,7 +118,57 @@ class IntegrationSpec
         val expected = Bet.FailedState(
           Bet
             .Status("betId1", "walletId1", "marketId1", 1.26, 100, 0),
-          "market odds not available")
+          "market odds [Some(1.05)] not available")
+
+        betProbe.expectMessage(Bet.CurrentState(expected))
+      }
+
+      //TODO for the reader. Make sure the money is back to the wallet is bet fails.
+      // wallet ! Wallet.CheckFunds(walletProbe.ref)
+      // walletProbe.expectMessage(Wallet.CurrentBalance(100))
+    }
+  }
+
+  "a bet" should {
+    "pass if the odds from the market are equal that the bet ones" in {
+
+      val walletId = "walletId2"
+      val marketId = "marketId2"
+      val betId = "betId2"
+
+      val walletProbe = createTestProbe[Wallet.Response]
+
+      val wallet = sharding.entityRefFor(Wallet.TypeKey, walletId)
+
+      wallet ! Wallet.AddFunds(100, walletProbe.ref)
+
+      walletProbe.expectMessage(10.seconds, Wallet.Accepted)
+
+      val marketProbe = createTestProbe[Market.Response]
+
+      val market = sharding.entityRefFor(Market.TypeKey, marketId)
+
+      market ! Market.Open(
+        Market.Fixture("fixtureId2", "RM", "MU"),
+        Market.Odds(1.25, 1.75, 1.05),
+        OffsetDateTime.now,
+        marketProbe.ref)
+
+      marketProbe.expectMessage(10.seconds, Market.Accepted)
+
+      val bet = sharding.entityRefFor(Bet.TypeKey, betId)
+
+      val betProbe = createTestProbe[Bet.Response]
+
+      bet ! Bet.Open(walletId, marketId, 1.25, 100, 0, betProbe.ref)
+
+      eventually {
+
+        bet ! Bet.GetState(betProbe.ref)
+
+        val expected = Bet.OpenState(
+          Bet
+            .Status(betId, walletId, marketId, 1.25, 100, 0))
 
         betProbe.expectMessage(Bet.CurrentState(expected))
       }
@@ -130,9 +178,9 @@ class IntegrationSpec
   "a bet" should {
     "pass if the odds from the market are higher than the bet ones" in {
 
-      val walletId = "walletId2"
-      val marketId = "marketId2"
-      val betId = "betId2"
+      val walletId = "walletId3"
+      val marketId = "marketId3"
+      val betId = "betId3"
 
       val walletProbe = createTestProbe[Wallet.Response]
 
@@ -147,7 +195,7 @@ class IntegrationSpec
       val market = sharding.entityRefFor(Market.TypeKey, marketId)
 
       market ! Market.Open(
-        Market.Fixture("fixtureId1", "RM", "MU"),
+        Market.Fixture("fixtureId3", "RM", "MU"),
         Market.Odds(1.25, 1.75, 1.05),
         OffsetDateTime.now,
         marketProbe.ref)
@@ -159,8 +207,6 @@ class IntegrationSpec
       val betProbe = createTestProbe[Bet.Response]
 
       bet ! Bet.Open(walletId, marketId, 1.05, 100, 0, betProbe.ref)
-
-      betProbe.expectMessage(Bet.Registered)
 
       eventually {
 

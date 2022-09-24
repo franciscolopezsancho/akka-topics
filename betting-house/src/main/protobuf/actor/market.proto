@@ -22,9 +22,9 @@ message MarketData {
 	FixtureData fixture = 2;
 	OddsData odds = 3;
 	enum Result {
-		DEFAULT = 0;
-		HOME_WINS = 1;
-		HOME_LOSES = 2;
+		HOME_WINS = 0;
+		HOME_LOSES = 1;
+		TIE = 2;
 	}
 	Result result = 4;
 	uint64 opensAt = 5;

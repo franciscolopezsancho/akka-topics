@@ -1,3 +1,7 @@
+## Intro
+The following is for you to start to get familiar with most of the concepts you have been learning in the book. This application is only an scaffold by not means it is finished. I encourage you to test diferent scenarios until you break or find the things don't work as you would expected. With the knowledge you have acquire till here you should be able to improve the application and take it to the next level. 
+
+
 ## Run in local docker
 
     cd local-deployment
@@ -8,13 +12,14 @@
 
 Create tables in DB. When prompt enter password `betting`
 
+    cd ../common-deployment
     psql -h 127.0.0.1 -d betting  -U betting -f bet-projection.sql
     psql -h 127.0.0.1 -d betting  -U betting -f akka-persistence.sql
     psql -h 127.0.0.1 -d betting  -U betting -f akka-projection.sql
 
 ### start the application
 
-    sbt "-Dconfig.resource=local.conf"
+    sbt "-Dconfig.resource=local.conf" \
     betting-house/run
 
 
@@ -37,7 +42,7 @@ Update
         "marketId": "1243",
         "odds": {"winHome": 1.80, "winAway": 1.05, "tie": 1.40 },
         "opensAt": 123,
-        "result": 0
+        "result": 1
       }' -plaintext localhost:9002 MarketService/Update
 
 and verify 
@@ -60,87 +65,126 @@ Verify
     curl "localhost:9001/wallet?walletId=123"
 
 
-### Place Bet
+### Place a couple of Bets// TODO review. 
     grpcurl -d  '{ 
       "betId": "112",
       "walletId": "123",
       "marketId": "1243",
       "odds": 1.80,
       "stake": 100,
+      "result": 0
+    }' -plaintext localhost:9000 BetService/Open
+
+and verify 
+
+    grpcurl -d  '{ "betId": "112"}' -plaintext localhost:9000 BetService/GetState
+
+
+    grpcurl -d  '{ 
+      "betId": "114",
+      "walletId": "123",
+      "marketId": "1243",
+      "odds": 1.05,
+      "stake": 110,
       "result": 1
     }' -plaintext localhost:9000 BetService/Open
 
 and verify 
 
-    grpcurl -d  '{ 
-      "betId": "112"
-    }' -plaintext localhost:9000 BetService/GetState
+    grpcurl -d  '{ "betId": "112"}' -plaintext localhost:9000 BetService/GetState
 
 ### Get Projection
 
-grpcurl -d  '{ 
-  "marketId": "1243"
-}' -plaintext localhost:9003 BetProjectionService/GetBetByMarket
+     grpcurl -d  '{ "marketId": "1243"}' -plaintext -emit-defaults localhost:9003 BetProjectionService/GetBetByMarket
 
-kompose convert -f docker-compose.yaml
+here `-emit-defaults` does print zero in values with type int32. Such as `result` in `bet.proto` 
 
+### Known issues
 
+When running grpcurl above to query the DB projection - even thought the server gets the data right - the gRPC when transformation doesn't get the field 'result' in some cases.
 
+#### TIP
+To create the required files for the Kubernetes Deployments
+    
+    kompose convert -f docker-compose.yaml
 
+Those files are already created for you in k8s-deployemnt folder. This is just a tip.
 
+## Run in Kubernetes
 
+### start minikube [optional]
+    
+    minikube start
 
-## minikube
+In another command like go to
 
     cd k8s-deployment
 
+### create namespace to hold all the resources for the Akka Cluster, Kafka and DB
+
+    kubectl create ns akka-cluster
+
 ### create Kafka cluster
 
-kubectl create -f 'https://strimzi.io/install/latest?namespace=akka-cluster' -n akka-cluster
+    kubectl create -f 'https://strimzi.io/install/latest?namespace=akka-cluster' -n akka-cluster
 
-kubectl apply -f https://strimzi.io/examples/latest/kafka/kafka-persistent-single.yaml -n akka-cluster
+    kubectl apply -f https://strimzi.io/examples/latest/kafka/kafka-persistent-single.yaml -n akka-cluster
 
-#### create topic in Kafka cluster //TODO check topic.yml is not needed anymore
-kubectl -n akka-cluster run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.26.0-kafka-3.0.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic bet-projection --from-beginning
+#### create topic in Kafka cluster 
+    
+    kubectl -n akka-cluster run kafka-consumer -ti \
+       --image=quay.io/strimzi/kafka:0.26.0-kafka-3.0.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic bet-projection --from-beginning
 
 ### create database
 
-kubectl apply -f postgres-betting-db-deployment.yaml 
-kubectl apply -f postgres-betting-db-service.yaml 
+    kubectl apply -f postgres-betting-db-deployment.yaml 
+    kubectl apply -f postgres-betting-db-service.yaml 
+    kubectl port-forward pods/[pod-name] 5432:5432 -n akka-cluster 
+
+change the `pod-name` accordingly 
+    
+    cd ../common-deployment
+    psql -h 127.0.0.1 -d betting  -U betting -f bet-projection.sql
+    psql -h 127.0.0.1 -d betting  -U betting -f akka-persistence.sql
+    psql -h 127.0.0.1 -d betting  -U betting -f akka-projection.sql
+ 
 
 ### create betting-house image and deploy
 
- sbt docker:publish
+    sbt docker:publish
 
- k -n akka-cluster apply -f deployment.yml
+    k -n akka-cluster apply -f deployment.yml
 
- k -n akka-cluster expose deployment my-deployment-name \
-  --name=betting-service
 
 ### link local ports to kubernetes pods
-k port-forward svc/postgres-betting-db 5432:5432 -n akka-cluster
-
-k port-forward svc/my-cluster-kafka-bootstrap 9092:9092 -n akka-cluster
-
-k port-forward svc/betting-service 9000:9000 9001:9001 9002:9002 9003:9003 -n akka-cluster
 
 
+    k port-forward svc/my-cluster-kafka-bootstrap 9092:9092 -n akka-cluster
 
- kafkacat -C -b 127.0.0.1:9092 -t bet-projection
+    k port-forward svc/betting-service 9000:9000 9001:9001 9002:9002 9003:9003 -n akka-cluster
 
 
 
+#### To connect to DB
+
+You can use the port forwarding to the DB to connect to it and check the expected events are stored in the DB.
+  
+    k port-forward svc/postgres-betting-db 5432:5432 -n akka-cluster
 
 
+#### To connect to the betting services
+
+    k -n akka-cluster expose deployment my-deployment-name --name=betting-service
 
 
+    k port-forward svc/betting-service 9000:9000 9001:9001 9002:9002 9003:9003 -n akka-cluster
+
+#### To connect to the Kafka topic
+
+You can use a Kafka consumer to check if the expected events end up in the Topic of the market. One possibility is the Strimzi Kafka consumer , which you can use as follows.
+    
+    kubectl -n akka-cluster run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.26.0-kafka-3.0.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic bet-projection --from-beginning      
+                  
+This spins a kafka-consumer pod that listens to the market-projection topic and connect you to the pod. 
 
 
-
-
-
-
-
-
-#####
-prove settle

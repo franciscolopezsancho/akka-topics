@@ -12,8 +12,6 @@ import com.typesafe.config.ConfigFactory
 
 import example.bet.grpc.{ BetServiceHandler, BetServiceImplSharding }
 
-import scala.io.StdIn
-
 import example.betting.WalletService
 
 object WalletServiceServer {

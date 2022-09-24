@@ -146,18 +146,14 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
       val odds = marketData.odds.map(m =>
         Market.Odds(m.winHome, m.winAway, m.tie))
 
-      val opensAt = marketData.opensAt match {
-        case 0L => None
-        case x =>
-          Some(
-            OffsetDateTime
-              .ofInstant(Instant.ofEpochMilli(x), ZoneId.of("UTC")))
-      }
+      val opensAt =
+        Some(
+          OffsetDateTime
+            .ofInstant(
+              Instant.ofEpochMilli(marketData.opensAt),
+              ZoneId.of("UTC")))
 
-      val result = marketData.result match {
-        case MarketData.Result.DEFAULT => None
-        case x                         => Some(x.value)
-      }
+      val result = Some(marketData.result.value)
 
       Market.Update(odds, opensAt, result, replyTo)
 

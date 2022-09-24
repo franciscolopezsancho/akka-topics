@@ -1,0 +1,150 @@
+[2022-09-23 17:08:45,784] [INFO] [akka.event.slf4j.Slf4jLogger] [] [betting-house-akka.actor.default-dispatcher-3] - Slf4jLogger started 
+[2022-09-23 17:08:47,883] [INFO] [akka.remote.artery.ArteryTransport] [] [betting-house-akka.actor.default-dispatcher-3] - Remoting started with transport [Artery tcp]; listening on address [akka://betting-house@172.17.0.8:25520] with UID [-4043729810563770804] 
+[2022-09-23 17:08:47,978] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-3] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Starting up, Akka version [2.6.20] ... 
+[2022-09-23 17:08:49,265] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-3] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Registered cluster JMX MBean [akka:type=Cluster] 
+[2022-09-23 17:08:49,266] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-3] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Started up successfully 
+[2022-09-23 17:08:49,771] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-6] - Cluster Node [akka://betting-house@172.17.0.8:25520] - No seed nodes found in configuration, relying on Cluster Bootstrap for joining 
+[2022-09-23 17:08:49,951] [INFO] [akka.cluster.sbr.SplitBrainResolver] [] [betting-house-akka.actor.default-dispatcher-6] - SBR started. Config: strategy [KeepMajority], stable-after [20 seconds], down-all-when-unstable [15 seconds], selfUniqueAddress [akka://betting-house@172.17.0.8:25520#-4043729810563770804], selfDc [default]. 
+[2022-09-23 17:08:54,159] [INFO] [akka.management.internal.HealthChecksImpl] [] [betting-house-akka.actor.default-dispatcher-3] - Loading readiness checks [(cluster-membership,akka.management.cluster.scaladsl.ClusterMembershipCheck), (sharding,akka.cluster.sharding.ClusterShardingHealthCheck)] 
+[2022-09-23 17:08:54,159] [INFO] [akka.management.internal.HealthChecksImpl] [] [betting-house-akka.actor.default-dispatcher-3] - Loading liveness checks [] 
+[2022-09-23 17:08:54,769] [INFO] [akka.management.scaladsl.AkkaManagement] [] [betting-house-akka.actor.default-dispatcher-3] - Binding Akka Management (HTTP) endpoint to: 0.0.0.0:8558 
+[2022-09-23 17:08:55,247] [INFO] [akka.management.scaladsl.AkkaManagement] [] [betting-house-akka.actor.default-dispatcher-13] - Including HTTP management routes for ClusterHttpManagementRouteProvider 
+[2022-09-23 17:08:56,464] [INFO] [akka.management.scaladsl.AkkaManagement] [] [betting-house-akka.actor.default-dispatcher-13] - Including HTTP management routes for ClusterBootstrap 
+[2022-09-23 17:08:56,474] [INFO] [akka.management.cluster.bootstrap.ClusterBootstrap] [] [betting-house-akka.actor.default-dispatcher-13] - Using self contact point address: http://172.17.0.8:8558 
+[2022-09-23 17:08:56,564] [INFO] [akka.management.scaladsl.AkkaManagement] [] [betting-house-akka.actor.default-dispatcher-13] - Including HTTP management routes for HealthCheckRoutes 
+[2022-09-23 17:08:58,054] [INFO] [akka.management.cluster.bootstrap.ClusterBootstrap] [] [betting-house-akka.actor.default-dispatcher-13] - Initiating bootstrap procedure using kubernetes-api method... 
+[2022-09-23 17:08:58,066] [INFO] [akka.management.cluster.bootstrap.ClusterBootstrap] [] [betting-house-akka.actor.default-dispatcher-13] - Bootstrap using `akka.discovery` method: kubernetes-api 
+[2022-09-23 17:08:58,071] [INFO] [akka.management.scaladsl.AkkaManagement] [akkaManagementBound] [betting-house-akka.actor.default-dispatcher-13] - Bound Akka Management (HTTP) endpoint to: 0.0.0.0:8558 
+[2022-09-23 17:08:58,492] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [akkaBootstrapInit] [betting-house-akka.actor.default-dispatcher-13] - Locating service members. Using discovery [akka.discovery.kubernetes.KubernetesApiServiceDiscovery], join decider [akka.management.cluster.bootstrap.LowestAddressJoinDecider], scheme [http] 
+[2022-09-23 17:08:58,540] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [] [betting-house-akka.actor.default-dispatcher-13] - Looking up [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))] 
+[2022-09-23 17:08:58,540] [INFO] [akka.discovery.kubernetes.KubernetesApiServiceDiscovery] [] [betting-house-akka.actor.default-dispatcher-13] - Querying for pods with label selector: [app=to-find-nodes-and-form-the-cluster]. Namespace: [akka-cluster]. Port: [None] 
+[2022-09-23 17:08:58,952] [INFO] [akka.cluster.sharding.typed.scaladsl.ClusterSharding] [] [betting-house-akka.actor.default-dispatcher-13] - Starting Shard Region [bet]... 
+[2022-09-23 17:08:59,545] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [] [betting-house-akka.actor.default-dispatcher-17] - Looking up [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))] 
+[2022-09-23 17:08:59,546] [INFO] [akka.discovery.kubernetes.KubernetesApiServiceDiscovery] [] [betting-house-akka.actor.default-dispatcher-17] - Querying for pods with label selector: [app=to-find-nodes-and-form-the-cluster]. Namespace: [akka-cluster]. Port: [None] 
+[2022-09-23 17:08:59,658] [INFO] [akka.cluster.sharding.ShardRegion] [] [betting-house-akka.actor.default-dispatcher-16] - bet: Automatic entity passivation: idle entities after [2.000 min], checked every [1.000 min] 
+[2022-09-23 17:09:00,761] [INFO] [akka.cluster.sharding.typed.scaladsl.ClusterSharding] [] [betting-house-akka.actor.default-dispatcher-13] - Starting Shard Region [market]... 
+[2022-09-23 17:09:00,772] [INFO] [akka.cluster.sharding.ShardRegion] [] [betting-house-akka.actor.default-dispatcher-16] - market: Automatic entity passivation: idle entities after [2.000 min], checked every [1.000 min] 
+[2022-09-23 17:09:01,046] [INFO] [akka.cluster.sharding.typed.scaladsl.ClusterSharding] [] [betting-house-akka.actor.default-dispatcher-17] - Starting Shard Region [wallet]... 
+[2022-09-23 17:09:01,062] [INFO] [akka.cluster.sharding.ShardRegion] [] [betting-house-akka.actor.default-dispatcher-6] - wallet: Automatic entity passivation: idle entities after [2.000 min], checked every [1.000 min] 
+[2022-09-23 17:09:01,348] [INFO] [akka.cluster.sharding.typed.scaladsl.ClusterSharding] [] [betting-house-akka.actor.default-dispatcher-17] - Starting Shard Region [sharded-daemon-process-bet-projection]... 
+[2022-09-23 17:09:01,350] [INFO] [akka.cluster.sharding.ShardRegion] [] [betting-house-akka.actor.default-dispatcher-17] - sharded-daemon-process-bet-projection: Automatic entity passivation: disabled 
+[2022-09-23 17:09:01,466] [INFO] [akka.cluster.sharding.typed.scaladsl.ClusterSharding] [] [betting-house-akka.actor.default-dispatcher-17] - Starting Shard Region [sharded-daemon-process-MarketProjection]... 
+[2022-09-23 17:09:01,546] [INFO] [akka.cluster.sharding.ShardRegion] [] [betting-house-akka.actor.default-dispatcher-17] - sharded-daemon-process-MarketProjection: Automatic entity passivation: disabled 
+############# application starting ############## 
+Press RETURN to stop
+[2022-09-23 17:09:01,561] [INFO] [akka.actor.CoordinatedShutdown] [] [betting-house-akka.actor.default-dispatcher-6] - Running CoordinatedShutdown with reason [ActorSystemTerminateReason] 
+[2022-09-23 17:09:01,775] [INFO] [akka.actor.LocalActorRef] [akkaDeadLetter] [betting-house-akka.actor.default-dispatcher-6] - Message [akka.cluster.ClusterUserAction$Leave] to Actor[akka://betting-house/system/cluster/core/daemon#-1250747422] was unhandled. [1] dead letters encountered. This logging can be turned off or adjusted with configuration settings 'akka.log-dead-letters' and 'akka.log-dead-letters-during-shutdown'. 
+[2022-09-23 17:09:01,846] [INFO] [akka.cluster.singleton.ClusterSingletonManager] [] [betting-house-akka.actor.default-dispatcher-6] - Exited [akka://betting-house@172.17.0.8:25520]. 
+[2022-09-23 17:09:01,847] [INFO] [akka.cluster.singleton.ClusterSingletonManager] [] [betting-house-akka.actor.default-dispatcher-6] - Exited [akka://betting-house@172.17.0.8:25520]. 
+[2022-09-23 17:09:01,847] [INFO] [akka.cluster.singleton.ClusterSingletonManager] [] [betting-house-akka.actor.default-dispatcher-6] - Exited [akka://betting-house@172.17.0.8:25520]. 
+[2022-09-23 17:09:01,847] [INFO] [akka.cluster.singleton.ClusterSingletonManager] [] [betting-house-akka.actor.default-dispatcher-6] - Exited [akka://betting-house@172.17.0.8:25520]. 
+[2022-09-23 17:09:01,847] [INFO] [akka.cluster.singleton.ClusterSingletonManager] [] [betting-house-akka.actor.default-dispatcher-6] - Exited [akka://betting-house@172.17.0.8:25520]. 
+[2022-09-23 17:09:01,849] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-6] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Exiting completed 
+[2022-09-23 17:09:01,851] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-6] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Shutting down... 
+[2022-09-23 17:09:01,858] [INFO] [akka.cluster.Cluster] [] [betting-house-akka.actor.default-dispatcher-6] - Cluster Node [akka://betting-house@172.17.0.8:25520] - Successfully shut down 
+[2022-09-23 17:09:01,862] [INFO] [org.apache.kafka.clients.producer.ProducerConfig] [] [betting-house-akka.kafka.default-dispatcher-25] - ProducerConfig values: 
+	acks = 1
+	batch.size = 16384
+	bootstrap.servers = [my-cluster-kafka-bootstrap:9092]
+	buffer.memory = 33554432
+	client.dns.lookup = use_all_dns_ips
+	client.id = producer-1
+	compression.type = none
+	connections.max.idle.ms = 540000
+	delivery.timeout.ms = 120000
+	enable.idempotence = false
+	interceptor.classes = []
+	internal.auto.downgrade.txn.commit = false
+	key.serializer = class org.apache.kafka.common.serialization.StringSerializer
+	linger.ms = 0
+	max.block.ms = 60000
+	max.in.flight.requests.per.connection = 5
+	max.request.size = 1048576
+	metadata.max.age.ms = 300000
+	metadata.max.idle.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partitioner.class = class org.apache.kafka.clients.producer.internals.DefaultPartitioner
+	receive.buffer.bytes = 32768
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.mechanism = GSSAPI
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 127000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	transaction.timeout.ms = 60000
+	transactional.id = null
+	value.serializer = class org.apache.kafka.common.serialization.ByteArraySerializer
+ 
+[2022-09-23 17:09:02,575] [INFO] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-25] - Kafka version: 2.7.0 
+[2022-09-23 17:09:02,575] [INFO] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-25] - Kafka commitId: 448719dc99a19793 
+[2022-09-23 17:09:02,576] [INFO] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-25] - Kafka startTimeMs: 1663952942541 
+[2022-09-23 17:09:02,767] [INFO] [org.apache.kafka.clients.producer.KafkaProducer] [] [betting-house-akka.kafka.default-dispatcher-25] - [Producer clientId=producer-1] Closing the Kafka producer with timeoutMillis = 60000 ms. 
+[2022-09-23 17:09:03,360] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [akkaBootstrapResolved] [betting-house-akka.actor.default-dispatcher-13] - Located service members based on: [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))]: [ResolvedTarget(172-17-0-8.akka-cluster.pod.cluster.local,None,Some(/172.17.0.8)), ResolvedTarget(172-17-0-10.akka-cluster.pod.cluster.local,None,Some(/172.17.0.10)), ResolvedTarget(172-17-0-9.akka-cluster.pod.cluster.local,None,Some(/172.17.0.9))], filtered to [172-17-0-8.akka-cluster.pod.cluster.local:0, 172-17-0-10.akka-cluster.pod.cluster.local:0, 172-17-0-9.akka-cluster.pod.cluster.local:0] 
+[2022-09-23 17:09:03,449] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [akkaBootstrapResolved] [betting-house-akka.actor.default-dispatcher-15] - Located service members based on: [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))]: [ResolvedTarget(172-17-0-8.akka-cluster.pod.cluster.local,None,Some(/172.17.0.8)), ResolvedTarget(172-17-0-10.akka-cluster.pod.cluster.local,None,Some(/172.17.0.10)), ResolvedTarget(172-17-0-9.akka-cluster.pod.cluster.local,None,Some(/172.17.0.9))], filtered to [172-17-0-8.akka-cluster.pod.cluster.local:0, 172-17-0-10.akka-cluster.pod.cluster.local:0, 172-17-0-9.akka-cluster.pod.cluster.local:0] 
+[2022-09-23 17:09:03,772] [INFO] [akka.management.cluster.bootstrap.LowestAddressJoinDecider] [akkaBootstrapInProgress] [betting-house-akka.actor.default-dispatcher-17] - Discovered [3] contact points, confirmed [0], which is less than the required [2], retrying 
+[2022-09-23 17:09:03,850] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-26] - Probing [http://172-17-0-10.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-10.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[2022-09-23 17:09:03,961] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-15] - Probing [http://172-17-0-9.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-9.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[2022-09-23 17:09:04,663] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [] [betting-house-akka.actor.default-dispatcher-3] - Looking up [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))] 
+[2022-09-23 17:09:04,664] [INFO] [akka.discovery.kubernetes.KubernetesApiServiceDiscovery] [] [betting-house-akka.actor.default-dispatcher-3] - Querying for pods with label selector: [app=to-find-nodes-and-form-the-cluster]. Namespace: [akka-cluster]. Port: [None] 
+[2022-09-23 17:09:04,664] [INFO] [akka.management.internal.HealthChecksImpl] [akkaReadinessCheckFailed] [betting-house-akka.actor.default-dispatcher-3] - Check [akka.management.cluster.scaladsl.ClusterMembershipCheck] not ok 
+[2022-09-23 17:09:04,960] [INFO] [akka.management.cluster.bootstrap.LowestAddressJoinDecider] [akkaBootstrapInProgress] [betting-house-akka.actor.default-dispatcher-16] - Discovered [3] contact points, confirmed [0], which is less than the required [2], retrying 
+[2022-09-23 17:09:05,165] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-15] - Probing [http://172-17-0-10.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-10.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[2022-09-23 17:09:05,242] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [akkaBootstrapResolved] [betting-house-akka.actor.default-dispatcher-6] - Located service members based on: [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))]: [ResolvedTarget(172-17-0-8.akka-cluster.pod.cluster.local,None,Some(/172.17.0.8)), ResolvedTarget(172-17-0-10.akka-cluster.pod.cluster.local,None,Some(/172.17.0.10)), ResolvedTarget(172-17-0-9.akka-cluster.pod.cluster.local,None,Some(/172.17.0.9))], filtered to [172-17-0-8.akka-cluster.pod.cluster.local:0, 172-17-0-10.akka-cluster.pod.cluster.local:0, 172-17-0-9.akka-cluster.pod.cluster.local:0] 
+[2022-09-23 17:09:05,344] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-17] - Probing [http://172-17-0-9.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-9.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[2022-09-23 17:09:05,356] [INFO] [akka.management.cluster.bootstrap.contactpoint.HttpClusterBootstrapRoutes] [] [betting-house-akka.actor.default-dispatcher-6] - Bootstrap request from 172.17.0.8:42966: Contact Point returning 0 seed-nodes [] 
+[2022-09-23 17:09:05,560] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [akkaBootstrapSeedNodes] [betting-house-akka.actor.default-dispatcher-26] - Contact point [akka://betting-house@172.17.0.8:25520] returned [0] seed-nodes [] 
+[2022-09-23 17:09:05,976] [INFO] [akka.management.cluster.bootstrap.LowestAddressJoinDecider] [akkaBootstrapInProgress] [betting-house-akka.actor.default-dispatcher-6] - Discovered [3] contact points, confirmed [1], which is less than the required [2], retrying 
+[2022-09-23 17:09:06,247] [INFO] [org.apache.kafka.common.metrics.Metrics] [] [betting-house-akka.kafka.default-dispatcher-25] - Metrics scheduler closed 
+[2022-09-23 17:09:06,248] [INFO] [org.apache.kafka.common.metrics.Metrics] [] [betting-house-akka.kafka.default-dispatcher-25] - Closing reporter org.apache.kafka.common.metrics.JmxReporter 
+[2022-09-23 17:09:06,248] [INFO] [org.apache.kafka.common.metrics.Metrics] [] [betting-house-akka.kafka.default-dispatcher-25] - Metrics reporters closed 
+[2022-09-23 17:09:06,253] [INFO] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-25] - App info kafka.producer for producer-1 unregistered 
+[2022-09-23 17:09:06,271] [INFO] [akka.remote.RemoteActorRefProvider$RemotingTerminator] [] [betting-house-akka.actor.default-dispatcher-15] - Shutting down remote daemon. 
+[2022-09-23 17:09:06,271] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-15] - Probing [http://172-17-0-10.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-10.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[2022-09-23 17:09:06,343] [INFO] [akka.remote.RemoteActorRefProvider$RemotingTerminator] [] [betting-house-akka.actor.default-dispatcher-6] - Remote daemon shut down; proceeding with flushing remote transports. 
+[2022-09-23 17:09:06,468] [INFO] [akka.management.cluster.bootstrap.internal.BootstrapCoordinator] [] [betting-house-akka.actor.default-dispatcher-13] - Looking up [Lookup(to-find-nodes-and-form-the-cluster,None,Some(tcp))] 
+[2022-09-23 17:09:06,468] [INFO] [akka.discovery.kubernetes.KubernetesApiServiceDiscovery] [] [betting-house-akka.actor.default-dispatcher-13] - Querying for pods with label selector: [app=to-find-nodes-and-form-the-cluster]. Namespace: [akka-cluster]. Port: [None] 
+[2022-09-23 17:09:06,568] [INFO] [akka.remote.RemoteActorRefProvider$RemotingTerminator] [] [betting-house-akka.actor.default-dispatcher-6] - Remoting shut down. 
+[2022-09-23 17:09:06,569] [WARN] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-6] - Probing [http://172-17-0-9.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-9.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused 
+[WARN] [09/23/2022 17:09:06.569] [betting-house-akka.actor.default-dispatcher-16] [akka://betting-house@172.17.0.8:25520/system/bootstrapCoordinator/contactPointProbe-172-17-0-9.akka-cluster.pod.cluster.local-8558] Probing [http://172-17-0-9.akka-cluster.pod.cluster.local:8558/bootstrap/seed-nodes] failed due to: Tcp command [Connect(172-17-0-9.akka-cluster.pod.cluster.local:8558,None,List(),Some(10 seconds),true)] failed because of java.net.ConnectException: Connection refused
+[2022-09-23 17:09:06,658] [ERROR] [akka.management.cluster.bootstrap.internal.HttpContactPointBootstrap] [] [betting-house-akka.actor.default-dispatcher-3] - Overdue of probing-failure-timeout, stop probing, signaling that it's failed 
+[ERROR] [09/23/2022 17:09:06.648] [betting-house-akka.actor.default-dispatcher-16] [akka://betting-house@172.17.0.8:25520/system/bootstrapCoordinator/contactPointProbe-172-17-0-9.akka-cluster.pod.cluster.local-8558] Overdue of probing-failure-timeout, stop probing, signaling that it's failed

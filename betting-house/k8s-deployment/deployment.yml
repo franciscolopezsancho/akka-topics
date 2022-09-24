@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   labels:
     app: my-label-xyz
-  name: my-deployment-name # shall a remove 21 here and in line 23?
+  name: my-deployment-name 
 spec:
   replicas: 3
   selector:
@@ -25,7 +25,7 @@ spec:
       serviceAccountName: my-cluster # check this name is right
       containers:
       - name: my-container-name
-        image: franciscolopezsancho/betting-house:0.1.2-SNAPSHOT
+        image: franciscolopezsancho/betting-house:0.1.0-SNAPSHOT
         # Remove for a real project, the image is picked up locally for the integratio test
         imagePullPolicy: Always 
         #health

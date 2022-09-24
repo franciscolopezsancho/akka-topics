@@ -331,13 +331,13 @@ lazy val `betting-house` = project
         "com.lightbend.akka.management" %% "akka-management-cluster-http" % AkkaManagementVersion,
         "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % AkkaManagementVersion,
         "org.scalatest" %% "scalatest" % ScalaTest % Test, 
-          "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
-      "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
-      "org.postgresql" % "postgresql" % "42.2.18",
-       "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
-      "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
-      "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
-      "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion
+        "org.scalikejdbc" %% "scalikejdbc"       % ScalikeJdbcVersion,
+        "org.scalikejdbc" %% "scalikejdbc-config" % ScalikeJdbcVersion,
+        "org.postgresql" % "postgresql" % "42.2.18",
+        "com.typesafe.akka" %% "akka-stream-kafka" % "2.1.1",
+        "com.lightbend.akka" %% "akka-projection-core" % AkkaProjectionVersion,
+        "com.lightbend.akka" %% "akka-projection-eventsourced" % AkkaProjectionVersion,
+        "com.lightbend.akka" %% "akka-projection-jdbc" % AkkaProjectionVersion
       ))
 
 lazy val chapter16 = project

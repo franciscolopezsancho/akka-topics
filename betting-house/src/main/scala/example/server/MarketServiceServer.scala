@@ -16,8 +16,6 @@ import example.market.grpc.{
 
 import example.bet.grpc.BetServiceServer
 
-import scala.io.StdIn
-
 object MarketServiceServer {
 
   def init(
