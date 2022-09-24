@@ -1,6 +1,9 @@
 ## Intro
-The following is for you to start to get familiar with most of the concepts you have been learning in the book. This application is only an scaffold by not means it is finished. I encourage you to test diferent scenarios until you break or find the things don't work as you would expected. With the knowledge you have acquire till here you should be able to improve the application and take it to the next level. 
+This project is designed to reinforce most of the concepts you learned in this book. This application is just a scaffold, it is by no means finished. I encourage you to test different scenarios until you find that something is broken or doesn't work as you expected. For example, you can start with the TODO  created for you IntegrationSpec.
 
+There are also some suggestions in SuggestionsSpec.
+
+With the knowledge you have acquired so far, you should be able to improve the application and take it to the next level. 
 
 ## Run in local docker
 
@@ -81,11 +84,11 @@ and verify
 
 
     grpcurl -d  '{ 
-      "betId": "114",
+      "betId": "113",
       "walletId": "123",
       "marketId": "1243",
       "odds": 1.05,
-      "stake": 110,
+      "stake": 10,
       "result": 1
     }' -plaintext localhost:9000 BetService/Open
 
@@ -99,9 +102,20 @@ and verify
 
 here `-emit-defaults` does print zero in values with type int32. Such as `result` in `bet.proto` 
 
-### Known issues
+The result of this call is expresses the stake multiplied by the odds and grouped by result.
 
-When running grpcurl above to query the DB projection - even thought the server gets the data right - the gRPC when transformation doesn't get the field 'result' in some cases.
+    {
+      "sumstakes": [
+        {
+          "total": 179.99999523162842,
+          "result": 0
+        },
+        {
+          "total": 10.499999523162842,
+          "result": 1
+        }
+      ]
+    }
 
 #### TIP
 To create the required files for the Kubernetes Deployments
