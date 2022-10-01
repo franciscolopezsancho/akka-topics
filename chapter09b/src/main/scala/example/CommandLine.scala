@@ -8,14 +8,14 @@ object CommandLine {
 
   object Command {
 
-    case class AddCargo(
+    final case class AddCargo(
         containerId: String,
         cargoId: String,
         cargoKind: String,
         cargoSize: Int)
         extends Command
-    case object Quit extends Command
-    case class Unknown(consoleInput: String) extends Command
+    final case object Quit extends Command
+    final case class Unknown(consoleInput: String) extends Command
 
     def apply(consoleInput: String): Command =
       CommandParser.parseAsCommand(consoleInput)

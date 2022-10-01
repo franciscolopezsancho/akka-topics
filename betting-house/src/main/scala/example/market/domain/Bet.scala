@@ -39,7 +39,7 @@ object Bet {
   trait ReplyCommand extends Command with CborSerializable {
     def replyTo: ActorRef[Response]
   }
-  case class Open(
+  final case class Open(
       walletId: String,
       marketId: String,
       odds: Double,
@@ -48,30 +48,31 @@ object Bet {
       replyTo: ActorRef[Response])
       extends ReplyCommand
   //probably want a local class not to depend on Market? see Market.State below
-  case class Settle(result: Int, replyTo: ActorRef[Response])
+  final case class Settle(result: Int, replyTo: ActorRef[Response])
       extends ReplyCommand
-  case class Cancel(reason: String, replyTo: ActorRef[Response])
+  final case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends ReplyCommand
-  case class GetState(replyTo: ActorRef[Response])
+  final case class GetState(replyTo: ActorRef[Response])
       extends ReplyCommand
-  private case class MarketOddsAvailable(
+  private final case class MarketOddsAvailable(
       available: Boolean,
       marketOdds: Option[Double])
       extends Command
-  private case class RequestWalletFunds(
+  private final case class RequestWalletFunds(
       response: Wallet.UpdatedResponse)
       extends Command
-  private case class ValidationsTimedOut(seconds: Int) extends Command
-  private case class Fail(reason: String) extends Command
-  private case class Close(reason: String) extends Command
+  private final case class ValidationsTimedOut(seconds: Int)
+      extends Command
+  private final case class Fail(reason: String) extends Command
+  private final case class Close(reason: String) extends Command
 
   sealed trait Response
-  case object Accepted extends Response
-  case class RequestUnaccepted(reason: String) extends Response
-  case class CurrentState(state: State) extends Response
+  final case object Accepted extends Response
+  final case class RequestUnaccepted(reason: String) extends Response
+  final case class CurrentState(state: State) extends Response
 
   //how do I know I bet to the winner or the looser or draw??
-  case class Status(
+  final case class Status(
       betId: String,
       walletId: String,
       marketId: String,
@@ -86,16 +87,17 @@ object Bet {
   sealed trait State extends CborSerializable {
     def status: Status
   }
-  case class UninitializedState(status: Status) extends State
-  case class OpenState(
+  final case class UninitializedState(status: Status) extends State
+  final case class OpenState(
       status: Status,
       marketConfirmed: Option[Boolean] = None,
       fundsConfirmed: Option[Boolean] = None)
       extends State // the ask user when market no longer available
-  case class SettledState(status: Status) extends State
-  case class CancelledState(status: Status) extends State
-  case class FailedState(status: Status, reason: String) extends State
-  case class ClosedState(status: Status) extends State
+  final case class SettledState(status: Status) extends State
+  final case class CancelledState(status: Status) extends State
+  final case class FailedState(status: Status, reason: String)
+      extends State
+  final case class ClosedState(status: Status) extends State
 
   def apply(betId: String): Behavior[Command] = {
     Behaviors.withTimers { timers =>
@@ -159,10 +161,10 @@ object Bet {
   }
 
   sealed trait Event extends CborSerializable
-  case class MarketConfirmed(state: OpenState) extends Event
-  case class FundsGranted(state: OpenState) extends Event
-  case class ValidationsPassed(state: OpenState) extends Event
-  case class Opened(
+  final case class MarketConfirmed(state: OpenState) extends Event
+  final case class FundsGranted(state: OpenState) extends Event
+  final case class ValidationsPassed(state: OpenState) extends Event
+  final case class Opened(
       betId: String,
       walletId: String,
       marketId: String,
@@ -170,10 +172,11 @@ object Bet {
       stake: Int,
       result: Int)
       extends Event
-  case class Settled(betId: String) extends Event
-  case class Cancelled(betId: String, reason: String) extends Event
-  case class Failed(betId: String, reason: String) extends Event
-  case object Closed extends Event
+  final case class Settled(betId: String) extends Event
+  final case class Cancelled(betId: String, reason: String)
+      extends Event
+  final case class Failed(betId: String, reason: String) extends Event
+  final case object Closed extends Event
 
   def handleEvents(state: State, event: Event): State = event match {
     case Opened(betId, walletId, marketId, odds, stake, result) =>
@@ -309,7 +312,7 @@ object Bet {
     }
   }
 
-  private case class Match(doMatch: Boolean, marketOdds: Double)
+  private final case class Match(doMatch: Boolean, marketOdds: Double)
 
   private def oddsDoMatch(
       marketStatus: Market.Status,

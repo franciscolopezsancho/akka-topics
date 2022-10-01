@@ -8,11 +8,11 @@ object Container {
 
   val TypeKey = EntityTypeKey[Command]("container")
 
-  case class Cargo(kind: String, size: Int)
-  case class Cargos(cargos: List[Cargo])
+  final case class Cargo(kind: String, size: Int)
+  final case class Cargos(cargos: List[Cargo])
 
   sealed trait Command
-  case class AddCargo(cargo: Cargo, replyTo: ActorRef[Int])
+  final case class AddCargo(cargo: Cargo, replyTo: ActorRef[Int])
       extends Command
 
   def apply(

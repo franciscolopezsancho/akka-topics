@@ -16,7 +16,7 @@ object PhotoProcessor {
 
 object Camera {
 
-  case class Photo(content: String)
+  final case class Photo(content: String)
 
   def apply() = Behaviors.setup[Photo] { context =>
 

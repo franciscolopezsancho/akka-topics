@@ -10,12 +10,12 @@ import scala.concurrent.duration._
 object Master {
 
   sealed trait Event
-  case object Tick extends Event
+  final case object Tick extends Event
 
-  case class CountedWords(aggregation: Map[String, Int])
+  final case class CountedWords(aggregation: Map[String, Int])
       extends Event
       with CborSerializable
-  case class FailedJob(text: String) extends Event
+  final case class FailedJob(text: String) extends Event
 
   def apply(workerRouter: ActorRef[Worker.Command]): Behavior[Event] =
     Behaviors.withTimers { timers =>

@@ -2,7 +2,7 @@ package example.repository.scalike
 
 import scalikejdbc._
 
-case class StakePerResult(sum: Double, result: Int)
+final case class StakePerResult(sum: Double, result: Int)
 
 trait BetRepository {
 

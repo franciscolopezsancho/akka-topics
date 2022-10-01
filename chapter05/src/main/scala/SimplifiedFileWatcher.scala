@@ -9,7 +9,7 @@ import akka.actor.typed.scaladsl.{ Behaviors }
 object SimplifiedFileWatcher {
 
   sealed trait Command
-  case class Watch(ref: ActorRef[String]) extends Command
+  final case class Watch(ref: ActorRef[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors

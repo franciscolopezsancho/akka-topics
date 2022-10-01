@@ -56,7 +56,7 @@ object ScalikeJdbcSetup {
       with TypesafeConfig
       with NoEnvPrefix
 
-  private case class HikariCloser(dataSource: HikariDataSource)
+  private final case class HikariCloser(dataSource: HikariDataSource)
       extends DataSourceCloser {
     override def close(): Unit = dataSource.close()
   }

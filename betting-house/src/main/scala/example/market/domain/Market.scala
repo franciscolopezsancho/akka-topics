@@ -22,43 +22,50 @@ object Market {
 
   val TypeKey = EntityTypeKey[Command]("market")
 
-  case class Fixture(id: String, homeTeam: String, awayTeam: String)
+  final case class Fixture(
+      id: String,
+      homeTeam: String,
+      awayTeam: String)
       extends CborSerializable
-  case class Odds(winHome: Double, winAway: Double, draw: Double)
+  final case class Odds(
+      winHome: Double,
+      winAway: Double,
+      draw: Double)
       extends CborSerializable
 
   sealed trait Command extends CborSerializable {
     def replyTo: ActorRef[Response]
   }
-  case class Open(
+  final case class Open(
       fixture: Fixture,
       odds: Odds,
       opensAt: OffsetDateTime,
       replyTo: ActorRef[Response])
       extends Command
 
-  case class Update(
+  final case class Update(
       odds: Option[Odds],
       opensAt: Option[OffsetDateTime],
       result: Option[Int], //1 =  winHome, 2 = winAway, 0 = draw
       replyTo: ActorRef[Response])
       extends Command
 
-  case class Close(replyTo: ActorRef[Response]) extends Command
+  final case class Close(replyTo: ActorRef[Response]) extends Command
 
-  case class Cancel(reason: String, replyTo: ActorRef[Response])
+  final case class Cancel(reason: String, replyTo: ActorRef[Response])
       extends Command
-  case class GetState(replyTo: ActorRef[Response]) extends Command
+  final case class GetState(replyTo: ActorRef[Response])
+      extends Command
 
   sealed trait Response extends CborSerializable
-  case object Accepted extends Response
-  case class CurrentState(status: Status) extends Response
-  case class RequestUnaccepted(reason: String) extends Response
+  final case object Accepted extends Response
+  final case class CurrentState(status: Status) extends Response
+  final case class RequestUnaccepted(reason: String) extends Response
 
   sealed trait State extends CborSerializable {
     def status: Status;
   }
-  case class Status(
+  final case class Status(
       marketId: String,
       fixture: Fixture,
       odds: Odds,
@@ -69,9 +76,9 @@ object Market {
       Status(marketId, Fixture("", "", ""), Odds(-1, -1, -1), 0)
   }
   final case class UninitializedState(status: Status) extends State
-  case class OpenState(status: Status) extends State
-  case class ClosedState(status: Status) extends State
-  case class CancelledState(status: Status) extends State
+  final case class OpenState(status: Status) extends State
+  final case class ClosedState(status: Status) extends State
+  final case class CancelledState(status: Status) extends State
 
   def apply(marketId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
@@ -107,16 +114,23 @@ object Market {
   sealed trait Event extends CborSerializable {
     def marketId: String
   }
-  case class Opened(marketId: String, fixture: Fixture, odds: Odds)
+  final case class Opened(
+      marketId: String,
+      fixture: Fixture,
+      odds: Odds)
       extends Event
-  case class Updated(
+  final case class Updated(
       marketId: String,
       odds: Option[Odds],
       result: Option[Int])
       extends Event
-  case class Closed(marketId: String, result: Int, at: OffsetDateTime)
+  final case class Closed(
+      marketId: String,
+      result: Int,
+      at: OffsetDateTime)
       extends Event
-  case class Cancelled(marketId: String, reason: String) extends Event
+  final case class Cancelled(marketId: String, reason: String)
+      extends Event
 
   private def handleEvents(state: State, event: Event): State = {
     (state, event) match {

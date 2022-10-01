@@ -6,9 +6,9 @@ import akka.actor.typed.{ ActorRef, Behavior }
 object Switch {
 
   sealed trait Command
-  case object SwitchOn extends Command
-  case object SwitchOff extends Command
-  case class Payload(content: String, metadata: String)
+  final case object SwitchOn extends Command
+  final case object SwitchOff extends Command
+  final case class Payload(content: String, metadata: String)
       extends Command
 
   def apply(

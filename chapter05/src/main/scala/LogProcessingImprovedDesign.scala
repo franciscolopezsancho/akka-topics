@@ -53,8 +53,10 @@ object LogProcessingGuardian {
 object FileWatcher extends FileListeningAbilities {
 
   sealed trait Command
-  case class NewFile(file: File, timeAdded: Long) extends Command
-  case class FileModified(file: File, timeAdded: Long) extends Command
+  final case class NewFile(file: File, timeAdded: Long)
+      extends Command
+  final case class FileModified(file: File, timeAdded: Long)
+      extends Command
 
   def apply(directory: String): Behavior[Command] =
     Behaviors
@@ -93,7 +95,7 @@ trait FileListeningAbilities {
 object LogProcessor {
 
   sealed trait Command
-  case class LogFile(file: File) extends Command
+  final case class LogFile(file: File) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors
@@ -121,7 +123,10 @@ object LogProcessor {
 object DbWriter {
 
   sealed trait Command
-  case class Line(time: Long, message: String, messageType: String)
+  final case class Line(
+      time: Long,
+      message: String,
+      messageType: String)
       extends Command
 
   def apply(databaseUrl: String): Behavior[Command] =

@@ -9,9 +9,9 @@ import akka.actor.typed.scaladsl.{ Behaviors }
 object ParentWatcher {
 
   sealed trait Command
-  case class Spawn(behavior: Behavior[String]) extends Command
-  case object StopChildren extends Command
-  case object FailChildren extends Command
+  final case class Spawn(behavior: Behavior[String]) extends Command
+  final case object StopChildren extends Command
+  final case object FailChildren extends Command
 
   val childBehavior = Behaviors.receivePartial[String] {
     case (_, "stop") =>

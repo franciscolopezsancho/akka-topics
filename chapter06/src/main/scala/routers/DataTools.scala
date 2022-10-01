@@ -7,7 +7,8 @@ import akka.actor.typed.receptionist.{ Receptionist, ServiceKey }
 
 object DataObfuscator {
   sealed trait Command
-  case class Message(id: String, content: String) extends Command
+  final case class Message(id: String, content: String)
+      extends Command
 
   def apply() = Behaviors.setup[Command] { context =>
 
@@ -29,7 +30,8 @@ object DataObfuscator {
 
 object DataEnricher {
   sealed trait Command
-  case class Message(id: String, content: String) extends Command
+  final case class Message(id: String, content: String)
+      extends Command
 
   def apply() = Behaviors.setup[Command] { context =>
 
@@ -57,11 +59,16 @@ object Aggregator {
   sealed trait Command {
     def id: String
   }
-  case class Obfuscated(id: String, content: String) extends Command
-  case class Enriched(id: String, metadata: String) extends Command
+  final case class Obfuscated(id: String, content: String)
+      extends Command
+  final case class Enriched(id: String, metadata: String)
+      extends Command
 
   sealed trait Event
-  case class Completed(id: String, content: String, metadata: String)
+  final case class Completed(
+      id: String,
+      content: String,
+      metadata: String)
       extends Event
 
   def apply(

@@ -9,7 +9,9 @@ object Worker {
   val RegistrationKey = ServiceKey[Worker.Command]("Worker")
 
   sealed trait Command
-  case class Process(text: String, replyTo: ActorRef[Master.Event])
+  final case class Process(
+      text: String,
+      replyTo: ActorRef[Master.Event])
       extends Command
       with CborSerializable
 

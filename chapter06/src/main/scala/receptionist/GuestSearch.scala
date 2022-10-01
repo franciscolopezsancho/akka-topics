@@ -7,8 +7,9 @@ import akka.actor.typed.receptionist.Receptionist
 object GuestSearch {
 
   sealed trait Command
-  case object Find extends Command
-  private case class ListingResponse(listings: Receptionist.Listing)
+  final case object Find extends Command
+  private final case class ListingResponse(
+      listings: Receptionist.Listing)
       extends Command
 
   def apply(

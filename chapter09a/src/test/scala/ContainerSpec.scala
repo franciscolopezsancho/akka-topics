@@ -61,13 +61,13 @@ object Container {
   val TypeKey =
     EntityTypeKey[Container.Command]("container-type-key")
 
-  case class Cargo(id: String, kind: String, size: Int)
+  final case class Cargo(id: String, kind: String, size: Int)
 
   sealed trait Command
-  case class AddCargo(cargo: Cargo)
+  final case class AddCargo(cargo: Cargo)
       extends Command
       with CborSerializable
-  case class GetCargos(replyTo: ActorRef[List[Cargo]])
+  final case class GetCargos(replyTo: ActorRef[List[Cargo]])
       extends Command
       with CborSerializable
 

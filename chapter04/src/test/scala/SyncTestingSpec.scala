@@ -18,48 +18,11 @@ import akka.actor.typed.ActorRef
 import org.slf4j.event.Level
 import scala.concurrent.duration.DurationInt
 
-object SyncTestingSpec {
-
-  object SimplifiedWorker {
-    def apply() = Behaviors.ignore[String]
-  }
-
-  object SimplifiedManager {
-
-    sealed trait Command
-    case class CreateChild(name: String) extends Command
-    case class Forward(message: String, sendTo: ActorRef[String])
-        extends Command
-    case object ScheduleLog extends Command
-    case object Log extends Command
-
-    def apply(): Behaviors.Receive[Command] =
-      Behaviors.receive { (context, message) =>
-        message match {
-          case CreateChild(name) =>
-            context.spawn(SimplifiedWorker(), name)
-            Behaviors.same
-          case Forward(text, sendTo) =>
-            sendTo ! text
-            Behaviors.same
-          case ScheduleLog =>
-            context.scheduleOnce(1.seconds, context.self, Log)
-            Behaviors.same
-          case Log =>
-            context.log.info(s"it's done")
-            Behaviors.same
-        }
-      }
-  }
-}
-
 class SyncTestingSpec extends AnyWordSpec with Matchers {
-
-  import SyncTestingSpec._
 
   "Typed actor synchronous testing" must {
 
-    "record spawning" in {
+    "spawning takes place" in {
       val testKit = BehaviorTestKit(SimplifiedManager())
       testKit.expectEffect(NoEffects)
       testKit.run(SimplifiedManager.CreateChild("adan"))
@@ -93,4 +56,36 @@ class SyncTestingSpec extends AnyWordSpec with Matchers {
       }
     }
   }
+}
+
+object SimplifiedWorker {
+  def apply() = Behaviors.ignore[String]
+}
+
+object SimplifiedManager {
+
+  sealed trait Command
+  final case class CreateChild(name: String) extends Command
+  final case class Forward(message: String, sendTo: ActorRef[String])
+      extends Command
+  final case object ScheduleLog extends Command
+  final case object Log extends Command
+
+  def apply(): Behaviors.Receive[Command] =
+    Behaviors.receive { (context, message) =>
+      message match {
+        case CreateChild(name) =>
+          context.spawn(SimplifiedWorker(), name)
+          Behaviors.same
+        case Forward(text, sendTo) =>
+          sendTo ! text
+          Behaviors.same
+        case ScheduleLog =>
+          context.scheduleOnce(1.seconds, context.self, Log)
+          Behaviors.same
+        case Log =>
+          context.log.info(s"it's done")
+          Behaviors.same
+      }
+    }
 }

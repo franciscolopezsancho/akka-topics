@@ -173,7 +173,7 @@ class SampleSpec
 
   object Cap {
 
-    case class Increment(increment: Int, replyTo: ActorRef[Int])
+    final case class Increment(increment: Int, replyTo: ActorRef[Int])
 
     def apply(current: Int, max: Int): Behavior[Increment] = {
       Behaviors.receiveMessage { message =>
@@ -335,7 +335,7 @@ class SampleSpec
   "The invalid results" should {
     "be diverted to another Sink as soon as possible" ignore {
 
-      case class Result(
+      final case class Result(
           value: Int,
           isValid: Boolean,
           message: String = "")

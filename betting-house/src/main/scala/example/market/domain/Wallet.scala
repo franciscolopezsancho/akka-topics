@@ -20,26 +20,29 @@ object Wallet {
   val TypeKey = EntityTypeKey[Command]("wallet")
 
   sealed trait Command extends CborSerializable
-  case class ReserveFunds(
+  final case class ReserveFunds(
       amount: Int,
       replyTo: ActorRef[UpdatedResponse])
       extends Command
-  case class AddFunds(amount: Int, replyTo: ActorRef[UpdatedResponse])
+  final case class AddFunds(
+      amount: Int,
+      replyTo: ActorRef[UpdatedResponse])
       extends Command
-  case class CheckFunds(replyTo: ActorRef[Response]) extends Command
+  final case class CheckFunds(replyTo: ActorRef[Response])
+      extends Command
 
   sealed trait Event extends CborSerializable
-  case class FundsReserved(amount: Int) extends Event
-  case class FundsAdded(amount: Int) extends Event
-  case class FundsReservationDenied(amount: Int) extends Event
+  final case class FundsReserved(amount: Int) extends Event
+  final case class FundsAdded(amount: Int) extends Event
+  final case class FundsReservationDenied(amount: Int) extends Event
 
   sealed trait Response extends CborSerializable
   trait UpdatedResponse extends Response
-  case object Accepted extends UpdatedResponse
-  case object Rejected extends UpdatedResponse
-  case class CurrentBalance(amount: Int) extends Response
+  final case object Accepted extends UpdatedResponse
+  final case object Rejected extends UpdatedResponse
+  final case class CurrentBalance(amount: Int) extends Response
 
-  case class State(balance: Int) extends CborSerializable
+  final case class State(balance: Int) extends CborSerializable
 
   def apply(walletId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](

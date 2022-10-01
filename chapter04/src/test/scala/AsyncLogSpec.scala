@@ -54,7 +54,7 @@ class AsyncLogSpec
 object SimplifiedManager {
 
   sealed trait Command
-  case object Log extends Command
+  final case object Log extends Command
 
   def apply(): Behaviors.Receive[Command] =
     Behaviors.receive { (context, message) =>

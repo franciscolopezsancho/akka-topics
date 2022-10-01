@@ -9,7 +9,7 @@ object CounterTimer {
   sealed trait Command
   final case object Increase extends Command
   final case class Pause(seconds: Int) extends Command
-  private[fishing] final case object Resume extends Command
+  private final case object Resume extends Command
 
   def apply(): Behavior[Command] =
     resume(0)

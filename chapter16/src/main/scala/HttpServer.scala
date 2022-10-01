@@ -19,7 +19,7 @@ import spray.json.RootJsonFormat
 
 object HttpServer {
 
-  case class Validated(accepted: Boolean)
+  final case class Validated(accepted: Boolean)
 
   def main(args: Array[String]): Unit = {
 

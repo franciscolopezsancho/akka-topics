@@ -29,18 +29,18 @@ object SPContainer {
   val TypeKey =
     EntityTypeKey[SPContainer.Command]("spcontainer-type-key")
 
-  case class Cargo(id: String, kind: String, size: Int)
+  final case class Cargo(id: String, kind: String, size: Int)
 
   sealed trait Command
-  case class AddCargo(cargo: Cargo)
+  final case class AddCargo(cargo: Cargo)
       extends Command
       with CborSerializable
-  case class GetCargos(replyTo: ActorRef[List[Cargo]])
+  final case class GetCargos(replyTo: ActorRef[List[Cargo]])
       extends Command
       with CborSerializable
 
   sealed trait Event
-  case class CargoAdded(containerId: String, cargo: Cargo)
+  final case class CargoAdded(containerId: String, cargo: Cargo)
       extends Event
       with CborSerializable
 
@@ -85,14 +85,15 @@ object SPContainer {
 //persistence container
 object Container {
 
-  case class Cargo(id: String, kind: String, size: Int)
+  final case class Cargo(id: String, kind: String, size: Int)
 
   sealed trait Command
-  case class AddCargo(cargo: Cargo) extends Command
-  case class GetCargos(replyTo: ActorRef[List[Cargo]]) extends Command
+  final case class AddCargo(cargo: Cargo) extends Command
+  final case class GetCargos(replyTo: ActorRef[List[Cargo]])
+      extends Command
 
   sealed trait Event
-  case class CargoAdded(containerId: String, cargo: Cargo)
+  final case class CargoAdded(containerId: String, cargo: Cargo)
       extends Event
 
   final case class State(cargos: List[Cargo] = Nil)

@@ -38,7 +38,7 @@ object Manager {
 
   sealed trait Command
   final case class Delegate(texts: List[String]) extends Command
-  final private case class Report(description: String) extends Command
+  private final case class Report(description: String) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
@@ -70,7 +70,8 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  final case class Parse(replyTo: ActorRef[Worker.Response]) extends Command
+  final case class Parse(replyTo: ActorRef[Worker.Response])
+      extends Command
 
   sealed trait Response
   final case object Done extends Response

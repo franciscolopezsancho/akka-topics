@@ -10,12 +10,12 @@ import scala.concurrent.duration._
 object GuestFinder {
 
   sealed trait Command
-  case class Find(
+  final case class Find(
       actorName: String,
       replyTo: ActorRef[ActorRef[VIPGuest.Command]])
       extends Command
 
-  case object Void extends Command
+  final case object Void extends Command
 
   def apply() =
     Behaviors.setup[Command] { context =>

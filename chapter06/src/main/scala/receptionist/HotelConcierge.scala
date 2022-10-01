@@ -8,7 +8,8 @@ object HotelConcierge {
   val GoldenKey = ServiceKey[VIPGuest.Command]("concierge-key")
 
   sealed trait Command
-  private case class ListingResponse(listing: Receptionist.Listing)
+  private final case class ListingResponse(
+      listing: Receptionist.Listing)
       extends Command
 
   def apply() = Behaviors.setup[Command] { context =>

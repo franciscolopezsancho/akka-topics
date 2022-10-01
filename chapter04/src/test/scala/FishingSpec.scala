@@ -85,8 +85,8 @@ class FishingSpec
 object Receiver {
 
   sealed trait Command
-  case object Tock extends Command
-  case object Cancelled extends Command
+  final case object Tock extends Command
+  final case object Cancelled extends Command
 
   def apply() = Behaviors.ignore
 
@@ -95,8 +95,8 @@ object Receiver {
 object Sender {
 
   sealed trait Command
-  case object Tick extends Command
-  case class Cancel(key: String) extends Command
+  final case object Tick extends Command
+  final case class Cancel(key: String) extends Command
 
   def apply(
       forwardTo: ActorRef[Receiver.Command],

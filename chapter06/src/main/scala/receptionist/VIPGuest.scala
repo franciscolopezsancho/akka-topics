@@ -6,8 +6,8 @@ import akka.actor.typed.receptionist.Receptionist
 object VIPGuest {
 
   sealed trait Command
-  case object EnterHotel extends Command
-  case object LeaveHotel extends Command
+  final case object EnterHotel extends Command
+  final case object LeaveHotel extends Command
 
   def apply() = Behaviors.receive[Command] { (context, message) =>
     message match {

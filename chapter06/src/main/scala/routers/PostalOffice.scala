@@ -5,9 +5,9 @@ import akka.actor.typed.{ ActorRef, Behavior }
 
 object PostalOffice {
   sealed trait Command
-  case class Standard(msg: String) extends Command
-  case class Tracked(msg: String) extends Command
-  case class Guaranteed(msg: String) extends Command
+  final case class Standard(msg: String) extends Command
+  final case class Tracked(msg: String) extends Command
+  final case class Guaranteed(msg: String) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.empty

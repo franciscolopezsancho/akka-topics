@@ -36,13 +36,15 @@ object Manager {
 
   sealed trait Command
   final case class Delegate(texts: List[String]) extends Command
-  final private case class WorkerDoneAdapter(response: Worker.Response)
+  private final case class WorkerDoneAdapter(
+      response: Worker.Response)
       extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       val adapter: ActorRef[Worker.Response] =
-        context.messageAdapter(response => WorkerDoneAdapter(response))
+        context.messageAdapter(response =>
+          WorkerDoneAdapter(response))
 
       Behaviors.receiveMessage { message =>
         message match {

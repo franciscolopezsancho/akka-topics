@@ -72,7 +72,9 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  final case class Parse(text: String, replyTo: ActorRef[Worker.Response])
+  final case class Parse(
+      text: String,
+      replyTo: ActorRef[Worker.Response])
       extends Command
 
   sealed trait Response

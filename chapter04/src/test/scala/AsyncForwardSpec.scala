@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import akka.actor.testkit.typed.scaladsl.FishingOutcomes
 import java.util.Base64
 
-class AsyncTestingSpec
+class AsyncForwardSpec
     extends AnyWordSpec
     with BeforeAndAfterAll
     with Matchers {
@@ -52,7 +52,7 @@ class AsyncTestingSpec
 object SimplifiedManager {
 
   sealed trait Command
-  case class Forward(message: String, sendTo: ActorRef[String])
+  final case class Forward(message: String, sendTo: ActorRef[String])
       extends Command
 
   def apply(): Behaviors.Receive[Command] =
