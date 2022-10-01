@@ -17,11 +17,11 @@ object ErrorKernelApp extends App {
 object Guardian {
 
   sealed trait Command
-  case class Start(texts: List[String]) extends Command
+  final case class Start(texts: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
-      context.log.info("setting up. Creating manager")
+      context.log.info("Setting up. Creating manager")
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-alpha")
       Behaviors.receiveMessage {
@@ -36,13 +36,13 @@ object Manager {
 
   sealed trait Command
   final case class Delegate(texts: List[String]) extends Command
-  private case class WorkerDoneAdapter(response: Worker.Response)
+  final private case class WorkerDoneAdapter(response: Worker.Response)
       extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       val adapter: ActorRef[Worker.Response] =
-        context.messageAdapter(rsp => WorkerDoneAdapter(rsp))
+        context.messageAdapter(response => WorkerDoneAdapter(response))
 
       Behaviors.receiveMessage { message =>
         message match {

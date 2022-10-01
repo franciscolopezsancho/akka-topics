@@ -20,7 +20,7 @@ object SimpleQuestion extends App {
 object Guardian {
 
   sealed trait Command
-  case class Start(texts: List[String]) extends Command
+  final case class Start(texts: List[String]) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
@@ -37,8 +37,8 @@ object Guardian {
 object Manager {
 
   sealed trait Command
-  case class Delegate(texts: List[String]) extends Command
-  private case class Report(description: String) extends Command
+  final case class Delegate(texts: List[String]) extends Command
+  final private case class Report(description: String) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
@@ -55,7 +55,7 @@ object Manager {
                   Report(s"$text read by ${worker.path.name}")
                 case Failure(ex) =>
                   Report(
-                    s"reading '$text' has failed with [${ex.getMessage()}")
+                    s"parsing '$text' has failed with [${ex.getMessage()}")
               }
             }
             Behaviors.same
@@ -70,29 +70,25 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  case class Parse(replyTo: ActorRef[Worker.Response]) extends Command
+  final case class Parse(replyTo: ActorRef[Worker.Response]) extends Command
 
   sealed trait Response
-  case object Done extends Response
+  final case object Done extends Response
 
   def apply(text: String): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
         case Parse(replyTo) =>
           fakeLengthyParsing(text)
-          prettyPrint(context, "DONE!")
+          context.log.info(s"${context.self.path.name}: done")
           replyTo ! Worker.Done
           Behaviors.same
       }
     }
 
-  def fakeLengthyParsing(text: String): Unit = {
+  private def fakeLengthyParsing(text: String): Unit = {
     val endTime =
       System.currentTimeMillis + Random.between(2000, 4000)
     while (endTime > System.currentTimeMillis) {}
-  }
-
-  def prettyPrint(context: ActorContext[_], message: String): Unit = {
-    context.log.info(s"${context.self.path.name}: $message")
   }
 }

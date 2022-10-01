@@ -6,7 +6,7 @@ import scala.concurrent.duration.SECONDS
 import akka.util.Timeout
 import scala.util.{ Failure, Random, Success }
 
-object LoadedQuestion extends App {
+object QuestionWithPayload extends App {
 
   val guardian: ActorSystem[Guardian.Command] =
     ActorSystem(Guardian(), "LoadedQuestion")
@@ -24,40 +24,40 @@ object Guardian {
       val manager: ActorRef[Manager.Command] =
         context.spawn(Manager(), "manager-1")
       Behaviors.receiveMessage { message =>
-        manager ! Manager.Delegate(List("file-a", "file-b", "file-c"))
+        manager ! Manager.Delegate(List("text-a", "text-b", "text-c"))
         Behaviors.same
       }
     }
 
   sealed trait Command
-  case object Start extends Command
+  final case object Start extends Command
 }
 
 object Manager {
 
   sealed trait Command
-  final case class Delegate(files: List[String]) extends Command
+  final case class Delegate(texts: List[String]) extends Command
   final case class Report(outline: String) extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
       implicit val timeout: Timeout = Timeout(1, SECONDS)
-      def auxCreateRequest(file: String)(
+      def auxCreateRequest(text: String)(
           replyTo: ActorRef[Worker.Response]): Worker.Parse =
-        Worker.Parse(file, replyTo)
+        Worker.Parse(text, replyTo)
 
       Behaviors.receiveMessage { message =>
         message match {
-          case Delegate(files) =>
-            files.map { file =>
-              val reader: ActorRef[Worker.Command] =
-                context.spawn(Worker(), s"reader-$file")
-              context.ask(reader, auxCreateRequest(file)) {
+          case Delegate(texts) =>
+            texts.map { text =>
+              val worker: ActorRef[Worker.Command] =
+                context.spawn(Worker(), s"worker-$text")
+              context.ask(worker, auxCreateRequest(text)) {
                 case Success(_) =>
-                  Report(s"$file read by ${reader.path.name}")
+                  Report(s"$text read by ${worker.path.name}")
                 case Failure(ex) =>
                   Report(
-                    s"reading '$file' has failed with [${ex.getMessage()}")
+                    s"reading '$text' has failed with [${ex.getMessage()}")
               }
             }
             Behaviors.same
@@ -72,30 +72,26 @@ object Manager {
 object Worker {
 
   sealed trait Command
-  case class Parse(file: String, replyTo: ActorRef[Worker.Response])
+  final case class Parse(text: String, replyTo: ActorRef[Worker.Response])
       extends Command
 
   sealed trait Response
-  case object Done extends Response
+  final case object Done extends Response
 
   def apply(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
-        case Parse(file, replyTo) =>
-          fakeLengthyParsing(file)
-          prettyPrint(context, s"$file done")
+        case Parse(text, replyTo) =>
+          fakeLengthyParsing(text)
+          context.log.info(s"${context.self.path.name}: done")
           replyTo ! Worker.Done
           Behaviors.same
       }
     }
 
-  def fakeLengthyParsing(file: String): Unit = {
+  private def fakeLengthyParsing(text: String): Unit = {
     val endTime =
       System.currentTimeMillis + Random.between(2000, 4000)
     while (endTime > System.currentTimeMillis) {}
-  }
-
-  def prettyPrint(context: ActorContext[_], message: String): Unit = {
-    context.log.info(s"${context.self.path.name}: $message")
   }
 }
