@@ -4,7 +4,6 @@ import akka.actor.testkit.typed.scaladsl.{
   LogCapturing,
   ScalaTestWithActorTestKit
 }
-import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{ Behaviors, Routers }
 
 import com.typesafe.config.{ ConfigFactory }

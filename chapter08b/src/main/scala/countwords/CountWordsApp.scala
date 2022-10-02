@@ -2,16 +2,15 @@ package example.countwords
 
 import akka.cluster.typed.{ Cluster, Subscribe }
 import akka.cluster.typed.SelfUp
-import akka.cluster.ClusterEvent.ClusterDomainEvent
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors, Routers }
+import akka.actor.typed.scaladsl.{ Behaviors, Routers }
 import akka.actor.typed.{ ActorSystem, Behavior }
 import com.typesafe.config.ConfigFactory
 
-object App {
+object CountWordsApp {
 
   def main(args: Array[String]): Unit = {
     if (args.isEmpty) {
-      startup("worker", 25251)
+      startup("worker", 0)
     } else {
       require(
         args.size == 2,
