@@ -23,11 +23,11 @@ object GuestSearch {
       Behaviors.receiveMessage {
         case Find =>
           context.system.receptionist ! Receptionist
-            .Find(HotelConcierge.GoldenKey, listingResponseAdapter)
+            .Find(HotelConcierge.goldenKey, listingResponseAdapter)
           Behaviors.same
 
         case ListingResponse(
-            HotelConcierge.GoldenKey.Listing(listings)) =>
+            HotelConcierge.goldenKey.Listing(listings)) =>
           listings
             .filter(_.path.name.contains(actorName))
             .foreach(actor => replyTo ! actor)

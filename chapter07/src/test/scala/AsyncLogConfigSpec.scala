@@ -18,7 +18,7 @@ import com.typesafe.config.{ Config, ConfigFactory }
 class AsyncLogConfigSpec
     extends ScalaTestWithActorTestKit(
       ConfigFactory
-        .parseString("""akka.es-entity.journal-enabled  = false""")
+        .parseString("""akka.eventsourced-entity.journal-enabled  = false""")
         .withFallback(ConfigFactory.load("in-memory")))
     with AnyWordSpecLike
     with Matchers {
@@ -46,9 +46,9 @@ class AsyncLogConfigSpec
     "lift one property from conf" in {
       val inmemory = testKit.system.settings.config
       val journalenabled =
-        inmemory.getString("akka.es-entity.journal-enabled")
+        inmemory.getString("akka.eventsourced-entity.journal-enabled")
       val readjournal =
-        inmemory.getString("akka.es-entity.read-journal")
+        inmemory.getString("akka.eventsourced-entity.read-journal")
 
       val loggerBehavior: Behavior[String] = Behaviors.receive {
         (context, message) =>

@@ -5,7 +5,7 @@ import akka.actor.typed.receptionist.{ Receptionist, ServiceKey }
 
 object HotelConcierge {
 
-  val GoldenKey = ServiceKey[VIPGuest.Command]("concierge-key")
+  val goldenKey = ServiceKey[VIPGuest.Command]("concierge-key")
 
   sealed trait Command
   private final case class ListingResponse(
@@ -17,10 +17,10 @@ object HotelConcierge {
       context.messageAdapter[Receptionist.Listing](ListingResponse)
 
     context.system.receptionist ! Receptionist
-      .Subscribe(GoldenKey, listingNotificationAdapter)
+      .Subscribe(goldenKey, listingNotificationAdapter)
 
     Behaviors.receiveMessage {
-      case ListingResponse(GoldenKey.Listing(listings)) =>
+      case ListingResponse(goldenKey.Listing(listings)) =>
         listings.foreach { actor =>
           context.log.info(s"${actor.path.name} is in")
         }

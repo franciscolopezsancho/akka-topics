@@ -13,12 +13,12 @@ object VIPGuest {
     message match {
       case EnterHotel =>
         context.system.receptionist ! Receptionist
-          .Register(HotelConcierge.GoldenKey, context.self)
+          .Register(HotelConcierge.goldenKey, context.self)
         Behaviors.same
 
       case LeaveHotel =>
         context.system.receptionist ! Receptionist
-          .Deregister(HotelConcierge.GoldenKey, context.self)
+          .Deregister(HotelConcierge.goldenKey, context.self)
         Behaviors.same
     }
 

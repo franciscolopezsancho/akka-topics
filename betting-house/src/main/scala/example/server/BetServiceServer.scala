@@ -1,16 +1,10 @@
 package example.bet.grpc
 
 import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
-import akka.management.scaladsl.AkkaManagement
-import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import scala.concurrent.{ ExecutionContext, Future }
-import akka.http.scaladsl.{ Http, HttpConnectionContext }
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
-import com.typesafe.config.ConfigFactory
-
-import example.bet.grpc.{ BetServiceHandler, BetServiceImplSharding }
 
 object BetServiceServer {
 

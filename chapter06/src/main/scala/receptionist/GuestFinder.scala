@@ -24,9 +24,9 @@ object GuestFinder {
         case Find(actorName, replyTo) =>
           context.ask(
             context.system.receptionist,
-            Receptionist.Find(HotelConcierge.GoldenKey)) {
+            Receptionist.Find(HotelConcierge.goldenKey)) {
             case Success(
-                HotelConcierge.GoldenKey.Listing(listings)) =>
+                HotelConcierge.goldenKey.Listing(listings)) =>
               listings
                 .filter(_.path.name.contains(actorName))
                 .foreach(actor => replyTo ! actor)
