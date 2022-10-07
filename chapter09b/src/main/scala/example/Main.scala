@@ -45,7 +45,7 @@ object Main {
 
     val shardRegion: ActorRef[ShardingEnvelope[SPContainer.Command]] =
       sharding.init(
-        Entity(SPContainer.TypeKey)(createBehavior = entityContext =>
+        Entity(SPContainer.typeKey)(createBehavior = entityContext =>
           SPContainer(entityContext.entityId)))
 
     shardRegion

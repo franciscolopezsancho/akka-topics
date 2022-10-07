@@ -26,7 +26,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     logger.info("initializing system")
     val system = if (args.isEmpty) {
-      initActorSystem(25533)
+      initActorSystem(0)
     } else {
       initActorSystem(args(0).toInt)
     }

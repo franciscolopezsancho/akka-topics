@@ -39,7 +39,7 @@ class StreamsSpec
   }
 
   "a producer of fixed elements 1,2,3 and a function" should {
-    "allow when consumed see the side effects | simplestest version" in {
+    "allow when consumed see the side effects | simple test version" in {
       var fakeDB: List[Int] = List()
       def storeDB(value: Int) =
         fakeDB = fakeDB :+ value
@@ -82,11 +82,6 @@ class StreamsSpec
       val consumer: Sink[Int, Future[Done]] =
         Sink.foreach(i => storeDB(i))
 
-      // val composed: Source[Int, NotUsed] = producer.via(processor)
-
-      // val future = composed.to(consumer).run // => this is a Keep.left so
-      // it returns a Sink[Int, NotUsed] that comes from Source[Int, NotUsed]
-      // the question would be; CAN I CHANGE [X, NotUsed] ? it forces you to have NotUsed actually.
       val blueprint
           : RunnableGraph[scala.concurrent.Future[akka.Done]] =
         producer.via(processor).toMat(consumer)(Keep.right)
@@ -113,11 +108,11 @@ class StreamsSpec
 
       val dbFakeSink = Sink.foreach[String](dbFakeInsert)
 
-      val (cancelble, future): (Cancellable, Future[Done]) =
+      val (cancellable, future): (Cancellable, Future[Done]) =
         liveSource.via(masking).toMat(dbFakeSink)(Keep.both).run
 
       Thread.sleep(3000)
-      cancelble.cancel
+      cancellable.cancel
 
       Await.result(future, 1.seconds)
       assert(future.isCompleted)
@@ -134,14 +129,14 @@ class StreamsSpec
       val liveSource: Source[Int, Cancellable] =
         Source.tick(1.second, 1.second, Random.nextInt(3))
 
-      val (cancelble, future): (Cancellable, Future[Done]) =
+      val (cancellable, future): (Cancellable, Future[Done]) =
         liveSource
           .filter(_ % 2 == 0)
           .toMat(Sink.foreach(storeDB))(Keep.both)
           .run
 
       Thread.sleep(3000)
-      cancelble.cancel
+      cancellable.cancel
 
       Await.result(future, 1.seconds)
       assert(future.isCompleted)

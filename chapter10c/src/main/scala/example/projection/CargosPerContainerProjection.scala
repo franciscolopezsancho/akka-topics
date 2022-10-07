@@ -9,7 +9,7 @@ import akka.projection.scaladsl.ExactlyOnceProjection
 import akka.projection.eventsourced.EventEnvelope
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 
-import akka.projection.jdbc.scaladsl.{ JdbcHandler, JdbcProjection }
+import akka.projection.jdbc.scaladsl.JdbcProjection
 
 import akka.persistence.query.Offset
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
@@ -47,25 +47,5 @@ object CargosPerContainerProjection {
       sourceProvider = sourceProvider,
       handler = () => new CPCProjectionHandler(repository),
       sessionFactory = () => new ScalikeJdbcSession())(system)
-  }
-}
-
-class CPCProjectionHandler(repository: CargosPerContainerRepository)
-    extends JdbcHandler[
-      EventEnvelope[SPContainer.Event],
-      ScalikeJdbcSession] {
-
-  val logger = LoggerFactory.getLogger(classOf[CPCProjectionHandler])
-
-  override def process(
-      session: ScalikeJdbcSession,
-      envelope: EventEnvelope[SPContainer.Event]): Unit = {
-    envelope.event match {
-      case SPContainer.CargoAdded(containerId, cargo) =>
-        repository.addCargo(containerId, session)
-      case x =>
-        logger.debug("ignoring event {} in projection", x)
-
-    }
   }
 }

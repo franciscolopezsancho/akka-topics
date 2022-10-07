@@ -1,33 +1,20 @@
 package example.persistence
 
-import org.slf4j.LoggerFactory
-
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-
 import akka.stream.scaladsl.Source
-
-import akka.persistence.query.{
-  EventEnvelope,
-  Offset,
-  PersistenceQuery
-}
+import akka.persistence.query.PersistenceQuery
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
-
 import akka.NotUsed
 
-object Main {
+object Main extends App {
 
-  //write
-  val logger = LoggerFactory.getLogger(Main + "")
+  implicit val system = ActorSystem(Behaviors.ignore, "runner")
 
-  def main(args: Array[String]): Unit = {
-    val system =
-      ActorSystem[Nothing](Behaviors.empty, "persistence-query")
-    val readJournal = PersistenceQuery(system)
-      .readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
-    val source: Source[EventEnvelope, NotUsed] =
-      readJournal.eventsByTag("tag-0", Offset.noOffset)
-  }
+  val readJournal: JdbcReadJournal = PersistenceQuery(system)
+    .readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
+  val source: Source[String, NotUsed] = readJournal.persistenceIds
+
+  source.runForeach(println)
 }

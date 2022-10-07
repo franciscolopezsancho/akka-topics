@@ -45,7 +45,7 @@ class SPContainerSpec
       val shardRegion
           : ActorRef[ShardingEnvelope[SPContainer.Command]] =
         sharding.init(
-          Entity(SPContainer.TypeKey)(createBehavior =
+          Entity(SPContainer.typeKey)(createBehavior =
             entityContext => SPContainer(entityContext.entityId)))
 
       val containerId = "123"
@@ -58,7 +58,7 @@ class SPContainerSpec
       val probe =
         createTestProbe[List[SPContainer.Cargo]]()
       val container: EntityRef[SPContainer.Command] =
-        sharding.entityRefFor(SPContainer.TypeKey, containerId)
+        sharding.entityRefFor(SPContainer.typeKey, containerId)
       container ! SPContainer.GetCargos(probe.ref)
 
       probe.expectMessage(List(cargo))

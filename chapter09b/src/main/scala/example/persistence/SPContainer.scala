@@ -1,8 +1,5 @@
 package example.persistence
 
-import com.typesafe.config.ConfigFactory
-
-import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior }
 
 import akka.persistence.typed.scaladsl.{
@@ -11,13 +8,7 @@ import akka.persistence.typed.scaladsl.{
 }
 import akka.persistence.typed.PersistenceId
 
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  Entity,
-  EntityRef,
-  EntityTypeKey
-}
-import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 import akka.persistence.typed.scaladsl.RetentionCriteria
 import akka.actor.typed.SupervisorStrategy
@@ -26,7 +17,7 @@ import scala.concurrent.duration._
 //sharded and persistence container
 object SPContainer {
 
-  val TypeKey =
+  val typeKey =
     EntityTypeKey[SPContainer.Command]("spcontainer-type-key")
 
   final case class Cargo(id: String, kind: String, size: Int)
@@ -48,7 +39,7 @@ object SPContainer {
 
   def apply(containerId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
-      PersistenceId(TypeKey.name, containerId),
+      PersistenceId(typeKey.name, containerId),
       State(),
       commandHandler = (state, command) =>
         commandHandler(containerId, state, command),
@@ -82,44 +73,4 @@ object SPContainer {
     }
 }
 
-//persistence container
-object Container {
 
-  final case class Cargo(id: String, kind: String, size: Int)
-
-  sealed trait Command
-  final case class AddCargo(cargo: Cargo) extends Command
-  final case class GetCargos(replyTo: ActorRef[List[Cargo]])
-      extends Command
-
-  sealed trait Event
-  final case class CargoAdded(containerId: String, cargo: Cargo)
-      extends Event
-
-  final case class State(cargos: List[Cargo] = Nil)
-
-  def apply(containerId: String): Behavior[Command] =
-    EventSourcedBehavior[Command, Event, State](
-      PersistenceId.ofUniqueId(containerId),
-      State(),
-      commandHandler = (state, command) =>
-        commandHandler(containerId, state, command),
-      eventHandler)
-
-  def commandHandler(
-      containerId: String,
-      state: State,
-      command: Command): Effect[Event, State] =
-    command match {
-      case AddCargo(cargo) =>
-        Effect.persist(CargoAdded(containerId, cargo))
-      case GetCargos(replyTo) =>
-        Effect.none.thenRun(state => replyTo ! state.cargos)
-    }
-
-  def eventHandler(state: State, event: Event): State =
-    event match {
-      case CargoAdded(containerId, cargo) =>
-        state.copy(cargos = cargo +: state.cargos)
-    }
-}

@@ -16,9 +16,9 @@ Press enter and then copy one input at a time - without the dolar - and press en
 	$ 11 499 barrel 120 
 
 ## Known Problems
-After pressing ENTER it appears a `M^` in the console. As a consequence this not produces a new line and you can't interact with the console to send input to create containers. 
+After pressing ENTER it appears a `M^` in the console. As a consequence this not produces a new line and you can't interact with the console to send input to create containers.
 
-To solve this enter the following:
+To solve this enter the following in your command line before starting the Sbt shell:
 
 	stty sane
 

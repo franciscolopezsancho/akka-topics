@@ -14,11 +14,7 @@ object MiniCluster {
   val logger = LoggerFactory.getLogger("App")
 
   def main(args: Array[String]): Unit = {
-    if (args.isEmpty) {
-      startup(25251)
-    } else {
       startup(args(0).toInt)
-    }
   }
 
   def startup(port: Int): Unit = {
@@ -32,7 +28,7 @@ object MiniCluster {
     val system =
       ActorSystem[Nothing](Behaviors.empty, "MiniCluster", config)
 
-    val tags = Vector("tag-1", "tag-2", "tag-3")
+    val tags = Vector("container-tag-1", "container-tag-2", "container-tag-3")
 
     ShardedDaemonProcess(system).init(
       "loggers",

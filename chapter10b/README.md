@@ -1,5 +1,12 @@
+## start database
+	$ docker-compose up
+
+### run scripts
+	$ psql -h 127.0.0.1 -d containers -U containers -f persistence_create_tables.sql 
 
 
-Please note that the test on this project need you to follow chapter09b/README.md 
+The password is `containers` as you can find the docker-compose.yml
 
-Following those instructions you will start the database, set it up and send 3 pieces of data to it. 
+### start the application 
+
+    $ sbt "chapter10b/run"
