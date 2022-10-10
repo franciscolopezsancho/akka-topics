@@ -11,9 +11,7 @@ import akka.stream.scaladsl.Source
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.concurrent.duration._
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ ExecutionContext, Future }
 
 class S3Spec
     extends AnyFlatSpec
@@ -29,11 +27,13 @@ class S3Spec
   "alpakka s3" should "be able to upload data to S3" in {
 
     val result: Future[MultipartUploadResult] = Source
-      .single(ByteString("mydata"))
-      .runWith(S3.multipartUpload("franchuelo", "bucketKey"))
+      .single(ByteString("myData"))
+      .runWith(S3.multipartUpload("myBucket", "bucketKey"))
 
     assert(result.futureValue.isInstanceOf[MultipartUploadResult])
-    result.map(println) // having a look at the contents of MultipartUploadResult(...)
+    result.map(
+      println
+    ) // having a look at the contents of MultipartUploadResult(...)
   }
 
   import akka.stream.scaladsl.FileIO
@@ -47,7 +47,7 @@ class S3Spec
         fs.getPath("./chapter14/src/test/resources/characters.csv"))
 
     val result: Future[MultipartUploadResult] = source
-      .runWith(S3.multipartUpload("franchuelo", "characters.csv"))
+      .runWith(S3.multipartUpload("myBucket", "characters.csv"))
 
     assert(result.futureValue.isInstanceOf[MultipartUploadResult])
   }

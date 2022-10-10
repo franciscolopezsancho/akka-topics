@@ -34,9 +34,6 @@ import example.betting.Market
 //Bets grouped per Market and Wallet
 object MarketProjection { //BPM
 
-  val logger =
-    LoggerFactory.getLogger(MarketProjection + "")
-
   def init(system: ActorSystem[_]): Unit = {
     val producer = createProducer(system)
     val topic =
@@ -57,7 +54,7 @@ object MarketProjection { //BPM
       system: ActorSystem[_]): SendProducer[String, Array[Byte]] = {
 
     val producerSettings =
-      ProducerSettings( //the look up on creation at "akka.kafka.producer" in .conf
+      ProducerSettings( //they look up on creation at "akka.kafka.producer" in .conf
         system,
         new StringSerializer,
         new ByteArraySerializer)
@@ -66,7 +63,7 @@ object MarketProjection { //BPM
       CoordinatedShutdown.PhaseBeforeActorSystemTerminate,
       "closing send producer") { () =>
       sendProducer.close()
-    } //otherwise trying to restart the application you would probably get [2021-11-22 14:56:32,024] [WARN] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-20] - Error registering AppInfo mbean javax.management.InstanceAlreadyExistsException: kafka.producer:type=app-info,id=producer-
+    } //otherwise trying to restart the application you would probably get [WARN] [org.apache.kafka.common.utils.AppInfoParser] [] [betting-house-akka.kafka.default-dispatcher-X] - Error registering AppInfo mbean javax.management.InstanceAlreadyExistsException: kafka.producer:type=app-info,id=producer-
     sendProducer
   }
 
@@ -91,5 +88,4 @@ object MarketProjection { //BPM
         () => new MarketProjectionHandler(system, topic, producer),
       sessionFactory = () => new ScalikeJdbcSession())(system)
   }
-
 }

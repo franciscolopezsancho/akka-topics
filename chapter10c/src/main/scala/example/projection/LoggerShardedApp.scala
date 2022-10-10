@@ -9,7 +9,7 @@ import akka.actor.typed.scaladsl.Behaviors
 
 import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
 
-object MiniCluster {
+object LoggerShardedApp {
 
   val logger = LoggerFactory.getLogger("App")
 
@@ -26,7 +26,7 @@ object MiniCluster {
       .withFallback(ConfigFactory.load("shardeddeamon"))
 
     val system =
-      ActorSystem[Nothing](Behaviors.empty, "MiniCluster", config)
+      ActorSystem[Nothing](Behaviors.empty, "LoggerSharded", config)
 
     val tags = Vector("container-tag-1", "container-tag-2", "container-tag-3")
 

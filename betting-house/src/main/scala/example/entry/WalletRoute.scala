@@ -39,7 +39,7 @@ class WalletService(implicit sharding: ClusterSharding) {
       : RootJsonFormat[Wallet.CurrentBalance] =
     jsonFormat1(Wallet.CurrentBalance)
 
-  sharding.init(Entity(Wallet.TypeKey)(entityContext =>
+  sharding.init(Entity(Wallet.typeKey)(entityContext =>
     Wallet(entityContext.entityId)))
 
   val route: Route =
@@ -51,7 +51,7 @@ class WalletService(implicit sharding: ClusterSharding) {
               (walletId, funds) =>
 
                 val wallet =
-                  sharding.entityRefFor(Wallet.TypeKey, walletId)
+                  sharding.entityRefFor(Wallet.typeKey, walletId)
                 def auxAddFunds(funds: Int)(
                     replyTo: ActorRef[Wallet.UpdatedResponse]) =
                   Wallet.AddFunds(funds, replyTo)
@@ -76,7 +76,7 @@ class WalletService(implicit sharding: ClusterSharding) {
               (walletId, funds) =>
 
                 val wallet =
-                  sharding.entityRefFor(Wallet.TypeKey, walletId)
+                  sharding.entityRefFor(Wallet.typeKey, walletId)
                 def auxReserveFunds(funds: Int)(
                     replyTo: ActorRef[Wallet.UpdatedResponse]) =
                   Wallet.ReserveFunds(funds, replyTo)
@@ -104,7 +104,7 @@ class WalletService(implicit sharding: ClusterSharding) {
           parameters("walletId".as[String]) {
             entityId => //FIXME avoid param, id is assumed
               val container =
-                sharding.entityRefFor(Wallet.TypeKey, entityId)
+                sharding.entityRefFor(Wallet.typeKey, entityId)
 
               val response: Future[Wallet.CurrentBalance] =
                 container

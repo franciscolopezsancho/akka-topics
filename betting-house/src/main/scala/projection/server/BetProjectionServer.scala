@@ -27,8 +27,6 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object BetProjectionServer {
 
-  val logger = LoggerFactory.getLogger(BetProjectionServer + "")
-
   def init(repository: BetRepository)(
       implicit ec: ExecutionContext,
       system: ActorSystem[_]): Unit = {

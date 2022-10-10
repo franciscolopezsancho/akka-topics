@@ -14,7 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 
 import scala.io.StdIn
 
-object ConsumerOne {
+object ConsumerPlainSource {
 
   def main(args: Array[String]) = {
 
@@ -30,9 +30,6 @@ object ConsumerOne {
         new StringDeserializer())
         .withBootstrapServers("127.0.0.1:9092")
         .withGroupId("group01")
-        .withProperty(
-          ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-          "true")
 
     Consumer
       .plainSource(consumerSettings, Subscriptions.topics("test"))
@@ -46,5 +43,4 @@ object ConsumerOne {
     StdIn.readLine("Consumer started \n Press ENTER to stop")
     system.terminate()
   }
-  //kafkacat -P -b 127.0.0.1:9092 -t test
 }

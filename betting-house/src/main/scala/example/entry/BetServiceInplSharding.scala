@@ -23,11 +23,11 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
     ExecutionContext.global
 
   sharding.init(
-    Entity(Bet.TypeKey)(entityContext => Bet(entityContext.entityId)))
+    Entity(Bet.typeKey)(entityContext => Bet(entityContext.entityId)))
 
   def cancel(in: example.bet.grpc.CancelMessage)
       : scala.concurrent.Future[example.bet.grpc.BetResponse] = {
-    val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)
+    val bet = sharding.entityRefFor(Bet.typeKey, in.betId)
 
     def auxCancel(reason: String)(replyTo: ActorRef[Bet.Response]) =
       Bet.Cancel(reason, replyTo)
@@ -45,7 +45,7 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
   }
   def open(in: example.bet.grpc.Bet)
       : scala.concurrent.Future[example.bet.grpc.BetResponse] = {
-    val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)
+    val bet = sharding.entityRefFor(Bet.typeKey, in.betId)
 
     def auxOpen(
         walletId: String,
@@ -77,7 +77,7 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
 
   def settle(in: example.bet.grpc.SettleMessage)
       : scala.concurrent.Future[example.bet.grpc.BetResponse] = {
-    val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)
+    val bet = sharding.entityRefFor(Bet.typeKey, in.betId)
 
     def auxSettle(result: Int)(replyTo: ActorRef[Bet.Response]) =
       Bet.Settle(result, replyTo)
@@ -96,7 +96,7 @@ class BetServiceImplSharding(implicit sharding: ClusterSharding)
 
   def getState(in: example.bet.grpc.BetId)
       : scala.concurrent.Future[example.bet.grpc.Bet] = {
-    val bet = sharding.entityRefFor(Bet.TypeKey, in.betId)
+    val bet = sharding.entityRefFor(Bet.typeKey, in.betId)
 
     bet.ask(Bet.GetState).mapTo[Bet.Response].map { response =>
       response match {

@@ -25,9 +25,6 @@ import org.slf4j.LoggerFactory
 
 object BetProjection {
 
-  val logger =
-    LoggerFactory.getLogger(BetProjection + "")
-
   def init(
       system: ActorSystem[_],
       repository: BetRepository): Unit = {

@@ -22,7 +22,7 @@ object Container {
     Behaviors.receive { (context, message) =>
       message match {
         case AddCargo(cargo) =>
-          println(s"adding cargo $cargo")
+          context.log.info(s"adding cargo $cargo")
           apply(entityId, cargo +: cargos)
         case GetCargos(replyTo) =>
           replyTo ! Cargos(cargos)

@@ -3,11 +3,9 @@ import org.apache.kafka.common.serialization.{
   StringSerializer
 }
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.consumer.{ ConsumerConfig }
-
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-
 import akka.kafka.{
   ConsumerSettings,
   ProducerSettings,
@@ -17,14 +15,14 @@ import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.ProducerMessage
 import akka.kafka.scaladsl.Producer
 import akka.kafka.scaladsl.Consumer
-
 import akka.Done
+import akka.kafka.CommitterSettings
 
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.io.StdIn
 
-object ConsumerProducer {
+object ConsumerProducerAtLeastOnce {
 
   implicit val system = ActorSystem(Behaviors.empty, "producerOne")
 
@@ -51,6 +49,8 @@ object ConsumerProducer {
     val producerConfig =
       system.settings.config.getConfig("akka.kafka.producer")
 
+    val committerSettings = CommitterSettings(system)
+
     val producerSettings = ProducerSettings(
       producerConfig,
       new StringSerializer(),
@@ -70,8 +70,9 @@ object ConsumerProducer {
             msg.record.value),
           msg.committableOffset)
       }
-      .toMat(Producer.committableSink(producerSettings))(
-        Consumer.DrainingControl.apply)
+      .toMat(Producer.committableSink(
+        producerSettings,
+        committerSettings))(Consumer.DrainingControl.apply)
       .run()
 
     StdIn.readLine("Consumer started \n Press ENTER to stop")

@@ -22,7 +22,7 @@ object ContainerServer {
         new ContainerServiceImpl())
 
     val bindingFuture: Future[Http.ServerBinding] =
-      Http().newServerAt("0.0.0.0", 8080).bind(service)
+      Http().newServerAt("localhost", 8080).bind(service)
 
     println(s"server at localhost:8080 \nPress RETURN to stop")
     StdIn.readLine()

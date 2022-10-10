@@ -17,13 +17,11 @@ import akka.kafka.ConsumerMessage.TransactionalMessage
 import akka.kafka.ProducerMessage
 import akka.kafka.scaladsl.{ Consumer, Transactional }
 
-import akka.Done
-
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.io.StdIn
 
-object EffectivelyOnce {
+object ConsumerProducerEffectivelyOnce {
 
   implicit val system = ActorSystem(Behaviors.empty, "producerOne")
 
@@ -66,7 +64,7 @@ object EffectivelyOnce {
         .source(
           consumerSettings,
           Subscriptions.topics("test5")
-        ) //we don't need commiter settings
+        ) //we don't need committer settings
         .map { msg: TransactionalMessage[String, String] =>
           ProducerMessage.single(
             new ProducerRecord[String, String](

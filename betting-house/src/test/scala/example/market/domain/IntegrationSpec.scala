@@ -64,15 +64,15 @@ class IntegrationSpec
     Cluster(system).manager ! Join(Cluster(system).selfMember.address)
 
     sharding.init(
-      Entity(Wallet.TypeKey)(createBehavior = entityContext =>
+      Entity(Wallet.typeKey)(createBehavior = entityContext =>
         Wallet(entityContext.entityId)))
 
     sharding.init(
-      Entity(Market.TypeKey)(createBehavior = entityContext =>
+      Entity(Market.typeKey)(createBehavior = entityContext =>
         Market(entityContext.entityId)))
 
     sharding.init(
-      Entity(Bet.TypeKey)(createBehavior = entityContext =>
+      Entity(Bet.typeKey)(createBehavior = entityContext =>
         Bet(entityContext.entityId)))
   }
 
@@ -81,7 +81,7 @@ class IntegrationSpec
 
       val walletProbe = createTestProbe[Wallet.Response]
 
-      val wallet = sharding.entityRefFor(Wallet.TypeKey, "walletId1")
+      val wallet = sharding.entityRefFor(Wallet.typeKey, "walletId1")
 
       wallet ! Wallet.AddFunds(100, walletProbe.ref)
 
@@ -89,7 +89,7 @@ class IntegrationSpec
 
       val marketProbe = createTestProbe[Market.Response]
 
-      val market = sharding.entityRefFor(Market.TypeKey, "marketId1")
+      val market = sharding.entityRefFor(Market.typeKey, "marketId1")
 
       market ! Market.Open(
         Market.Fixture("fixtureId1", "RM", "MU"),
@@ -99,7 +99,7 @@ class IntegrationSpec
 
       marketProbe.expectMessage(10.seconds, Market.Accepted)
 
-      val bet = sharding.entityRefFor(Bet.TypeKey, "betId1")
+      val bet = sharding.entityRefFor(Bet.typeKey, "betId1")
 
       val betProbe = createTestProbe[Bet.Response]
 
@@ -138,7 +138,7 @@ class IntegrationSpec
 
       val walletProbe = createTestProbe[Wallet.Response]
 
-      val wallet = sharding.entityRefFor(Wallet.TypeKey, walletId)
+      val wallet = sharding.entityRefFor(Wallet.typeKey, walletId)
 
       wallet ! Wallet.AddFunds(100, walletProbe.ref)
 
@@ -146,7 +146,7 @@ class IntegrationSpec
 
       val marketProbe = createTestProbe[Market.Response]
 
-      val market = sharding.entityRefFor(Market.TypeKey, marketId)
+      val market = sharding.entityRefFor(Market.typeKey, marketId)
 
       market ! Market.Open(
         Market.Fixture("fixtureId2", "RM", "MU"),
@@ -156,7 +156,7 @@ class IntegrationSpec
 
       marketProbe.expectMessage(10.seconds, Market.Accepted)
 
-      val bet = sharding.entityRefFor(Bet.TypeKey, betId)
+      val bet = sharding.entityRefFor(Bet.typeKey, betId)
 
       val betProbe = createTestProbe[Bet.Response]
 
@@ -184,7 +184,7 @@ class IntegrationSpec
 
       val walletProbe = createTestProbe[Wallet.Response]
 
-      val wallet = sharding.entityRefFor(Wallet.TypeKey, walletId)
+      val wallet = sharding.entityRefFor(Wallet.typeKey, walletId)
 
       wallet ! Wallet.AddFunds(100, walletProbe.ref)
 
@@ -192,7 +192,7 @@ class IntegrationSpec
 
       val marketProbe = createTestProbe[Market.Response]
 
-      val market = sharding.entityRefFor(Market.TypeKey, marketId)
+      val market = sharding.entityRefFor(Market.typeKey, marketId)
 
       market ! Market.Open(
         Market.Fixture("fixtureId3", "RM", "MU"),
@@ -202,7 +202,7 @@ class IntegrationSpec
 
       marketProbe.expectMessage(10.seconds, Market.Accepted)
 
-      val bet = sharding.entityRefFor(Bet.TypeKey, betId)
+      val bet = sharding.entityRefFor(Bet.typeKey, betId)
 
       val betProbe = createTestProbe[Bet.Response]
 

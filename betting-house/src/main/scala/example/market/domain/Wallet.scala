@@ -3,9 +3,6 @@ package example.betting
 import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy }
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
-
 import akka.persistence.typed.scaladsl.{
   Effect,
   EventSourcedBehavior,
@@ -17,7 +14,7 @@ import scala.concurrent.duration._
 
 object Wallet {
 
-  val TypeKey = EntityTypeKey[Command]("wallet")
+  val typeKey = EntityTypeKey[Command]("wallet")
 
   sealed trait Command extends CborSerializable
   final case class ReserveFunds(
@@ -46,7 +43,7 @@ object Wallet {
 
   def apply(walletId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
-      PersistenceId(TypeKey.name, walletId),
+      PersistenceId(typeKey.name, walletId),
       State(0),
       commandHandler = handleCommands,
       eventHandler = handleEvents)

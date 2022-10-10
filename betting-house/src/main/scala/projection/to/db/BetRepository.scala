@@ -32,8 +32,10 @@ class BetRepositoryImpl extends BetRepository {
       session: ScalikeJdbcSession): Unit = {
     session.db.withinTx { implicit dbSession =>
       sql"""
-				INSERT INTO bet_wallet_market (betId, walletId, marketId, odds, stake, result) VALUES ($betId, $walletId, $marketId, $odds, $stake, $result)
-				ON CONFLICT (betId) DO NOTHING
+			INSERT INTO
+			    bet_wallet_market (betId, walletId, marketId, odds, stake, result)
+				VALUES ($betId, $walletId, $marketId, $odds, $stake, $result)
+			   ON CONFLICT (betId) DO NOTHING
 			""".executeUpdate().apply()
     }
 

@@ -111,9 +111,8 @@ class CSVSpec
       Map("name" -> "Alice", "surname" -> "Pleasence", "age" -> "19"))
   }
 
-  import akka.stream.alpakka.file.scaladsl.FileTailSource
   import akka.stream.scaladsl.FileIO
-  import java.nio.file.{ FileSystems, Paths }
+  import java.nio.file.FileSystems
   import akka.NotUsed
   import org.scalatest.time.{ Millis, Seconds, Span }
 

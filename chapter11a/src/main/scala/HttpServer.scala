@@ -4,13 +4,9 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import scala.io.StdIn
-
-import akka.stream.scaladsl.Source
-import akka.http.scaladsl.Http.IncomingConnection
 import scala.concurrent.Future
 
 object HttpServer {
@@ -29,7 +25,7 @@ object HttpServer {
       }
 
     val bindingFuture: Future[ServerBinding] =
-      Http().newServerAt("0.0.0.0", 8080).bind(route)
+      Http().newServerAt("localhost", 8080).bind(route)
 
     println(s"server at localhost:8080 \nPress RETURN to stop")
     StdIn.readLine()

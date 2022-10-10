@@ -8,10 +8,8 @@ import akka.actor.typed.scaladsl.{
 }
 import akka.cluster.sharding.typed.scaladsl.{
   ClusterSharding,
-  Entity,
   EntityTypeKey
 }
-import akka.cluster.sharding.typed.{ ShardingEnvelope }
 
 import akka.persistence.typed.scaladsl.{
   Effect,
@@ -21,19 +19,16 @@ import akka.persistence.typed.scaladsl.{
 }
 import akka.persistence.typed.PersistenceId
 
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 import akka.util.Timeout
 import org.slf4j.LoggerFactory
 
-/**
- */
 object Bet {
 
   val logger = LoggerFactory.getLogger(Bet.getClass())
 
-  val TypeKey = EntityTypeKey[Command]("bet")
+  val typeKey = EntityTypeKey[Command]("bet")
 
   sealed trait Command
   trait ReplyCommand extends Command with CborSerializable {
@@ -105,7 +100,7 @@ object Bet {
         .setup[Command] { context =>
           val sharding = ClusterSharding(context.system)
           EventSourcedBehavior[Command, Event, State](
-            PersistenceId(TypeKey.name, betId),
+            PersistenceId(typeKey.name, betId),
             UninitializedState(Status.empty(betId)),
             commandHandler = (state, command) =>
               handleCommands(
@@ -259,7 +254,7 @@ object Bet {
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
     val marketRef =
-      sharding.entityRefFor(Market.TypeKey, command.marketId)
+      sharding.entityRefFor(Market.typeKey, command.marketId)
 
     implicit val timeout
         : Timeout = Timeout(3, SECONDS) //TODO read from properties
@@ -275,21 +270,17 @@ object Bet {
     }
   }
 
-  /// if I already have asks why do I need a global time out?
-  ///I could use that global time out and then indirectly let the Wallet grant the Bet otherwise will be cancelled.
-  //As this methods now requires me to create the Customer maybe is better leave it as a theoretical
-  // possibility
-  //I can tell to funds and make the case I might need thids party calls or
-  /// the wallet might need to do so and there fore multiple asks chained are
-  /// a bad practice.
-  /// I would need an adapter
+  //if I already have asks why do I need a global time out?
+  // you use that global time out and then indirectly let the Wallet grant the Bet otherwise will be cancelled.
+  // you can tell to funds in case the bet might need thirds party calls or
+  // the wallet might need to do so. In general multiple asks chained are a bad practice.
 
   private def requestFundsReservation(
       command: Open,
       sharding: ClusterSharding,
       context: ActorContext[Command]): Unit = {
     val walletRef =
-      sharding.entityRefFor(Wallet.TypeKey, command.walletId)
+      sharding.entityRefFor(Wallet.typeKey, command.walletId)
     val walletResponseMapper: ActorRef[Wallet.UpdatedResponse] =
       context.messageAdapter(rsp => RequestWalletFunds(rsp))
 
@@ -358,7 +349,7 @@ object Bet {
 
     if (isWinner(state, command.result)) {
       val walletRef =
-        sharding.entityRefFor(Wallet.TypeKey, state.status.walletId)
+        sharding.entityRefFor(Wallet.typeKey, state.status.walletId)
       context.ask(walletRef, auxCreateRequest(state.status.stake)) {
         case Success(_) =>
           Close(s"stake reimbursed to wallet [$walletRef]")

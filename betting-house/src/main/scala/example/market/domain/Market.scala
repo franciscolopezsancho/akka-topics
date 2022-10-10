@@ -1,7 +1,6 @@
 package example.betting
 
 import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy }
-import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 import akka.persistence.typed.scaladsl.{
@@ -20,7 +19,7 @@ import java.time.{ OffsetDateTime, ZoneId }
  */
 object Market {
 
-  val TypeKey = EntityTypeKey[Command]("market")
+  val typeKey = EntityTypeKey[Command]("market")
 
   final case class Fixture(
       id: String,
@@ -82,7 +81,7 @@ object Market {
 
   def apply(marketId: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
-      PersistenceId(TypeKey.name, marketId),
+      PersistenceId(typeKey.name, marketId),
       UninitializedState(Status.empty(marketId)),
       commandHandler = handleCommands,
       eventHandler = handleEvents)
@@ -142,9 +141,9 @@ object Market {
           state.status.fixture,
           odds.getOrElse(state.status.odds),
           result.getOrElse(state.status.result)))
-      case (state: OpenState, Closed(marketId, result, _)) =>
+      case (state: OpenState, Closed(_, result, _)) =>
         ClosedState(state.status.copy(result = result))
-      case (_, Cancelled(marketId, reason)) =>
+      case (_, Cancelled(_, _)) =>
         CancelledState(state.status)
     }
   }

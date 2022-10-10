@@ -1,24 +1,12 @@
 package betting.house.projection
 
 import org.slf4j.LoggerFactory
-
-import akka.actor.typed.ActorSystem
-
-import akka.projection.ProjectionId
-import akka.projection.scaladsl.ExactlyOnceProjection
 import akka.projection.eventsourced.EventEnvelope
-import akka.projection.eventsourced.scaladsl.EventSourcedProvider
-
-import akka.projection.jdbc.scaladsl.{ JdbcHandler, JdbcProjection }
-
-import akka.persistence.query.Offset
-import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
-
+import akka.projection.jdbc.scaladsl.JdbcHandler
 import example.repository.scalike.{
   BetRepository,
   ScalikeJdbcSession
 }
-
 import example.betting.Bet
 
 class BetProjectionHandler(repository: BetRepository)

@@ -5,8 +5,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 import example.repository.scalike.{
   BetRepository,
-  ScalikeJdbcSession,
-  StakePerResult
+  ScalikeJdbcSession
 }
 
 class BetProjectionServiceImpl(
@@ -26,10 +25,8 @@ class BetProjectionServiceImpl(
         val sumStakes = betRepository
           .getBetPerMarketTotalStake(in.marketId, session)
           .map { each =>
-            println(s"${each.sum} : ${each.result}")
             SumStake(each.sum, each.result)
           }
-        println(SumStakes(sumStakes))
         SumStakes(sumStakes)
       }
     }

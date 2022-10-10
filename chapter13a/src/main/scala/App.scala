@@ -9,12 +9,12 @@ import com.typesafe.config.ConfigFactory
 object App {
 
   def main(args: Array[String]): Unit = {
-    val i = args(0)
+    val address = args(0)
 
     val config = ConfigFactory
       .parseString(s"""
-        akka.remote.artery.canonical.hostname = "127.0.0.$i"
-        akka.management.http.hostname = "127.0.0.$i"
+        akka.remote.artery.canonical.hostname = "127.0.0.$address"
+        akka.management.http.hostname = "127.0.0.$address"
         """)
       .withFallback(ConfigFactory.load())
 

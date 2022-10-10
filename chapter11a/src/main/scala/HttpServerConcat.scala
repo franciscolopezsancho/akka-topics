@@ -3,9 +3,8 @@ package example.http
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{ MissingCookieRejection, Route }
+import akka.http.scaladsl.server.Route
 import scala.io.StdIn
 
 object HttpServerConcat {

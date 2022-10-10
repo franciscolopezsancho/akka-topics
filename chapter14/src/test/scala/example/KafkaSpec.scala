@@ -30,6 +30,9 @@ class KafkaSpec
     val config =
       system.settings.config.getConfig("akka.kafka.producer")
 
+    val topicDest =
+      system.settings.config.getString("kafka.test.topic")
+
     val producerSettings = ProducerSettings(
       config,
       new StringSerializer(),
@@ -38,7 +41,7 @@ class KafkaSpec
     val done: Future[Done] = Source(1 to 10)
       .map(_.toString)
       .map(
-        elem => new ProducerRecord[String, String]("test", elem)
+        elem => new ProducerRecord[String, String](topicDest, elem)
       ) //we can also pass partition and key
       .runWith(Producer.plainSink(producerSettings))
 

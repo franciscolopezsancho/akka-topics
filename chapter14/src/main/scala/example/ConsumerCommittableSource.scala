@@ -6,7 +6,6 @@ import akka.kafka.scaladsl.Consumer
 
 import akka.stream.scaladsl.Sink
 
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 
 import scala.io.StdIn
@@ -16,7 +15,7 @@ import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.CommitterSettings
 import akka.kafka.ConsumerMessage.CommittableMessage
 
-object ConsumerTwo {
+object ConsumerCommittableSource {
 
   def main(args: Array[String]) = {
 

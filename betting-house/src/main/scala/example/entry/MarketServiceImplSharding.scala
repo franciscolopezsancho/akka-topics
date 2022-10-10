@@ -26,12 +26,12 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
   implicit val executionContext: ExecutionContext =
     ExecutionContext.global
 
-  sharding.init(Entity(Market.TypeKey)(entityContext =>
+  sharding.init(Entity(Market.typeKey)(entityContext =>
     Market(entityContext.entityId)))
 
   override def cancel(in: example.market.grpc.CancelMarket)
       : scala.concurrent.Future[example.market.grpc.Response] = {
-    val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
+    val market = sharding.entityRefFor(Market.typeKey, in.marketId)
     def auxCancel(reason: String)(
         replyTo: ActorRef[Market.Response]) =
       Market.Cancel(in.reason, replyTo)
@@ -52,7 +52,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
 
   override def closeMarket(in: example.market.grpc.MarketId)
       : scala.concurrent.Future[example.market.grpc.Response] = {
-    val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
+    val market = sharding.entityRefFor(Market.typeKey, in.marketId)
 
     market
       .ask(Market.Close)
@@ -69,7 +69,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
   }
   override def getState(in: example.market.grpc.MarketId)
       : scala.concurrent.Future[example.market.grpc.MarketData] = {
-    val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
+    val market = sharding.entityRefFor(Market.typeKey, in.marketId)
 
     market.ask(Market.GetState).mapTo[Market.CurrentState].map {
       state =>
@@ -91,7 +91,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
 
   override def open(in: example.market.grpc.MarketData)
       : scala.concurrent.Future[example.market.grpc.Response] = {
-    val market = sharding.entityRefFor(Market.TypeKey, in.marketId)
+    val market = sharding.entityRefFor(Market.typeKey, in.marketId)
 
     def auxInit(in: MarketData)(
         replyTo: ActorRef[Market.Response]) = {
@@ -161,7 +161,7 @@ class MarketServiceImplSharding(implicit sharding: ClusterSharding)
 
     in.mapAsync(10) { marketData =>
       val marketRef =
-        sharding.entityRefFor(Market.TypeKey, marketData.marketId)
+        sharding.entityRefFor(Market.typeKey, marketData.marketId)
 
       marketRef
         .ask(auxUpdate(marketData))

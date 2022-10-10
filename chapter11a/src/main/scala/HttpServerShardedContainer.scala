@@ -9,8 +9,6 @@ import scala.io.StdIn
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import akka.util.Timeout
-import akka.actor.typed.scaladsl.AskPattern.Askable
-import akka.actor.typed.scaladsl.AskPattern.schedulerFromActorSystem
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.StatusCodes
@@ -50,12 +48,11 @@ object HttpServerShardedContainer {
       path("cargo") {
         concat(
           post {
-            //or  entity(as[Container.Cargo]) { cargo =>
-            parameters(
-              "entityId".as[String],
-              "kind".as[String],
-              "size".as[Int]) { (entityId, kind, size) =>
-              val cargo = Container.Cargo(kind, size)
+             parameters(                                     // or
+               "entityId".as[String],                        // entity(as[Container.Cargo]) { cargo =>
+               "kind".as[String],                            //
+               "size".as[Int]) { (entityId, kind, size) =>   //
+               val cargo = Container.Cargo(kind, size)       //
 
               shardingRegion ! ShardingEnvelope(
                 entityId,
@@ -80,7 +77,7 @@ object HttpServerShardedContainer {
       }
 
     val bindingFuture: Future[ServerBinding] =
-      Http().newServerAt("0.0.0.0", 8080).bind(route)
+      Http().newServerAt("localhost", 8080).bind(route)
 
     println(s"server at localhost:8080 \nPress RETURN to stop")
     StdIn.readLine()
@@ -90,8 +87,6 @@ object HttpServerShardedContainer {
   }
 }
 
-import akka.actor.typed.{ ActorRef, Behavior }
-import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 object Container {
