@@ -1,39 +1,32 @@
-package example.streams.two
+package example
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.BeforeAndAfter
-
-import scala.concurrent.{ Await, ExecutionContext, Future, Promise }
-import scala.concurrent.duration._
-import scala.collection.StringOps
-import java.util.concurrent.Executors
-import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
 import akka.Done
 import akka.NotUsed
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Keep
+import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.Source
+import org.scalatest.BeforeAndAfter
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class SampleSpec
+import java.util.concurrent.Executors
+import scala.collection.StringOps
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.concurrent.Promise
+import scala.concurrent.duration._
+
+class SamplesSpec
     extends ScalaTestWithActorTestKit
     with AnyWordSpecLike
     with Matchers
     with BeforeAndAfter {
 
-// https://jessitron.com/2014/01/29/choosing-an-executorservice/
   implicit val ec =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1000))
-
-  "calling local process" should {
-    "eventually return" ignore {
-
-      val result: Future[Done] =
-        Source(1 to 10)
-          .map(each => parsingDoc(each.toString))
-          .run()
-
-      Await.result(result, 30.seconds)
-    }
-  }
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(12)) //
 
   "calling to an external service" should {
     "eventually return 3 times faster" ignore {
@@ -109,16 +102,15 @@ class SampleSpec
     }
   }
 
-  import akka.http.scaladsl.client.RequestBuilding.Get
   import akka.http.scaladsl.Http
-  import akka.http.scaladsl.unmarshalling.Unmarshal
+  import akka.http.scaladsl.client.RequestBuilding.Get
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+  import akka.http.scaladsl.unmarshalling.Unmarshal
+  import example.validation.HttpServer
   import spray.json.DefaultJsonProtocol._
   import spray.json.RootJsonFormat
-
-  import example.validation.HttpServer
   "calling to a real service" should {
-    "work" ignore {
+    "be handle with throttle and mapAsync" ignore {
 
       implicit val validatedFormat
           : RootJsonFormat[HttpServer.Validated] =
@@ -140,21 +132,22 @@ class SampleSpec
     }
   }
 
-  import scalikejdbc._, config._
+  import scalikejdbc._
+  import config._
 
   "connecting to a db" should {
     "work" ignore {
 
-      DBs.setup('containers)
+      DBs.setup(Symbol("containers"))
 
-      def myGetPersistenceId(id: Int): Option[String] = {
-        val name: Option[String] = NamedDB('containers).readOnly {
-          implicit session =>
-            sql"select persistence_id from event_journal where sequence_number = ${id}"
+      def myGetPersistenceId(seqNum: Int): Option[String] = {
+        val name: Option[String] =
+          NamedDB(Symbol("containers")).readOnly { implicit session =>
+            sql"select persistence_id from event_journal where sequence_number = ${seqNum}"
               .map(rs => rs.string("persistence_id"))
               .first
               .apply()
-        }
+          }
         name
       }
       //use throttle to send 1000 queries?
@@ -164,33 +157,11 @@ class SampleSpec
         .run()
 
       Await.result(result, 5.seconds)
-      DBs.close('containers)
+      DBs.close(Symbol("containers"))
     }
   }
 
-  import akka.actor.typed.{ ActorRef, Behavior }
-  import akka.actor.typed.scaladsl.Behaviors
-
-  object Cap {
-
-    final case class Increment(increment: Int, replyTo: ActorRef[Int])
-
-    def apply(current: Int, max: Int): Behavior[Increment] = {
-      Behaviors.receiveMessage { message =>
-        message match {
-          case Increment(increment, replyTo) =>
-            if (current + increment > max) {
-              replyTo ! current
-              Behaviors.same
-            } else {
-              replyTo ! current + increment
-              apply(current + increment, max)
-            }
-        }
-      }
-    }
-  }
-
+  import akka.actor.typed.ActorRef
   import akka.stream.typed.scaladsl.ActorFlow
 
   "connecting to an actor from a stream" should {
@@ -234,8 +205,6 @@ class SampleSpec
     }
   }
 
-  import scala.util.Random
-
   "an Exception" should {
     "stop the stream and log 'tried riskyHandle'" ignore {
       def riskyHandler(elem: Int): Int =
@@ -272,8 +241,8 @@ class SampleSpec
     }
   }
 
-  import akka.stream.Supervision
   import akka.stream.ActorAttributes
+  import akka.stream.Supervision
 
   val decider: Supervision.Decider = {
     case _: ArithmeticException => Supervision.Resume
@@ -370,15 +339,13 @@ class SampleSpec
     }
   }
 
-  import akka.stream.scaladsl.RestartSource
-  import akka.stream.RestartSettings
-  import example.locator.grpc.{
-    Location,
-    LocatorService,
-    LocatorServiceClient
-  }
   import akka.grpc.GrpcClientSettings
+  import akka.stream.RestartSettings
+  import akka.stream.scaladsl.RestartSource
   import com.google.protobuf.empty.Empty
+  import example.locator.grpc.Location
+  import example.locator.grpc.LocatorService
+  import example.locator.grpc.LocatorServiceClient
 
   "A Source" should {
     "be able to keep consuming from a failed and restored service" ignore {
@@ -435,7 +402,8 @@ class SampleSpec
     }
   }
 
-  import akka.stream.{ OverflowStrategy, QueueOfferResult }
+  import akka.stream.OverflowStrategy
+  import akka.stream.QueueOfferResult
   import akka.stream.scaladsl.SourceQueue
 
   "Source queue" should {

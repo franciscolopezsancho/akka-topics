@@ -32,5 +32,4 @@ object LocatorServer {
       .flatMap(_.unbind())
       .onComplete(_ => system.terminate())
   }
-
 }

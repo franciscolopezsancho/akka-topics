@@ -4,13 +4,11 @@ option java_package = "example.locator.grpc";
 option java_outer_classname = "LocatorProto";
 import "google/protobuf/empty.proto";
 
-
 message Location {
 	double lat = 1;
 	double lon = 2;
 }
 
 service LocatorService {
-
 	rpc  Follow(google.protobuf.Empty) returns (stream Location) {}
 } 
