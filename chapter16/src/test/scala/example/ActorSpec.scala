@@ -56,7 +56,6 @@ class ActorSpec
         .run()
 
       Await.result(result2, 10.seconds)
-
     }
   }
 }
