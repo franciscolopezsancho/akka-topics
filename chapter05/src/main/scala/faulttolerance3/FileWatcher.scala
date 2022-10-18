@@ -40,6 +40,6 @@ object FileWatcher extends FileListeningAbilities {
       }
       .onFailure[ClosedWatchServiceException](
         SupervisorStrategy.restart)
-  //after restart work can get duplicated, dedup is out of the scope.
+  //after restart work can get duplicated, deduplication is out of the scope.
 
 }

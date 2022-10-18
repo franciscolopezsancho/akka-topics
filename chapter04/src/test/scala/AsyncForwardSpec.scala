@@ -1,15 +1,11 @@
 package async
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
-import akka.actor.testkit.typed.scaladsl.LoggingTestKit
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior }
-import scala.concurrent.duration._
-import akka.actor.testkit.typed.scaladsl.FishingOutcomes
-import java.util.Base64
+import common.SimplifiedManager
 
 class AsyncForwardSpec
     extends AnyWordSpec
@@ -47,20 +43,4 @@ class AsyncForwardSpec
 
     }
   }
-}
-
-object SimplifiedManager {
-
-  sealed trait Command
-  final case class Forward(message: String, sendTo: ActorRef[String])
-      extends Command
-
-  def apply(): Behaviors.Receive[Command] =
-    Behaviors.receive { (context, message) =>
-      message match {
-        case Forward(text, sendTo) =>
-          sendTo ! text
-          Behaviors.same
-      }
-    }
 }

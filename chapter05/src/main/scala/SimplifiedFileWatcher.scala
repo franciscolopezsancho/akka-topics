@@ -21,9 +21,6 @@ object SimplifiedFileWatcher {
         }
       }
       .receiveSignal {
-        case (context, ChildFailed(ref)) =>
-          context.log.info("childFailed")
-          Behaviors.same
         case (context, Terminated(ref)) =>
           context.log.info("terminated")
           Behaviors.same

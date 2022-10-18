@@ -1,11 +1,12 @@
 package fishing
 
 import akka.actor.testkit.typed.scaladsl._
+import akka.actor.typed.ActorRef
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.TimerScheduler
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-
-import akka.actor.typed.scaladsl.{ Behaviors, TimerScheduler }
-import akka.actor.typed.{ ActorRef, Behavior }
 
 import scala.concurrent.duration._
 

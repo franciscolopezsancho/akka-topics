@@ -2,16 +2,11 @@ package logging
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.actor.testkit.typed.scaladsl.LoggingTestKit
-import akka.actor.testkit.typed.scaladsl.LogCapturing
-
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior }
-import scala.concurrent.duration._
-
+import akka.actor.typed.Behavior
+import common.SimplifiedManager
 import org.slf4j.event.Level
 
 class AsyncLogSpec
@@ -49,20 +44,4 @@ class AsyncLogSpec
         }
     }
   }
-}
-
-object SimplifiedManager {
-
-  sealed trait Command
-  final case object Log extends Command
-
-  def apply(): Behaviors.Receive[Command] =
-    Behaviors.receive { (context, message) =>
-      message match {
-        case Log =>
-          context.log.info(s"it's done")
-          Behaviors.same
-      }
-    }
-
 }

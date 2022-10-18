@@ -3,7 +3,7 @@ package faulttolerance2
 
 import akka.actor.typed.ActorSystem
 
-object LogProcessingApp extends App {
+object LogProcessingInitialDesign extends App {
   val sources = Vector("file:///source1/", "file:///source2/")
   val databaseUrl = "http://mydatabase1"
 
