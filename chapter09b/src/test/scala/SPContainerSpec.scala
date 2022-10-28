@@ -41,12 +41,11 @@ class SPContainerSpec
 
     "be able to add container" in {
       val sharding = ClusterSharding(system)
-
+      val entityDefinition = Entity(SPContainer.typeKey)(createBehavior =
+        entityContext => SPContainer(entityContext.entityId))
       val shardRegion
           : ActorRef[ShardingEnvelope[SPContainer.Command]] =
-        sharding.init(
-          Entity(SPContainer.typeKey)(createBehavior =
-            entityContext => SPContainer(entityContext.entityId)))
+        sharding.init(entityDefinition)
 
       val containerId = "123"
       val cargo = SPContainer.Cargo("id-c", "sack", 3)

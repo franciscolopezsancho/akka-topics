@@ -11,13 +11,8 @@ import java.time.{ Instant, OffsetDateTime, ZoneId }
 
 import example.betting.Market
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success, Try }
-
-import akka.stream.scaladsl.Flow
-import akka.NotUsed
-import akka.stream.typed.scaladsl.ActorFlow
 
 class MarketServiceImplSharding(implicit sharding: ClusterSharding)
     extends MarketService {

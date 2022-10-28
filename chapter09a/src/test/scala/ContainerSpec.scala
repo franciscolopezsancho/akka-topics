@@ -17,11 +17,10 @@ class ContainerSpec
     "be able to add a cargo" in {
 
       val sharding = ClusterSharding(system)
-
+      val entityDef = Entity(Container.TypeKey)(createBehavior = entityContext =>
+        Container(entityContext.entityId))
       val shardRegion: ActorRef[ShardingEnvelope[Container.Command]] =
-        sharding.init(
-          Entity(Container.TypeKey)(createBehavior = entityContext =>
-            Container(entityContext.entityId)))
+        sharding.init(entityDef)
 
       val containerId = "id-1"
       val cargo = Container.Cargo("id-c", "sack", 3)

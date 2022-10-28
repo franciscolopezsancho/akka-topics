@@ -3,7 +3,11 @@ package basics
 import akka.actor.testkit.typed.scaladsl.BehaviorTestKit
 import akka.actor.testkit.typed.scaladsl.TestInbox
 import akka.actor.testkit.typed.CapturedLogEvent
-import akka.actor.testkit.typed.Effect.{NoEffects, Scheduled, Spawned}
+import akka.actor.testkit.typed.Effect.{
+  NoEffects,
+  Scheduled,
+  Spawned
+}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.exceptions.TestFailedException
@@ -52,7 +56,3 @@ class SyncTestingSpec extends AnyWordSpec with Matchers {
     }
   }
 }
-
-
-
-
