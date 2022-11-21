@@ -40,7 +40,7 @@ object Main {
       ActorSystem[Nothing](Behaviors.empty, "betting-house")
     try {
 
-      implicit val sharding = ClusterSharding(system)
+      val sharding = ClusterSharding(system)
       implicit val ec: ExecutionContext = system.executionContext
 
       AkkaManagement(system).start()

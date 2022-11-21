@@ -25,7 +25,7 @@ class KafkaSpec
 
   implicit val system = ActorSystem(Behaviors.empty, "producerOne")
 
-  "a producer" should "produce" in {
+  "a producer" should "write to Kafka" in {
 
     val config =
       system.settings.config.getConfig("akka.kafka.producer")

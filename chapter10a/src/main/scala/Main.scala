@@ -31,7 +31,10 @@ object Main extends App {
   : RunnableGraph[scala.concurrent.Future[akka.Done]] =
   producer.via(processor).toMat(consumer)(Keep.right)
 
-  val future: Future[Done] = blueprint.run()(SystemMaterializer(system).materializer)
-  Await.result(future, 1.seconds)
-  assert(fakeDB == List(2))
+  val future: Future[Done] = blueprint.run()
+
+  future.onComplete{ result =>
+    println(fakeDB)
+    system.terminate
+  }(system.executionContext)
 }
