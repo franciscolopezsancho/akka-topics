@@ -2,16 +2,12 @@ import akka.Done
 import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.javadsl.Behaviors
-import akka.stream.SystemMaterializer
 import akka.stream.scaladsl.Flow
 import akka.stream.scaladsl.Keep
 import akka.stream.scaladsl.RunnableGraph
 import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
-
-import scala.concurrent.Await
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 object Main extends App {
 

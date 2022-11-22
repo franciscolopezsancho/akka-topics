@@ -3,7 +3,7 @@ package example.locator.grpc
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import scala.concurrent.{ ExecutionContext, Future }
-import akka.http.scaladsl.{ Http, HttpConnectionContext }
+import akka.http.scaladsl.{ Http }
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 
 import scala.io.StdIn
