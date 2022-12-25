@@ -32,6 +32,4 @@ object SimplifiedManager {
     }
 }
 
-object SimplifiedWorker {
-  def apply() = Behaviors.ignore[String]
-}
+

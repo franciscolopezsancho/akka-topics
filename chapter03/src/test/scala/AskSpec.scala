@@ -8,7 +8,7 @@ class AskSpec
     with AnyWordSpecLike
     with Matchers {
 
-  import ask.content.Manager
+  import simplequestion.Manager
 
   "the message on dead letters" should {
     "be referrencing to the sender of the ask" in {
