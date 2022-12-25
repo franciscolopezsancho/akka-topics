@@ -1,22 +1,9 @@
 package betting.house.projection
 
-import scala.util.control.NonFatal
-
-import java.time.Instant
-
-import org.slf4j.LoggerFactory
-
-import com.typesafe.config.ConfigFactory
 
 import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
-
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.http.scaladsl.Http
-
-import example.repository.scalike.BetRepositoryImpl
-import example.repository.scalike.ScalikeJdbcSetup
-
 import betting.house.projection.proto.{
   BetProjectionServiceHandler,
   BetProjectionServiceImpl
