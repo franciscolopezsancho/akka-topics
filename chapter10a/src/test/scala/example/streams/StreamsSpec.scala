@@ -92,9 +92,6 @@ class StreamsSpec
     }
   }
 
-  // "a infinite producer"
-  // "alpakka?"
-
   "an infinite producer with a consumer creating side effect" should {
     "be cancellable" in {
 

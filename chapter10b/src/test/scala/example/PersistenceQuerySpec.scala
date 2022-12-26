@@ -9,7 +9,6 @@ import akka.persistence.query.{
   Offset,
   PersistenceQuery
 }
-import akka.persistence.query.scaladsl.{ ReadJournal }
 
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 
