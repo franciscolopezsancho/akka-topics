@@ -1,4 +1,4 @@
-package faulttolerance3.exception
+package faulttolerance2.exception
 
 @SerialVersionUID(1L)
 class UnexpectedColumnsException(msg: String)

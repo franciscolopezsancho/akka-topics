@@ -1,4 +1,4 @@
-package faulttolerance3
+package faulttolerance2
 
 //provides File watching API
 trait FileListeningAbilities {

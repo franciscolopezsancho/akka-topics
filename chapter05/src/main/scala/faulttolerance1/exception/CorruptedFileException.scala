@@ -1,4 +1,4 @@
-package faulttolerance2.exception
+package faulttolerance1.exception
 
 import java.io.File
 

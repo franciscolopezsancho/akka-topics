@@ -1,19 +1,18 @@
-package faulttolerance3
+package faulttolerance1
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.PostStop
 import akka.actor.typed.PreRestart
 import akka.actor.typed.SupervisorStrategy
 import akka.actor.typed.scaladsl.Behaviors
-import faulttolerance3.exception.DbBrokenConnectionException
-import faulttolerance3.exception.UnexpectedColumnsException
+import faulttolerance1.exception.DbBrokenConnectionException
+import faulttolerance1.exception.DbNodeDownException
 
 import scala.concurrent.duration._
 
 object DbWriter {
 
   sealed trait Command
-
   final case class Line(
       time: Long,
       message: String,
@@ -21,14 +20,13 @@ object DbWriter {
       extends Command
 
   def apply(databaseUrl: String): Behavior[Command] =
-    supervisorStrategy {
+    supervisonStrategy {
       Behaviors.setup[Command] { context =>
-        // creates connection using databaseUrl
+        // creates connection with databaseUrl)
         Behaviors
           .receiveMessage[Command] {
             case Line(t, m, mt) => ???
-            //transforms line to db schema
-            //saves to db
+            //saves line to db
           }
           .receiveSignal {
             case (_, PostStop) => ???
@@ -39,20 +37,16 @@ object DbWriter {
       }
     }
 
-  def supervisorStrategy(
-      behavior: Behavior[Command]): Behavior[Command] =
+  def supervisonStrategy(beh: Behavior[Command]): Behavior[Command] =
     Behaviors
       .supervise {
         Behaviors
-          .supervise(behavior)
-          .onFailure[UnexpectedColumnsException](
-            SupervisorStrategy.resume)
+          .supervise {
+            beh
+          }
+          .onFailure[DbBrokenConnectionException](
+            SupervisorStrategy.restart)
       }
-      .onFailure[DbBrokenConnectionException](
-        SupervisorStrategy
-          .restartWithBackoff(
-            minBackoff = 3.seconds,
-            maxBackoff = 30.seconds,
-            randomFactor = 0.1)
-          .withResetBackoffAfter(15.seconds))
+      .onFailure[DbNodeDownException](SupervisorStrategy.stop)
+
 }

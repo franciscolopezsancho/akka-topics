@@ -1,4 +1,4 @@
-package faulttolerance3
+package faulttolerance2
 //SECOND DESIGN. Figure 5.13 and 5.14
 
 import akka.actor.typed.ActorSystem

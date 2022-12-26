@@ -6,13 +6,14 @@ import akka.actor.typed.PreRestart
 import akka.actor.typed.SupervisorStrategy
 import akka.actor.typed.scaladsl.Behaviors
 import faulttolerance2.exception.DbBrokenConnectionException
-import faulttolerance2.exception.DbNodeDownException
+import faulttolerance2.exception.UnexpectedColumnsException
 
 import scala.concurrent.duration._
 
 object DbWriter {
 
   sealed trait Command
+
   final case class Line(
       time: Long,
       message: String,
@@ -20,13 +21,14 @@ object DbWriter {
       extends Command
 
   def apply(databaseUrl: String): Behavior[Command] =
-    supervisonStrategy {
+    supervisorStrategy {
       Behaviors.setup[Command] { context =>
-        // creates connection with databaseUrl)
+        // creates connection using databaseUrl
         Behaviors
           .receiveMessage[Command] {
             case Line(t, m, mt) => ???
-            //saves line to db
+            //transforms line to db schema
+            //saves to db
           }
           .receiveSignal {
             case (_, PostStop) => ???
@@ -37,16 +39,20 @@ object DbWriter {
       }
     }
 
-  def supervisonStrategy(beh: Behavior[Command]): Behavior[Command] =
+  def supervisorStrategy(
+      behavior: Behavior[Command]): Behavior[Command] =
     Behaviors
       .supervise {
         Behaviors
-          .supervise {
-            beh
-          }
-          .onFailure[DbBrokenConnectionException](
-            SupervisorStrategy.restart)
+          .supervise(behavior)
+          .onFailure[UnexpectedColumnsException](
+            SupervisorStrategy.resume)
       }
-      .onFailure[DbNodeDownException](SupervisorStrategy.stop)
-
+      .onFailure[DbBrokenConnectionException](
+        SupervisorStrategy
+          .restartWithBackoff(
+            minBackoff = 3.seconds,
+            maxBackoff = 30.seconds,
+            randomFactor = 0.1)
+          .withResetBackoffAfter(15.seconds))
 }
