@@ -6,5 +6,3 @@ object ClusterDomainEventListenerApp extends App {
 
   val guardian = ActorSystem(ClusterDomainEventListener(), "words")
 }
-
-

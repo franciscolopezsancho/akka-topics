@@ -42,8 +42,9 @@ object Main {
   def init(system: ActorSystem[_])
       : ActorRef[ShardingEnvelope[SPContainer.Command]] = {
     val sharding = ClusterSharding(system)
-    val entityDefinition = Entity(SPContainer.typeKey)(createBehavior = entityContext =>
-      SPContainer(entityContext.entityId))
+    val entityDefinition =
+      Entity(SPContainer.typeKey)(createBehavior = entityContext =>
+        SPContainer(entityContext.entityId))
 
     val shardRegion: ActorRef[ShardingEnvelope[SPContainer.Command]] =
       sharding.init(entityDefinition)

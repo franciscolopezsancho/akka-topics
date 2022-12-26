@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 object Main extends App {
 
-  implicit val system = ActorSystem(Behaviors.empty,"runner")
+  implicit val system = ActorSystem(Behaviors.empty, "runner")
   system
   var fakeDB: List[Int] = List()
   def storeDB(value: Int) =
@@ -23,13 +23,12 @@ object Main extends App {
   val consumer: Sink[Int, Future[Done]] =
     Sink.foreach(i => storeDB(i))
 
-  val blueprint
-  : RunnableGraph[scala.concurrent.Future[akka.Done]] =
-  producer.via(processor).toMat(consumer)(Keep.right)
+  val blueprint: RunnableGraph[scala.concurrent.Future[akka.Done]] =
+    producer.via(processor).toMat(consumer)(Keep.right)
 
   val future: Future[Done] = blueprint.run()
 
-  future.onComplete{ result =>
+  future.onComplete { result =>
     println(fakeDB)
     system.terminate
   }(system.executionContext)

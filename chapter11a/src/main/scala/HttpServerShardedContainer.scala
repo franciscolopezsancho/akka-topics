@@ -48,11 +48,12 @@ object HttpServerShardedContainer {
       path("cargo") {
         concat(
           post {
-             parameters(                                     // or
-               "entityId".as[String],                        // entity(as[Container.Cargo]) { cargo =>
-               "kind".as[String],                            //
-               "size".as[Int]) { (entityId, kind, size) =>   //
-               val cargo = Container.Cargo(kind, size)       //
+            parameters( // or
+              "entityId"
+                .as[String], // entity(as[Container.Cargo]) { cargo =>
+              "kind".as[String], //
+              "size".as[Int]) { (entityId, kind, size) => //
+              val cargo = Container.Cargo(kind, size) //
 
               shardingRegion ! ShardingEnvelope(
                 entityId,

@@ -16,12 +16,12 @@ object Container {
   final case class AddCargo(cargo: Cargo) extends Command
 
   final case class GetCargos(replyTo: ActorRef[List[Cargo]])
-    extends Command
+      extends Command
 
   sealed trait Event
 
   final case class CargoAdded(containerId: String, cargo: Cargo)
-    extends Event
+      extends Event
 
   final case class State(cargos: List[Cargo] = Nil)
 
@@ -34,9 +34,9 @@ object Container {
       eventHandler)
 
   def commandHandler(
-                      containerId: String,
-                      state: State,
-                      command: Command): Effect[Event, State] =
+      containerId: String,
+      state: State,
+      command: Command): Effect[Event, State] =
     command match {
       case AddCargo(cargo) =>
         Effect.persist(CargoAdded(containerId, cargo))

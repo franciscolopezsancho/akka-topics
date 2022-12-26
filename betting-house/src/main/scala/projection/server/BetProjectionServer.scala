@@ -1,6 +1,5 @@
 package betting.house.projection
 
-
 import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.http.scaladsl.Http

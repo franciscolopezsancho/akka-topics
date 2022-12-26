@@ -72,5 +72,3 @@ object SPContainer {
         state.copy(cargos = cargo +: state.cargos)
     }
 }
-
-

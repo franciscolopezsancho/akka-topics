@@ -5,10 +5,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{
-  ExceptionHandler,
-  Route,
-}
+import akka.http.scaladsl.server.{ ExceptionHandler, Route }
 import scala.io.StdIn
 import scala.util.Random
 
@@ -38,8 +35,8 @@ object HttpServerExceptions {
             complete(
               HttpEntity(
                 ContentTypes.`application/json`,
-                "exactly the site you wanted " + 
-                   (Random.nextInt / Random.nextInt(2))))
+                "exactly the site you wanted " +
+                (Random.nextInt / Random.nextInt(2))))
           }
         }
       }

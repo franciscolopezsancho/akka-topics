@@ -12,9 +12,3 @@ object ErrorKernelApp extends App {
   scala.io.StdIn.readLine()
   guardian.terminate()
 }
-
-
-
-
-
-

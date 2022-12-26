@@ -23,7 +23,7 @@ object ContainerServerSharding {
     val sharding: ClusterSharding = ClusterSharding(system)
 
     sharding.init(Entity(Container.TypeKey)(entityContext =>
-        Container(entityContext.entityId)))
+      Container(entityContext.entityId)))
 
     val service: HttpRequest => Future[HttpResponse] =
       ContainerServiceHandler.withServerReflection(

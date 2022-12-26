@@ -1,10 +1,17 @@
 package example.sharding
 
-import akka.actor.testkit.typed.scaladsl.{LogCapturing, ScalaTestWithActorTestKit}
+import akka.actor.testkit.typed.scaladsl.{
+  LogCapturing,
+  ScalaTestWithActorTestKit
+}
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.matchers.should.Matchers
 import akka.actor.typed.ActorRef
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityRef}
+import akka.cluster.sharding.typed.scaladsl.{
+  ClusterSharding,
+  Entity,
+  EntityRef
+}
 import akka.cluster.sharding.typed.ShardingEnvelope
 
 class ContainerSpec
@@ -17,8 +24,8 @@ class ContainerSpec
     "be able to add a cargo" in {
 
       val sharding = ClusterSharding(system)
-      val entityDef = Entity(Container.TypeKey)(createBehavior = entityContext =>
-        Container(entityContext.entityId))
+      val entityDef = Entity(Container.TypeKey)(createBehavior =
+        entityContext => Container(entityContext.entityId))
       val shardRegion: ActorRef[ShardingEnvelope[Container.Command]] =
         sharding.init(entityDef)
 
@@ -34,11 +41,9 @@ class ContainerSpec
       val container: EntityRef[Container.Command] =
         sharding.entityRefFor(Container.TypeKey, containerId)
 
-      container! Container.GetCargos(probe.ref)
+      container ! Container.GetCargos(probe.ref)
       probe.expectMessage(List(cargo))
 
     }
   }
 }
-
-

@@ -20,7 +20,7 @@ object Aggregator {
   final case class Enriched(id: String, metadata: String)
       extends Command
 
-  sealed trait Event{
+  sealed trait Event {
     def id: String
   }
   final case class Completed(

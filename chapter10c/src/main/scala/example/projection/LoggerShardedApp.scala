@@ -14,7 +14,7 @@ object LoggerShardedApp {
   val logger = LoggerFactory.getLogger("App")
 
   def main(args: Array[String]): Unit = {
-      startup(args(0).toInt)
+    startup(args(0).toInt)
   }
 
   def startup(port: Int): Unit = {
@@ -28,7 +28,8 @@ object LoggerShardedApp {
     val system =
       ActorSystem[Nothing](Behaviors.empty, "LoggerSharded", config)
 
-    val tags = Vector("container-tag-1", "container-tag-2", "container-tag-3")
+    val tags =
+      Vector("container-tag-1", "container-tag-2", "container-tag-3")
 
     ShardedDaemonProcess(system).init(
       "loggers",

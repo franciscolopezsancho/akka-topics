@@ -1,6 +1,5 @@
 package example.sharding
 
-
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
@@ -16,11 +15,11 @@ object Container {
   sealed trait Command
 
   final case class AddCargo(cargo: Cargo)
-    extends Command
+      extends Command
       with CborSerializable
 
   final case class GetCargos(replyTo: ActorRef[List[Cargo]])
-    extends Command
+      extends Command
       with CborSerializable
 
   def apply(containerId: String): Behavior[Command] = {
