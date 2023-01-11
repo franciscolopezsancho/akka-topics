@@ -1,27 +1,24 @@
 package example.http
 
-import akka.actor.typed.{ ActorRef, ActorSystem }
+import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ Behavior, PostStop }
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.Entity
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import scala.io.StdIn
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import akka.util.Timeout
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.util.Timeout
 import spray.json.DefaultJsonProtocol._
-import spray.json.{ JsonFormat, RootJsonFormat }
+import spray.json.JsonFormat
+import spray.json.RootJsonFormat
 
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  Entity
-}
-
-import akka.cluster.sharding.typed.ShardingEnvelope
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.io.StdIn
 
 object HttpServerShardedContainer {
 
@@ -85,35 +82,5 @@ object HttpServerShardedContainer {
     bindingFuture
       .flatMap(_.unbind())
       .onComplete(_ => system.terminate())
-  }
-}
-
-import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
-
-object Container {
-
-  val TypeKey = EntityTypeKey[Command]("container")
-
-  final case class Cargo(kind: String, size: Int)
-  final case class Cargos(cargos: List[Cargo])
-
-  sealed trait Command
-  final case class AddCargo(cargo: Cargo) extends Command
-  final case class GetCargos(replyTo: ActorRef[Cargos])
-      extends Command
-
-  def apply(
-      entityId: String,
-      cargos: List[Cargo] = Nil): Behavior[Command] = {
-    Behaviors.receive { (context, message) =>
-      message match {
-        case AddCargo(cargo) =>
-          println(s"adding cargo $cargo")
-          apply(entityId, cargo +: cargos)
-        case GetCargos(replyTo) =>
-          replyTo ! Cargos(cargos)
-          Behaviors.same
-      }
-    }
   }
 }

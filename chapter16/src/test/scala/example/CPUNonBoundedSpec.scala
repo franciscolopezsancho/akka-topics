@@ -1,9 +1,7 @@
 package example
 
 import akka.Done
-import akka.NotUsed
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import akka.stream.scaladsl.Flow
 import akka.stream.scaladsl.Source
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers

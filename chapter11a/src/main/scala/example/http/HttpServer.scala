@@ -4,10 +4,13 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.complete
+import akka.http.scaladsl.server.Directives.get
+import akka.http.scaladsl.server.Directives.path
 import akka.http.scaladsl.server.Route
-import scala.io.StdIn
+
 import scala.concurrent.Future
+import scala.io.StdIn
 
 object HttpServer {
 

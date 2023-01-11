@@ -3,9 +3,16 @@ package example.http
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{ ExceptionHandler, Route }
+import akka.http.scaladsl.model.ContentTypes
+import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.server.Directives.complete
+import akka.http.scaladsl.server.Directives.extractUri
+import akka.http.scaladsl.server.Directives.get
+import akka.http.scaladsl.server.Directives.handleExceptions
+import akka.http.scaladsl.server.Directives.path
+import akka.http.scaladsl.server.ExceptionHandler
+import akka.http.scaladsl.server.Route
+
 import scala.io.StdIn
 import scala.util.Random
 

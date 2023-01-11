@@ -49,5 +49,4 @@ class ContainerServiceImplSharding(sharding: ClusterSharding)(
         Cargos(c)
       }
   }
-
 }

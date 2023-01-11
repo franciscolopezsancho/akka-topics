@@ -13,19 +13,21 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+import akka.grpc.GrpcClientSettings
+import akka.stream.RestartSettings
+import akka.stream.scaladsl.RestartSource
+import com.google.protobuf.empty.Empty
+import example.locator.grpc.Location
+import example.locator.grpc.LocatorService
+import example.locator.grpc.LocatorServiceClient
+
 class LocatorServiceSpec
     extends ScalaTestWithActorTestKit
     with AnyWordSpecLike
     with Matchers
     with BeforeAndAfter {
 
-  import akka.grpc.GrpcClientSettings
-  import akka.stream.RestartSettings
-  import akka.stream.scaladsl.RestartSource
-  import com.google.protobuf.empty.Empty
-  import example.locator.grpc.Location
-  import example.locator.grpc.LocatorService
-  import example.locator.grpc.LocatorServiceClient
+
 
   "A Source" should {
     "be able to keep consuming from a failed and restored service" ignore {
