@@ -322,7 +322,7 @@ lazy val `betting-house` = project
     .enablePlugins(AkkaGrpcPlugin, JavaAppPackaging, DockerPlugin)
     .settings(
       version := "0.1.0-SNAPSHOT",
-      dockerUsername := Some("franciscolopezsancho"), // assumes docker.io by default
+      dockerUsername := Some("my-docker-registry"), // assumes docker.io by default
       scalafmtOnCompile := true,
       Compile / mainClass := Some("example.betting.Main"), 
       scalaVersion := ScalaVersion,

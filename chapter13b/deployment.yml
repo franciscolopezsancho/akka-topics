@@ -25,7 +25,7 @@ spec:
       serviceAccountName: my-cluster
       containers:
       - name: testing-bootstrap13b
-        image: franciscolopezsancho/chapter13b:0.1.0-SNAPSHOT
+        image: my-docker-registry/chapter13b:0.1.0-SNAPSHOT
         imagePullPolicy: Always
         #health
         livenessProbe:
