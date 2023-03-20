@@ -27,8 +27,6 @@ class LocatorServiceSpec
     with Matchers
     with BeforeAndAfter {
 
-
-
   "A Source" should {
     "be able to keep consuming from a failed and restored service" ignore {
 

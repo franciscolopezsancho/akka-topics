@@ -24,7 +24,7 @@ class ContainerSpec
     "be able to add a cargo" in {
 
       val sharding = ClusterSharding(system)
-      val entityDef = Entity(Container.TypeKey)(createBehavior =
+      val entityDef = Entity(Container.typeKey)(createBehavior =
         entityContext => Container(entityContext.entityId))
       val shardRegion: ActorRef[ShardingEnvelope[Container.Command]] =
         sharding.init(entityDef)
@@ -39,7 +39,7 @@ class ContainerSpec
       val probe = createTestProbe[List[Container.Cargo]]()
 
       val container: EntityRef[Container.Command] =
-        sharding.entityRefFor(Container.TypeKey, containerId)
+        sharding.entityRefFor(Container.typeKey, containerId)
 
       container ! Container.GetCargos(probe.ref)
       probe.expectMessage(List(cargo))

@@ -7,7 +7,7 @@ import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 object Container {
 
-  val TypeKey =
+  val typeKey =
     EntityTypeKey[Container.Command]("container-type-key")
 
   final case class Cargo(id: String, kind: String, size: Int)
