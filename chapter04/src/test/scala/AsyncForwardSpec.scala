@@ -43,4 +43,7 @@ class AsyncForwardSpec
 
     }
   }
+
+  override def afterAll(): Unit = testKit.shutdownTestKit()
+
 }

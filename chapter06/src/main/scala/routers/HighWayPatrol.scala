@@ -9,5 +9,3 @@ object HighWayPatrol {
 
   def apply() = Behaviors.ignore
 }
-
-
