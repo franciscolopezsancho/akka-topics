@@ -9,16 +9,9 @@ With the knowledge you have acquired so far, you should be able to improve the a
 
     cd local-deployment
 
-### start DB
+### start docker services
 
     docker compose up
-
-Create tables in DB. When prompt enter password `betting`
-
-    cd ../common-deployment
-    psql -h 127.0.0.1 -d betting  -U betting -f bet-projection.sql
-    psql -h 127.0.0.1 -d betting  -U betting -f akka-persistence.sql
-    psql -h 127.0.0.1 -d betting  -U betting -f akka-projection.sql
 
 ### start the application
 
