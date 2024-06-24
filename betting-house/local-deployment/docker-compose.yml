@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: betting
       POSTGRES_PASSWORD: betting
-    entrypoint: /bin/bash -c "apt-get update && apt-get install -y gosu && /init-scripts/init_psql.sh"
+    entrypoint: /init-scripts/init_psql.sh
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
